@@ -1,0 +1,46 @@
+:root {
+	--white: #feffff;
+	--black: #000000;
+	--blue: #141b90;
+}
+
+@font-face {
+	font-family: 'Korinna Regular BT';
+	font-weight: 400;
+	src: url(./korinna.woff2) format('woff2'), url(./korinna.woff) format('woff');
+}
+
+body {
+	background-color: var(--white);
+	font-family: 'Korinna Regular BT', sans-serif;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow-y: hidden;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+.init-container,
+.game-container {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	margin: auto;
+}
+
+.init-container {
+	width: min(100%, 600px);
+	margin-top: 1em;
+}
+
+.game-container {
+	width: 100%;
+}
+
+.nav-tabs .nav-link.active {
+	border-bottom: 5px solid var(--blue);
+}

@@ -1,0 +1,33 @@
+.input-row-v {
+	margin: auto;
+	width: min(100%, 400px);
+	display: flex;
+	flex-direction: column;
+	height: 4em;
+	position: relative;
+	.input-label {
+		font-size: 0.8em;
+		position: absolute;
+		z-index: 2;
+		top: 0.6em;
+		left: 0.8em;
+		font-weight: bold;
+		background-color: var(--white);
+	}
+	.input-container {
+		position: absolute;
+		width: 100%;
+		bottom: 0;
+		padding: 0.4em;
+		border: 2px solid var(--blue);
+		z-index: 1;
+		input {
+			width: 100%;
+		}
+	}
+}
+
+.input-row-v,
+.input-row-h {
+	margin-top: 1em;
+}

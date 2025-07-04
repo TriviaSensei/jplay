@@ -1,0 +1,30 @@
+{
+	"name": "j-play",
+	"version": "1.0.0",
+	"description": "Interactive jeopardy game",
+	"main": "server.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start:dev": "set NODE_ENV=development&&nodemon server.js -e js,css,pug,html,env"
+	},
+	"author": "Chuck Yu",
+	"license": "ISC",
+	"devDependencies": {
+		"node-html-parser": "^7.0.1",
+		"nodemon": "^3.1.4"
+	},
+	"dependencies": {
+		"axios": "^1.10.0",
+		"bad-words": "^3.0.4",
+		"cookie-parser": "^1.4.6",
+		"cookieparser": "^0.1.0",
+		"dotenv": "^16.4.5",
+		"express": "^4.19.2",
+		"html-to-text": "^9.0.5",
+		"moment-timezone": "^0.6.0",
+		"morgan": "^1.10.0",
+		"pug": "^3.0.3",
+		"socket.io": "^4.7.5",
+		"uuid": "^10.0.0"
+	}
+}
