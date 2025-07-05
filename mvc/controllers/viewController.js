@@ -13,7 +13,7 @@ exports.httpsRedirect = (req, res, next) => {
 
 exports.getHome = (req, res, next) => {
 	res.status(200).render('home', {
-		title: 'This is...J!',
+		title: 'This is...J-Play!',
 	});
 };
 
