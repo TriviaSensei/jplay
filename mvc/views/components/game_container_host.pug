@@ -1,0 +1,46 @@
+mixin lectern(n)
+    .lectern(data-index=`${n}`)
+        .ratio(style="--bs-aspect-ratio:3.7%;")
+            div.d-flex
+                .timer
+                    - var i = 0
+                    - while (i<10)
+                        .timer-light
+                        - i++
+        .ratio.ratio-1x1
+            .lectern-body    
+                .lectern-left
+                    .lectern-image
+                .lectern-center
+                    .score-display.d-flex
+                        .score.m-auto $0
+                    .light.light-top
+                    .ratio.ratio-4x3.name-display
+                        div
+                            .w-100.h-100.d-flex 
+                                .m-auto.edit-player 
+                                    //- nice to have later - ability to draw name
+                                    button.btn.btn-sm.btn-primary.edit-player-button Edit Player
+                                .m-auto.name-container.d-none
+                    .light.light-bottom
+                .lectern-right
+                    .lectern-image
+
+link(rel="stylesheet" href="/css/components/game_container/game_container_host.css")
+
+.ratio.ratio-4x3
+    .game-board 
+        - var row = 0
+        - while (row < 6)
+            - var col = 0;
+            - while (col<6)
+                - if (row===0)
+                    .category-box.category-hidden(data-category=`${col}`) 
+                - else 
+                    .clue-box(data-category=`${col}` data-row=`${row}`)
+                - col++
+            - row++
+.lecterns
+    +lectern(0)
+    +lectern(1)
+    +lectern(2)

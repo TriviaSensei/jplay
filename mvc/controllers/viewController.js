@@ -1,3 +1,7 @@
+const fs = require('fs');
+const path = require('path');
+const { readdir, readFile } = require('node:fs/promises');
+
 exports.httpsRedirect = (req, res, next) => {
 	if (
 		process.env.NODE_ENV === 'production' &&
@@ -11,9 +15,36 @@ exports.httpsRedirect = (req, res, next) => {
 	next();
 };
 
-exports.getHome = (req, res, next) => {
-	res.status(200).render('home', {
-		title: 'This is...J-Play!',
+exports.getHome = async (req, res, next) => {
+	try {
+		const folder = path.join(__dirname, `../games`);
+		const files = (await readdir(folder, { recursive: true }))
+			.filter((f) => f.indexOf('.json') > 0)
+			.map((f) => f.replace('\\', '/'));
+
+		res.status(200).render('home', {
+			title: 'This is...J-Play!',
+			files,
+		});
+	} catch (err) {
+		res.status(200).render('home', {
+			title: 'This is...J-Play!',
+			files: [],
+		});
+	}
+};
+
+exports.getGame = async (req, res, next) => {
+	const folder = req.params.folder;
+	const filename = req.params.filename;
+
+	const data = (
+		await readFile(path.join(__dirname, `../games/${folder}/${filename}`))
+	).toString('utf-8');
+
+	res.status(200).json({
+		status: 'success',
+		data: JSON.parse(data),
 	});
 };
 

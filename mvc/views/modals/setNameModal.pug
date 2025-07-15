@@ -1,0 +1,20 @@
+.modal#player-settings-modal(tabindex="-1" aria-labelledby="player-settings-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false")
+    .modal-dialog.modal-dialog-centered
+        .modal-content#player-settings-modal-content
+            input#player-index(type="hidden")
+            .modal-header
+                h5.modal-title#player-settings-label Player settings
+            .modal-body
+                .input-row-v 
+                    .input-label Player name 
+                    .input-container 
+                        input#set-player-name(type="text" placenolder="Name")
+                .input-row-v 
+                    .input-label Buzzer key 
+                    .input-container
+                        .d-flex.flex-row 
+                            button.me-3.btn.btn-sm.btn-primary#set-button(data-toggled="false") Set key 
+                            span Current key: #[span#current-key]
+            .modal-footer
+                button#cancel-edit-player.btn.btn-sm.btn-primary(type="button" data-bs-dismiss="modal") Cancel
+                button#confirm-edit-player.btn.btn-sm.btn-primary(type="button") OK

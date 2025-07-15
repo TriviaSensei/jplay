@@ -13,6 +13,7 @@ const server = app.listen(port, () => {
 
 const http = require('http').Server(app);
 // const socketManager = require('./mvc/utils/socketManager')(http, server);
+const socketManager = require('./utils/socketManager')(http, server);
 
 const viewRouter = require('./mvc/routes/viewRoutes');
 const path = require('path');

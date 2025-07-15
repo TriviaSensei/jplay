@@ -1,0 +1,310 @@
+{
+	"showNumber": null,
+	"airDate": "2024-01-12",
+	"comments": "2024 Champions Wildcard play-in game 1.<br>\r\nHosted by Buzzy Cohen.<br>\r\nGame entered from TuneIn audio presentation.",
+	"rounds": [
+		[
+			{
+				"category": "GRAND MARSHALS OF THE ROSE PARADE",
+				"comments": "",
+				"clues": [
+					{
+						"text": "This legendary animator was grand marshal in 1966; he died later that year",
+						"response": "Disney"
+					},
+					{
+						"text": "This beloved voice of the Dodgers did the honors in 2014",
+						"response": "(Vin) Scully"
+					},
+					{
+						"text": "He got the nod in 1953 as a senator from California; he rode again in 1960",
+						"response": "Richard Nixon"
+					},
+					{
+						"text": "She was grand marshal as a child star in 1939 &amp; also got the call in 1989 &amp; '99",
+						"response": "Shirley Temple"
+					},
+					{
+						"text": "In 1955, shortly after becoming chief justice of the U.S., he served as grand marshal",
+						"response": "Earl Warren"
+					}
+				]
+			},
+			{
+				"category": "LETTER PERFECT",
+				"comments": "",
+				"clues": [
+					{
+						"text": "This letter was used by the Romans to represent 1,000",
+						"response": "M"
+					},
+					{
+						"text": "This letter is used to define a generation &amp; also as a label for superhero mutants",
+						"response": "X"
+					},
+					{
+						"text": "Sometimes it's a consonant, sometimes it's a vowel &amp; its homophone is an interrogative",
+						"response": "Y"
+					},
+					{
+						"text": "This letter stands for the currency of Albania; when it comes before F in English words, it's often silent",
+						"response": "L (for the lek)"
+					},
+					{
+						"text": "It looks just like the Greek letter rho, but it's not \"R\"",
+						"response": "P"
+					}
+				]
+			},
+			{
+				"category": "THE COLORS OF MUSIC",
+				"comments": "",
+				"clues": [
+					{
+						"text": "Van Morrison:<br>\"____ Eyed Girl\"",
+						"response": "Brown"
+					},
+					{ "text": "John Mellencamp:<br>\"____ Houses\"", "response": "Pink" },
+					{
+						"text": "Chris de Burgh:<br>\"The Lady In ____\"",
+						"response": "Red"
+					},
+					{ "text": "R.E.M.:<br>\"____ Crush\"", "response": "Orange" },
+					{ "text": "Sting:<br>\"Fields Of ____\"", "response": "Gold" }
+				]
+			},
+			{
+				"category": "BREAK-UPS",
+				"comments": "",
+				"clues": [
+					{
+						"text": "This power couple wed March 9, 1796; being the emperor of France has its perks: he nullified the marriage in 1809",
+						"response": "Napoleon & Josephine"
+					},
+					{
+						"text": "This plastic couple got together in 1961; they split in 2004, but in 2011 she welcomed him back to her dream house",
+						"response": "Barbie & Ken"
+					},
+					{
+						"text": "Rob in this Nick Hornby novel deals with Laura's departure as with most things, by thinking a lot about old records",
+						"response": "<i>High Fidelity</i>"
+					},
+					{
+						"text": "These Mexican painters wed in 1929 &amp; divorced after a volatile decade; remarried in 1940, they had a rocky 2nd marriage",
+						"response": "Frida Kahlo & Diego Rivera"
+					},
+					{
+						"text": "This couple fell in love while filming \"Cleopatra\"; they wed in '64, divorced after a decade, remarried in 1975<span class=\"nobreak\">--</span>&amp; split again in 1976",
+						"response": "Elizabeth Taylor & Richard Burton"
+					}
+				]
+			},
+			{
+				"category": "STOP!",
+				"comments": "",
+				"clues": [
+					{
+						"text": "Around 1900 in Kansas, she wanted folks to stop drinking, so she began taking a hatchet to local saloons",
+						"response": "Carrie Nation"
+					},
+					{
+						"text": "In 1780, British lieutenant colonel Bannister Tarleton &amp; his raiders tried to stop this \"Swamp Fox\" in the Carolinas",
+						"response": "Francis Marion"
+					},
+					{
+						"text": "In the early 1790s Haydn stopped in Bonn, Germany &amp; met this young musical genius who would become Haydn's pupil",
+						"response": "Ludwig van Beethoven"
+					},
+					{
+						"text": "In the 1960s the French military stopped using this fortified line of defense named for a war minister",
+						"response": "Maginot Line"
+					},
+					{
+						"text": "On Nov. 5, 1605 he tried to blow up Parliament to stop the persecution of Roman Catholics in England",
+						"response": "Guy Fawkes"
+					}
+				]
+			},
+			{
+				"category": "HAMMER TIME",
+				"comments": "",
+				"clues": [
+					{
+						"text": "Known for its cephalofoil, this fierce fish can grow 20 feet long",
+						"response": "a hammerhead shark"
+					},
+					{
+						"text": "Countless hammers have swung since this org.'s founding in 1976, helping to house millions worldwide",
+						"response": "Habitat for Humanity"
+					},
+					{
+						"text": "Christopher Lee played this bloodthirsty immortal 7 times for Britain's Hammer Films",
+						"response": "Dracula"
+					},
+					{
+						"text": "House majority whip from 1995 to 2003, this Texas Republican was known as \"The Hammer\"",
+						"response": "Tom DeLay"
+					},
+					{
+						"text": "The tomb of this English king, the victor at Agincourt, calls him \"Hammer of the Gauls\"",
+						"response": "Henry V"
+					}
+				]
+			}
+		],
+		[
+			{
+				"category": "A CITY ON THE WATER",
+				"comments": "",
+				"clues": [
+					{
+						"text": "Daytona Beach,<br>Florida:<br>this ocean",
+						"response": "the Atlantic"
+					},
+					{ "text": "Easton,<br>Maryland", "response": "the Chesapeake Bay" },
+					{
+						"text": "Montreal,<br>Quebec",
+						"response": "the St. Lawrence River"
+					},
+					{ "text": "Pierre,<br>South Dakota", "response": "the Missouri" },
+					{ "text": "Shelburne,<br>Vermont", "response": "Lake Champlain" }
+				]
+			},
+			{
+				"category": "WIDE WORLD OF WEIRD WORDS",
+				"comments": "",
+				"clues": [
+					{
+						"text": "Although it sounds like it has to do with a Southern peanut, it really pertains to the job held by Newsom &amp; DeSantis",
+						"response": "gubernatorial"
+					},
+					{
+						"text": "Though it sounds like a laughing beer, it's really a hubbub, maybe in a pub, bub",
+						"response": "brouhaha"
+					},
+					{
+						"text": "Meaning to throw out of a window, this term gained fame after a 1618 incident in Prague where 2 officials were so thrown",
+						"response": "defenestration"
+					},
+					{
+						"text": "Meaning a silly or flighty person, this word with 2 sets of double \"B\"s was mentioned in \"King Lear\" as a demon's name",
+						"response": "flibbertigibbet"
+					},
+					{
+						"text": "Sigmund knows that this is from the German for \"damage\" &amp; \"joy\" &amp; I'm getting a certain amount of it right now",
+						"response": "schadenfreude"
+					}
+				]
+			},
+			{
+				"category": "GAME SHOWS IN THE MOVIES",
+				"comments": "",
+				"clues": [
+					{
+						"text": "The all-too-simple premise of the game show in this 2012 film<span class=\"nobreak\">--</span>kids murder each other",
+						"response": "<i>The Hunger Games</i>"
+					},
+					{
+						"text": "The all-too-simple premise of the game show hosted by Richard Dawson in this 1987 film<span class=\"nobreak\">--</span>criminals are murdered",
+						"response": "<i>The Running Man</i>"
+					},
+					{
+						"text": "Dev Patel wins big on a game show in this 2008 film",
+						"response": "<i>Slumdog Millionaire</i>"
+					},
+					{
+						"text": "In \"Quiz Show\" this Brit had all the answers on \"Twenty One\" as Charles Van Doren; do you have the question?",
+						"response": "Ralph Fiennes"
+					},
+					{
+						"text": "In \"Confessions of a Dangerous Mind\", a woman has the choice of Brad Pitt, Matt Damon or Bachelor No. 3 on this classic show",
+						"response": "<i>The Dating Game</i>"
+					}
+				]
+			},
+			{
+				"category": "OVER CASTE",
+				"comments": "",
+				"clues": [
+					{
+						"text": "These creatures of the genus Apis have a strict caste system with male drones, female workers &amp; a queen on top",
+						"response": "honeybees"
+					},
+					{
+						"text": "Taking their name from words meaning \"oak\" &amp; \"wizard\", they were the priestly upper caste of the ancient Celts",
+						"response": "the Druids"
+					},
+					{
+						"text": "A term for a member of the New England cultural elite, it's also the name of the highest Hindu caste",
+						"response": "the Brahmins"
+					},
+					{
+						"text": "The naked type of this hyphenated rodent lives in a colony that uses a caste system with one breeding female",
+						"response": "a mole-rat"
+					},
+					{
+						"text": "The mid-19th century \"Caste War\" of this peninsula pitted native Mayans against Ladinos of European descent",
+						"response": "the Yucatán Peninsula"
+					}
+				]
+			},
+			{
+				"category": "IAMB WOMAN",
+				"comments": "",
+				"clues": [
+					{
+						"text": "George Eliot's poem \"God Needs Antonio\" praises this master maker of musical instruments",
+						"response": "Stradivarius"
+					},
+					{
+						"text": "Lady Mary Chudleigh's \"To the Ladies\" warns fiancees that this \"and servant are the same / But only differ in the name\"",
+						"response": "wives"
+					},
+					{
+						"text": "She loved her iambs, as in \"Because I could not stop for Death\"",
+						"response": "Dickinson"
+					},
+					{
+						"text": "The 44 sonnets in an 1850 volume by her are largely in iambic pentameter",
+						"response": "Elizabeth Barrett Browning"
+					},
+					{
+						"text": "Her 1883 \"1492\" celebrates \"A virgin world where doors of sunset part, / Saying, 'Ho, all who weary, enter here!'\"",
+						"response": "Emma Lazarus"
+					}
+				]
+			},
+			{
+				"category": "HEAR ME ROAR",
+				"comments": "",
+				"clues": [
+					{
+						"text": "It's not just carnivores<span class=\"nobreak\">--</span>the harts of the red type of this roar to drive rival males away",
+						"response": "deer"
+					},
+					{
+						"text": "The Kalolo-Lozi people call the roar &amp; mist that the Zambezi River makes as it forms this \"the smoke that thunders\"",
+						"response": "Victoria Falls"
+					},
+					{
+						"text": "Written in 1792, this French song asks, \"Do you hear in the countryside the roar of those savage soldiers?\"",
+						"response": "\"La Marseillaise\""
+					},
+					{
+						"text": "Akira Ifukube used a leather glove coated in pine-tar resin &amp; a double bass to create this character's roar in 1954",
+						"response": "Godzilla"
+					},
+					{
+						"text": "Alphabetically first in Old Testament books comes this prophet who says, \"The Lord will roar from Zion\"",
+						"response": "Amos"
+					}
+				]
+			}
+		],
+		{
+			"category": "TOURIST SPOTS",
+			"text": "Originally known as Longacre, it got its name after a newspaper moved its offices there in 1904",
+			"response": "Times Square"
+		}
+	]
+}

@@ -1,13 +1,22 @@
 :root {
-	--white: #eee;
+	--white: #bbb;
+	--lt-gray: #eee;
 	--black: #000000;
 	--blue: #141b90;
+	--green: #00ff77;
+	--brown-1: #663c51;
+	--brown-2: #9d5f51;
 }
 
 @font-face {
 	font-family: 'Korinna Regular BT';
 	font-weight: 400;
 	src: url(./korinna.woff2) format('woff2'), url(./korinna.woff) format('woff');
+}
+@font-face {
+	font-family: 'Swiss 911 Compressed';
+	font-weight: 400;
+	src: url(./swiss.woff2) format('woff2'), url(./swiss.woff) format('woff');
 }
 
 body {
@@ -24,23 +33,63 @@ body {
 	bottom: 0;
 }
 
+* {
+	overscroll-behavior: none;
+}
+
+.no-select {
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none; /* Safari */
+	-khtml-user-select: none; /* Konqueror HTML */
+	-moz-user-select: none; /* Old versions of Firefox */
+	-ms-user-select: none; /* Internet Explorer/Edge */
+	user-select: none;
+}
+
+.message {
+	position: absolute;
+	z-index: 2000;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: fit-content;
+	width: -moz-fit-content;
+	border-radius: 5px;
+	border: 1px solid black;
+	background-color: white;
+	padding: 10px;
+	opacity: 1;
+	font-weight: bold;
+	transition: opacity 0.25s ease-in-out;
+	-moz-transition: opacity 0.25s ease-in-out;
+	-webkit-transition: opacity 0.25s ease-in-out;
+}
+
 .init-container,
-.game-container {
+.game-container,
+.host-panel {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
 	margin: auto;
 }
 
-.init-container {
-	width: min(100%, 600px);
-	margin-top: 1em;
+.init-container,
+.host-panel {
+	width: min(100%, 720px);
+	padding: 0.5em;
 }
 
 .game-container {
-	width: 100%;
+	width: min(89vh, 100%);
+	padding: 1%;
 }
 
 .nav-tabs .nav-link.active {
 	border-bottom: 5px solid var(--blue);
+}
+
+.host-panel {
+	display: flex;
+	flex-direction: column;
 }

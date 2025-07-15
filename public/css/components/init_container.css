@@ -3,26 +3,47 @@
 	width: min(100%, 400px);
 	display: flex;
 	flex-direction: column;
-	height: 4em;
 	position: relative;
 	.input-label {
 		font-size: 0.8em;
 		position: absolute;
 		z-index: 2;
-		top: 0.6em;
+		top: -0.8em;
 		left: 0.8em;
+		padding: 0 0.2em;
 		font-weight: bold;
 		background-color: var(--white);
 	}
 	.input-container {
-		position: absolute;
 		width: 100%;
-		bottom: 0;
-		padding: 0.4em;
+		padding: 0.8em 0.4em 0.4em 0.4em;
 		border: 2px solid var(--blue);
 		z-index: 1;
 		input {
 			width: 100%;
+		}
+		input.caps {
+			text-transform: uppercase;
+		}
+		::-webkit-input-placeholder {
+			/* WebKit browsers */
+			text-transform: none;
+		}
+		:-moz-placeholder {
+			/* Mozilla Firefox 4 to 18 */
+			text-transform: none;
+		}
+		::-moz-placeholder {
+			/* Mozilla Firefox 19+ */
+			text-transform: none;
+		}
+		:-ms-input-placeholder {
+			/* Internet Explorer 10+ */
+			text-transform: none;
+		}
+		::placeholder {
+			/* Recent browsers */
+			text-transform: none;
 		}
 	}
 }

@@ -1,0 +1,189 @@
+.game-board {
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	grid-template-rows: repeat(6, 1fr);
+
+	.clue-box,
+	.category-box {
+		background-color: var(--blue);
+		color: var(--white);
+		border: 1px solid var(--white);
+	}
+
+	.clue-box {
+		font-family: 'Korinna Regular BT', serif;
+		padding: 15%;
+		.clue-div {
+			text-align: center;
+			margin: auto;
+			text-wrap: wrap;
+			max-width: 70%;
+		}
+	}
+	.category-box {
+		display: flex;
+		font-family: 'Swiss 911 Compressed', sans-serif;
+		.category-div {
+			margin: auto;
+		}
+	}
+	.category-box.category-hidden {
+		background-image: url('/img/cat_header.jpg');
+		background-repeat: no-repeat;
+		background-size: contain;
+		background-position: center;
+		.category-div {
+			display: none;
+		}
+	}
+}
+
+.lecterns {
+	flex: 1;
+	display: flex;
+	justify-content: space-between;
+	margin-top: 2em;
+	.lectern {
+		width: 28%;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		.timer {
+			margin: 0 auto;
+			width: 55%;
+			display: flex;
+			flex-direction: row;
+			.timer-light {
+				flex: 1;
+				height: 100%;
+				border: 2px solid var(--lt-gray);
+				background-color: #332c42;
+			}
+			.timer-light.lit {
+				background-color: red;
+			}
+		}
+
+		.lectern-body {
+			color: white;
+			flex: 1;
+			display: flex;
+			flex-direction: row;
+			border-top: 3px solid var(--lt-gray);
+			.lectern-center > div {
+				border-top: 1px solid black;
+				box-sizing: border-box;
+			}
+			.lectern-center {
+				width: 55%;
+				display: flex;
+				flex-direction: column;
+				border: 3px solid black;
+				box-sizing: border-box;
+				.score-display {
+					height: 20%;
+					background-color: var(--blue);
+					font-family: Arial, Helvetica, sans-serif;
+					font-weight: bold;
+					text-align: center;
+				}
+
+				.light {
+					background-image: url('/img/light-bg.png');
+					background-repeat: no-repeat;
+					background-position: 0 0;
+					background-size: 105% 105%;
+				}
+				.light.lit {
+					background-color: white;
+				}
+				.light-top {
+					height: 13.33%;
+				}
+
+				.light-bottom {
+					flex: 1;
+				}
+				.name-display {
+					background-color: var(--blue);
+					text-align: center;
+				}
+				.name-container {
+					max-width: 100%;
+					overflow-wrap: break-word;
+					cursor: pointer;
+				}
+			}
+			.lectern-right,
+			.lectern-left {
+				position: relative;
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: end;
+				background: linear-gradient(to right, var(--brown-1), var(--brown-2));
+				.lectern-image {
+					border-image: linear-gradient(to left, #fff, #999) 5;
+					border-width: 2px;
+					border-style: solid;
+					height: 67%;
+					width: 90%;
+					background-repeat: no-repeat;
+					background-size: cover;
+				}
+			}
+			.lectern-left > .lectern-image {
+				background-image: url('/img/lectern-left.png');
+			}
+			.lectern-right {
+				.lectern-image {
+					background-image: url('/img/lectern-right.png');
+				}
+				-webkit-transform: scaleX(-1);
+				transform: scaleX(-1);
+			}
+			.lectern-left::before,
+			.lectern-right::before,
+			.lectern-left::after,
+			.lectern-right::after {
+				content: '';
+				width: 90%;
+				height: 2.3%;
+				position: absolute;
+				left: 0%;
+				z-index: 2;
+				background-color: white;
+				border-radius: 0 2px 2px 0;
+			}
+
+			/*
+				viewport is tall and narrow, and font size will be determined by the width of the window
+			*/
+			@media (max-aspect-ratio: 0.89) {
+				.name-display {
+					font-size: 2vw;
+				}
+				.score-display {
+					font-size: 2.8vw;
+				}
+			}
+			@media (aspect-ratio > 0.89) {
+				.name-display {
+					font-size: 1.8vh;
+				}
+				.score-display {
+					font-size: 2.52vh;
+				}
+			}
+
+			.lectern-left::before,
+			.lectern-right::before {
+				top: 10%;
+			}
+			.lectern-left::after,
+			.lectern-right::after {
+				top: 20%;
+			}
+		}
+	}
+}

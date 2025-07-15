@@ -1,0 +1,25 @@
+link(rel="stylesheet" href="/css/components/init_container/host_tab.css")
+.d-flex.flex-column 
+    .input-row-v 
+        .input-label Game type 
+        .input-container 
+            .d-flex.flex-row 
+                input#play-local(type="radio" name="play-type" value="local" checked)
+                label(for="play-local" data-bs-toggle="tooltip" data-bs-title="Requires keyboard, pen, and paper, and all players and host to be present. Best done with a dual screen. Not recommended with mobile") Local
+                input#play-remote(type="radio" name="play-type" value="remote")
+                label(for="play-remote" data-bs-toggle="tooltip" data-bs-title="Requires internet connection. Players may join with join code on mobile devices or use a keyboard and/or buzzer on this device. Host may open the control panel on this device or another device") Remote
+    .input-row-v
+        .input-label Load game file
+        .input-container
+            .d-flex.flex-column
+                .d-flex.flex-row
+                    input#load-local(type="radio" name="load-type" value="local" checked)
+                    label(for="load-local") From Computer
+                    input#load-remote(type="radio" name="load-type" value="remote")
+                    label(for="load-remote") From Server
+                .local-load.my-3
+                    input#game-file(type="file" accept=".json")
+                .remote-load.my-3
+                    each file in files
+                        .file(data-file=`${file}` aria-selected="false" aria-filename=`${file}`)= file
+    button#create-game.btn.btn-primary.m-auto.mt-3.w-50 Create

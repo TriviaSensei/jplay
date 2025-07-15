@@ -1,0 +1,36 @@
+input[type='radio'] {
+	display: none;
+}
+
+input[type='radio'] + label {
+	border: 1px solid black;
+	padding: 0.3em 0.5em;
+}
+
+input[type='radio']:checked + label {
+	background-color: var(--green);
+}
+
+.local-load,
+.remote-load {
+	display: none;
+}
+
+div:has(#load-local:checked) .local-load,
+div:has(#load-remote:checked) .remote-load {
+	display: unset;
+}
+
+.remote-load {
+	max-height: 10em;
+	overflow-y: auto;
+	.file {
+		margin: 0.2em 0;
+		cursor: pointer;
+		width: 100%;
+	}
+	.file.selected {
+		background-color: var(--green);
+		font-weight: bold;
+	}
+}
