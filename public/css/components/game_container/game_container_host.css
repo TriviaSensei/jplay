@@ -1,8 +1,36 @@
-.game-board {
+.game-board,
+.live-clue-display {
 	display: grid;
 	grid-template-columns: repeat(6, 1fr);
 	grid-template-rows: repeat(6, 1fr);
+}
 
+.game-container[data-round='1'] {
+	.category-hidden {
+		background-image: url('/img/cat_header_1.jpg');
+	}
+}
+.game-container[data-round='2'] {
+	.category-hidden {
+		background-image: url('/img/cat_header_2.jpg');
+	}
+}
+.game-container[data-round='3'] {
+	.category-hidden {
+		background-image: url('/img/cat_header_3.jpg');
+	}
+}
+
+.category-box.category-hidden {
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center;
+	.category-div {
+		display: none;
+	}
+}
+
+.game-board {
 	.clue-box,
 	.category-box {
 		background-color: var(--blue);
@@ -11,27 +39,154 @@
 	}
 
 	.clue-box {
-		font-family: 'Korinna Regular BT', serif;
-		padding: 15%;
-		.clue-div {
-			text-align: center;
+		font-family: 'Swiss 911 Compressed', serif;
+		text-align: center;
+		display: flex;
+		padding: 10%;
+		color: var(--yellow);
+		cursor: pointer;
+		.clue-value {
 			margin: auto;
-			text-wrap: wrap;
-			max-width: 70%;
+		}
+		@media (max-aspect-ratio: 0.89) {
+			.clue-value {
+				font-size: 4.9vw;
+			}
+		}
+		@media (aspect-ratio > 0.89) {
+			.clue-value {
+				font-size: 4.9vh;
+			}
 		}
 	}
 	.category-box {
 		display: flex;
+		padding: 0 5%;
+		.category-div {
+			font-family: 'Swiss 911 Compressed', sans-serif;
+			margin: auto;
+			text-align: center;
+		}
+		@media (max-aspect-ratio: 0.89) {
+			.category-div {
+				font-size: 2.2vw;
+			}
+		}
+		@media (aspect-ratio > 0.89) {
+			.category-div {
+				font-size: 2vh;
+			}
+		}
+	}
+}
+
+.live-clue-display {
+	div {
+		color: white;
+		background-color: var(--blue);
+		text-align: center;
+		text-transform: uppercase;
+		display: flex;
+	}
+
+	.side-light-right,
+	.side-light-left {
+		background-color: var(--dk-gray);
+		grid-row: 1/7;
+	}
+	.side-light-left {
+		grid-column: 1;
+	}
+	.side-light-right {
+		grid-column: 6;
+	}
+	.category-display {
+		grid-row: 1;
+		grid-column: 2/6;
 		font-family: 'Swiss 911 Compressed', sans-serif;
+		border: 1px solid white;
+	}
+	.value-display {
+		grid-row: 2;
+		grid-column: 2/6;
+		font-family: 'Swiss 911 Compressed', sans-serif;
+		border: 1px solid white;
+
+		.value-text {
+			color: var(--yellow);
+		}
+	}
+	.clue-display {
+		grid-row: 3/7;
+		grid-column: 2/6;
+		padding: 5%;
+		border: 1px solid white;
+
+		font-family: 'Korinna Regular BT', serif;
+	}
+	@media (max-aspect-ratio: 0.89) {
+		.clue-display,
+		.value-display,
+		.category-display {
+			font-size: 8vw;
+		}
+	}
+	/*
+		viewport is wide enough to fit everything - font size determined by the height of the window
+	*/
+	@media (aspect-ratio > 0.89) {
+		.clue-display,
+		.value-display,
+		.category-display {
+			font-size: 3.5vh;
+		}
+	}
+}
+
+.live-clue-display.live {
+	.side-light-left,
+	.side-light-right {
+		background-color: var(--white);
+	}
+}
+
+.category-scroll-container {
+	overflow: hidden;
+}
+.category-scroll {
+	width: 600%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	transition: left 0.5s;
+	overflow: hidden;
+	display: flex;
+	flex-direction: row;
+	font-family: 'Swiss 911 Compressed', sans-serif;
+
+	.category-box {
+		height: 100%;
+		width: 16.667%;
+		background-color: var(--blue);
+		color: white;
+		display: flex;
+		padding: 1%;
 		.category-div {
 			margin: auto;
+			text-align: center;
+		}
+		@media (max-aspect-ratio: 0.89) {
+			.category-div {
+				font-size: 12vw;
+			}
+		}
+		@media (aspect-ratio > 0.89) {
+			.category-div {
+				font-size: 12vh;
+			}
 		}
 	}
 	.category-box.category-hidden {
-		background-image: url('/img/cat_header.jpg');
-		background-repeat: no-repeat;
-		background-size: contain;
-		background-position: center;
 		.category-div {
 			display: none;
 		}
@@ -43,6 +198,9 @@
 	display: flex;
 	justify-content: space-between;
 	margin-top: 2em;
+	.lectern.control {
+		border-bottom: 4px solid var(--white);
+	}
 	.lectern {
 		width: 28%;
 		display: flex;
@@ -56,7 +214,7 @@
 			.timer-light {
 				flex: 1;
 				height: 100%;
-				border: 2px solid var(--lt-gray);
+				border: 1px solid var(--lt-gray);
 				background-color: #332c42;
 			}
 			.timer-light.lit {
@@ -94,9 +252,7 @@
 					background-position: 0 0;
 					background-size: 105% 105%;
 				}
-				.light.lit {
-					background-color: white;
-				}
+
 				.light-top {
 					height: 13.33%;
 				}
@@ -167,6 +323,9 @@
 					font-size: 2.8vw;
 				}
 			}
+			/*
+				viewport is wide enough to fit everything - font size determined by the height of the window
+			*/
 			@media (aspect-ratio > 0.89) {
 				.name-display {
 					font-size: 1.8vh;
@@ -184,6 +343,11 @@
 			.lectern-right::after {
 				top: 20%;
 			}
+		}
+	}
+	.lectern.lit {
+		.light {
+			background-color: white;
 		}
 	}
 }

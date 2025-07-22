@@ -332,19 +332,15 @@ class Game {
 			//for it. If it is a valid input, then the function will run and set the new game state.
 			start: () => {
 				if (
-					this.players.length > 0 &&
-					this.players.every((p) => p.getName() !== '')
+					this.gameState.players.length > 0 &&
+					this.gameState.players.some((p) => p.getName() !== '')
 				) {
 					this.setGameState({
 						state: 'boardIntro',
 						round: 0,
 						categoryShown: -1,
 					});
-				} else if (this.players.length === 0) {
-					throw new Error('You must have at least one player.');
-				} else {
-					throw new Error('Each player must have a name');
-				}
+				} else throw new Error('You must have at least one player.');
 			},
 			player: (p) => {
 				this.handleBuzz(p);
@@ -380,9 +376,9 @@ class Game {
 					this.setGameState({
 						control,
 						state: 'select',
-						message: `${this.gameState.players[
-							control
-						].getName()} starts the ${roundNames}Jeopardy round.`,
+						message: `${this.gameState.players[control].getName()} starts the ${
+							roundNames[this.gameState.round]
+						}Jeopardy round.`,
 					});
 				}
 			},
@@ -400,6 +396,7 @@ class Game {
 			clue: (cat, row) => {
 				const rd = this.gameState.round;
 				const clue = this.gameState.board[rd][cat].clues[row];
+				if (clue.selected) return;
 				clue.selected = true;
 				if (clue.dailyDouble)
 					this.setGameState({ state: 'waitingDD', playSound: true });
@@ -422,19 +419,17 @@ class Game {
 					this.setGameState({
 						state: 'clueLive',
 					});
-					this.startClueTimer(
-						{
-							buzzerArmed: false,
-							buzzedIn: -1,
-							selectedClue: [-1, -1],
-						},
-						clueTimeout
-					);
+					this.startClueTimer(clueTimeout, {
+						buzzerArmed: false,
+						buzzedIn: -1,
+						state: 'showClue',
+					});
 				}
 				//go back to select screen if the clue is timed out
 				else {
 					this.setGameState({
 						state: 'select',
+						timeout: false,
 					});
 				}
 			},
@@ -560,7 +555,7 @@ class Game {
 					state: 'FJLive',
 					playSound: true,
 				});
-				const fjOrder = this.players
+				const fjOrder = this.gameState.players
 					.map((p, i) => {
 						return {
 							score: p.getScore(),
@@ -697,10 +692,11 @@ class Game {
 			fjOrder: null,
 			fjStep: -1,
 			fjLock: false,
+			round: -1,
 		};
 
 		for (var i = 0; i < 3; i++) {
-			this.addPlayer('', null, null);
+			this.addPlayer(`player${i + 1}`, null, null);
 		}
 
 		this.updateGameState();
@@ -776,6 +772,18 @@ class Game {
 		this.updateGameState();
 	}
 
+	resetPlayer(index) {
+		if (this.gameState.players.length > index && index >= 0) {
+			const keys = ['ArrowLeft', 'ArrowUp', 'ArrowRight'];
+			this.gameState.players[index].setName('');
+			this.gameState.players[index].uid = randomString(20, chars);
+			this.gameState.players[index].setKey(keys[index]);
+			this.gameState.players[index].setRemote(this.isRemote);
+			this.gameState.players[index].setSocketId(null);
+			this.updateGameState();
+		}
+	}
+
 	shufflePlayers() {
 		if (this.gameState.active) return;
 		const temp = this.gameState.players.map((p) => {
@@ -805,12 +813,36 @@ class Game {
 		this.updateGameState();
 	}
 
+	handleInput(...args) {
+		if (args.length === 0) return;
+		//the input
+		const fn = args.shift();
+		//the current game state
+		const gs = this.gameState.state;
+		//the function to run as a result
+		const st = this.stateMap[gs];
+		if (!st) throw new Error(`Invalid game state (${gs})`);
+		const f = st[fn];
+		//invalid input for this state - don't do anything
+		if (!f) return console.log('invalid input');
+		f(...args);
+	}
+
 	setGameState(state) {
+		console.log(state);
+		let newData = {};
+		if (state.state && state.gameState !== this.gameState.state) {
+			const newState = state.state;
+			if (this.stateMap[newState]?.data) newData = this.stateMap[newState].data;
+		}
 		this.gameState = {
 			...this.gameState,
 			...state,
+			...newData,
 		};
 		this.updateGameState();
+		if (this.gameState.message) this.gameState.message = '';
+		if (this.gameState.playSound) this.gameState.playSound = false;
 	}
 
 	setPlayerScore(player, score) {
@@ -852,6 +884,7 @@ class Game {
 			timeout: true,
 			playSound: true,
 		});
+		this.gameState.playSound = false;
 	}
 
 	startClueTimer(limit, nextState) {

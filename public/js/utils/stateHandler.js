@@ -1,6 +1,7 @@
 const checkEqual = (a, b) => {
-	if (a === b) return true;
-	else if (typeof a !== typeof b) return false;
+	if (a === b) {
+		return true;
+	} else if (typeof a !== typeof b) return false;
 	else if ((typeof a).toLowerCase() !== 'object') return false;
 
 	if (Array.isArray(a)) {
@@ -14,6 +15,7 @@ const checkEqual = (a, b) => {
 		});
 	}
 };
+
 export class StateHandler {
 	randomString(length) {
 		const chars =
@@ -62,10 +64,14 @@ export class StateHandler {
 				`Updater function can take up to 1 argument with non-null object.`
 			);
 		let inputSettings = settings.length === 1 ? settings[0] : null;
-
+		if (settings.length > 0) console.log(inputSettings);
+		if (inputSettings?.checkDiff) {
+			console.log(obj);
+		}
 		this.objects.push({
 			node: obj,
 			updater,
+			checkDiff: inputSettings?.checkDiff || null,
 		});
 		if (obj) {
 			obj.addEventListener(`update-state-${this.id}`, updater, {
@@ -117,8 +123,25 @@ export class StateHandler {
 		this.objects.forEach((o) => {
 			if (o.node) {
 				if (!document.body.contains(o.node)) return this.removeWatcher(o);
-				else o.node.dispatchEvent(evt);
+				else {
+					if (o.checkDiff) {
+						console.log('checking diff');
+						const a = o.checkDiff(oldState.value);
+						const b = o.checkDiff(this.getState());
+						console.log(a, b);
+						if (checkEqual(a, b)) return;
+					}
+				}
+				o.node.dispatchEvent(evt);
 			} else {
+				if (o.checkDiff) {
+					console.log('checking diff');
+					const a = o.checkDiff(oldState.value);
+					const b = o.checkDiff(this.getState());
+					console.log(a, b);
+					if (checkEqual(a, b)) return;
+				}
+
 				if (o.updater.length === 1) o.updater(this.getState());
 				else if (o.updater.length === 2)
 					o.updater(oldState.value, this.getState());

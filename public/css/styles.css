@@ -1,11 +1,13 @@
 :root {
-	--white: #bbb;
-	--lt-gray: #eee;
+	--white: #eee;
+	--lt-gray: #bbb;
+	--dk-gray: #333;
 	--black: #000000;
 	--blue: #141b90;
 	--green: #00ff77;
 	--brown-1: #663c51;
 	--brown-2: #9d5f51;
+	--yellow: #e1a551;
 }
 
 @font-face {
@@ -33,8 +35,20 @@ body {
 	bottom: 0;
 }
 
+body.dark {
+	background-color: var(--black);
+}
+
 * {
 	overscroll-behavior: none;
+}
+
+.category-display {
+	font-family: 'Swiss 911 Compressed', sans-serif;
+}
+
+.clue-display {
+	font-family: 'Korinna Regular BT', serif;
 }
 
 .no-select {
@@ -83,6 +97,7 @@ body {
 .game-container {
 	width: min(89vh, 100%);
 	padding: 1%;
+	background-color: black;
 }
 
 .nav-tabs .nav-link.active {

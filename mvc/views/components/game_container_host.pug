@@ -29,6 +29,13 @@ mixin lectern(n)
 link(rel="stylesheet" href="/css/components/game_container/game_container_host.css")
 
 .ratio.ratio-4x3
+    .category-scroll-container.d-none 
+        .category-scroll
+            - var cat=0
+            - while (cat<6)
+                .category-box.category-hidden(data-col=`${cat}`)
+                    .category-div(data-col=`${cat}`)
+                - cat++
     .game-board 
         - var row = 0
         - while (row < 6)
@@ -36,11 +43,30 @@ link(rel="stylesheet" href="/css/components/game_container/game_container_host.c
             - while (col<6)
                 - if (row===0)
                     .category-box.category-hidden(data-category=`${col}`) 
+                        .category-div(data-col=`${cat}`)
                 - else 
-                    .clue-box(data-category=`${col}` data-row=`${row}`)
+                    .clue-box(data-category=`${col}` data-row=`${row-1}`)
+                        .clue-value(data-category=`${col}` data-row=`${row-1}`)
                 - col++
             - row++
+    .live-clue-display.d-none 
+        .side-light.side-light-left
+        .side-light.side-light-right 
+        .category-display
+            .category-text.m-auto
+        .value-display
+            .value-text.m-auto
+        .clue-display
+            .clue-text.m-auto
 .lecterns
     +lectern(0)
     +lectern(1)
     +lectern(2)
+audio#timeout-sound
+    source(src="/media/Jeopardy-time.mp3" type="audio/mpeg")
+audio#dd-sound
+    source(src="/media/dailydouble.mp3" type="audio/mpeg")
+audio#fj-reveal-sound
+    source(src="/media/FJreveal.mp3" type="audio/mpeg")
+audio#think-sound
+    source(src="/media/think.mp3" type="audio/mpeg")
