@@ -4,8 +4,8 @@ mixin lectern(n)
             div.d-flex
                 .timer
                     - var i = 0
-                    - while (i<10)
-                        .timer-light
+                    - while (i<9)
+                        .timer-light(data-time=`${Math.abs(i-4)}`)
                         - i++
         .ratio.ratio-1x1
             .lectern-body    
@@ -17,7 +17,7 @@ mixin lectern(n)
                     .light.light-top
                     .ratio.ratio-4x3.name-display
                         div
-                            .w-100.h-100.d-flex 
+                            .w-100.h-100.d-flex
                                 .m-auto.edit-player 
                                     //- nice to have later - ability to draw name
                                     button.btn.btn-sm.btn-primary.edit-player-button Edit Player
@@ -58,10 +58,12 @@ link(rel="stylesheet" href="/css/components/game_container/game_container_host.c
             .value-text.m-auto
         .clue-display
             .clue-text.m-auto
+
 .lecterns
     +lectern(0)
     +lectern(1)
     +lectern(2)
+
 audio#timeout-sound
     source(src="/media/Jeopardy-time.mp3" type="audio/mpeg")
 audio#dd-sound

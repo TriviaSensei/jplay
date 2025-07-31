@@ -1,10 +1,11 @@
 import { getElementArray } from './utils/getElementArray.js';
 import { showMessage } from './utils/messages.js';
 import { handleRequest } from './utils/requestHandler.js';
-import { StateHandler } from './utils/stateHandler.js';
 import { withTimeout } from './utils/socketTimeout.js';
 const createButton = document.querySelector('#create-game');
 const fileUpload = document.querySelector('#game-file');
+
+const isKey = location.href.indexOf('control') >= 0;
 
 const emit = (eventName, data, timeout) => {
 	const evt = new CustomEvent('emit-event', {
@@ -23,7 +24,12 @@ let game;
 const startGame = (type, data) => {
 	if (type === 'local') {
 		uid = localStorage.getItem('jp-client-id');
-		game = new Game(data, { uid, key: 'ArrowDown' }, null, sh);
+		game = new Game(
+			data,
+			{ uid, keys: ['arrowdown', 'space', 'spacebar'] },
+			null,
+			sh
+		);
 	} else if (type === 'remote') {
 		emit(
 			'create-game',
@@ -35,7 +41,6 @@ const startGame = (type, data) => {
 				(data) => {
 					if (data.status !== 'OK') return showMessage('error', data.message);
 					sh.setState(data.gameState);
-					console.log(sh.getState());
 				},
 				() => {
 					showMessage('error', `Request timed out - try again later`);
@@ -52,7 +57,9 @@ const nameDisplays = getElementArray(document, '.name-container');
 const cancelEditPlayer = document.querySelector('#cancel-edit-player');
 const removePlayer = document.querySelector('#remove-player');
 const confirmEditPlayer = document.querySelector('#confirm-edit-player');
-const playerSettingsModal = new bootstrap.Modal('#player-settings-modal');
+const playerSettingsModal = document.querySelector('#player-settings-modal')
+	? new bootstrap.Modal('#player-settings-modal')
+	: null;
 const pi = document.querySelector('#player-index');
 const playerName = document.querySelector('#set-player-name');
 const setKeyButton = document.querySelector('#set-button');
@@ -80,6 +87,7 @@ const liveValue = liveClue.querySelector('.value-text');
 let liveClueData;
 
 const lecterns = getElementArray(gameContainer, '.lectern');
+const scoreDisplays = getElementArray(gameContainer, '.lectern .score');
 
 const timeoutSound = document.querySelector('#timeout-sound');
 
@@ -101,10 +109,39 @@ const sendGameInput = (...args) => {
 	}
 };
 
+let keyWindow;
+//send game state to key window - called when key window is opened, or when
+//state is updated
+const sendGameState = () => {
+	if (isKey) return;
+	const state = sh.getState();
+	const evt = new CustomEvent('receive-state', { detail: state });
+	if (keyWindow?.document) keyWindow.document.dispatchEvent(evt);
+};
+//receive the game state from the main window
+const receiveGameState = (e) => {
+	sh.setState(e.detail);
+};
+if (isKey) document.addEventListener('receive-state', receiveGameState);
+
 //handle key press
-document.addEventListener('keydown', (e) => {
+const handleKeyPress = async (e) => {
 	const setKey = setKeyButton.getAttribute('data-toggled') === 'true';
 	const state = sh.getState();
+	if (!state) return;
+
+	//open up key window
+	if (e.key.toLowerCase() === 'k' && uid === state.host.uid && !isKey) {
+		if (keyWindow) keyWindow.close();
+		keyWindow = window.open(
+			`/control`,
+			'_blank',
+			'popup,menubar=false,statusbar=no,toolbar=false,location=false,scrollbars=false'
+		);
+		keyWindow.addEventListener('load', sendGameState, { once: true });
+
+		return;
+	}
 
 	if (!state) return;
 	if (setKey && !state.active) {
@@ -116,15 +153,19 @@ document.addEventListener('keydown', (e) => {
 			!state.players.every((p, i) => {
 				if (p.isRemote) return true;
 				return p.key !== e.key || i === playerIndex;
-			}) ||
-			(!state.players[playerIndex].isRemote && e.key === state.host.key)
+			})
 		) {
 			showMessage('warning', `Duplicated buzzer key - no changes made`);
 		} else if (
 			!state.players[playerIndex].isRemote &&
+			state.host.keys.includes(e.key.toLowerCase())
+		) {
+			showMessage('warning', `Key is reserved for host - no changes made`);
+		} else if (
+			!state.players[playerIndex].isRemote &&
 			['C', 'X'].includes(e.key.toUpperCase())
 		) {
-			return showMessage('error', 'Key is reserved for host functionality');
+			showMessage('warning', `Key is reserved for host - no changes made`);
 		} else {
 			state.players[playerIndex].key = e.key;
 			buzzerKey.setAttribute('data-key', e.key);
@@ -133,16 +174,14 @@ document.addEventListener('keydown', (e) => {
 		setKeyButton.setAttribute('data-toggled', 'false');
 		setKeyButton.innerHTML = 'Set key';
 		return;
-	} else if (!state.active && e.key === state.host.key) {
+	} else if (!state.active && state.host.keys.includes(e.key.toLowerCase())) {
 		if (state.players.some((p) => p.name)) startGameModal.show();
 		else
 			return showMessage('error', 'You must have at least one active player');
 	} else if (state.active) {
-		if (
-			[state.host.key.toLowerCase(), 'c', 'x'].includes(e.key.toLowerCase())
-		) {
+		if ([...state.host.keys, 'c', 'x', 'k'].includes(e.key.toLowerCase())) {
 			if (uid !== state.host.uid) return;
-			if (e.key === state.host.key) sendGameInput('host');
+			if (state.host.keys.includes(e.key.toLowerCase())) sendGameInput('host');
 			else if (e.key.toLowerCase() === 'c') sendGameInput('correct');
 			else if (e.key.toLowerCase() === 'x') sendGameInput('incorrect');
 		} else {
@@ -153,68 +192,90 @@ document.addEventListener('keydown', (e) => {
 			sendGameInput('player', ind);
 		}
 	}
-});
+};
+const sendKey = (e) => {
+	const key = e.key;
+	if (!window.opener) return;
+	const evt = new CustomEvent('receive-key', { detail: { key } });
+	window.opener.document.dispatchEvent(evt);
+};
+//main game - handle key press on keydown, receive key from control window
+if (!isKey) {
+	document.addEventListener('keydown', handleKeyPress);
+	document.addEventListener('receive-key', (e) => {
+		handleKeyPress({ key: e.detail.key });
+	});
+}
+//control window - on key press, send it to the main window to manage the state
+else {
+	document.addEventListener('keydown', sendKey);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
 	const files = getElementArray(document, '.file');
-	const selectFile = (e) => {
-		const sf = document.querySelector('.file.selected');
-		if (!e.target || sf === e.target) return;
-		if (sf) {
-			sf.classList.remove('selected');
-			sf.setAttribute('aria-selected', false);
-		}
-		e.target.classList.add('selected');
-		e.target.setAttribute('aria-selected', true);
-	};
-	files.forEach((f) => f.addEventListener('click', selectFile));
+	if (files) {
+		const selectFile = (e) => {
+			const sf = document.querySelector('.file.selected');
+			if (!e.target || sf === e.target) return;
+			if (sf) {
+				sf.classList.remove('selected');
+				sf.setAttribute('aria-selected', false);
+			}
+			e.target.classList.add('selected');
+			e.target.setAttribute('aria-selected', true);
+		};
+		files.forEach((f) => f.addEventListener('click', selectFile));
+	}
 
-	createButton.addEventListener('click', async () => {
-		const gameType = document.querySelector(
-			'[name="play-type"]:checked'
-		)?.value;
-		if (!gameType) return showMessage('error', 'No game type selected');
-		else if (gameType !== 'local' && gameType !== 'remote')
-			return showMessage('error', 'Invalid game type selected');
-		const fileType = document.querySelector(
-			'[name="load-type"]:checked'
-		)?.value;
-		if (!fileType) return showMessage('error', 'File location not specified');
-		let data;
-		if (fileType === 'local') {
-			const file = fileUpload.files[0];
-			if (!file) return showMessage('error', 'No file specified');
-			else if (file.type !== 'application/json')
-				return showMessage('error', 'Invalid file format');
-			const reader = new FileReader();
-			reader.addEventListener('load', () => {
-				data = JSON.parse(reader.result);
-				startGame(gameType, data.rounds);
-			});
-			reader.readAsText(file, 'utf-8');
-		} else if (fileType === 'remote') {
-			const filename = document
-				.querySelector('.file.selected')
-				?.getAttribute('data-file');
-			if (!filename) return showMessage('error', 'No file selected');
-			const handler = (res) => {
-				if (res.status === 'success') data = res.data.rounds;
-				else return showMessage('error', res.message);
-				startGame(gameType, data);
-			};
-			const url = `/games/${filename}`;
-			showMessage('info', 'Starting game...');
-			handleRequest(url, 'GET', null, handler);
-		} else return showMessage('error', 'Invalid file location specified');
-	});
+	if (createButton)
+		createButton.addEventListener('click', async () => {
+			const gameType = document.querySelector(
+				'[name="play-type"]:checked'
+			)?.value;
+			if (!gameType) return showMessage('error', 'No game type selected');
+			else if (gameType !== 'local' && gameType !== 'remote')
+				return showMessage('error', 'Invalid game type selected');
+			const fileType = document.querySelector(
+				'[name="load-type"]:checked'
+			)?.value;
+			if (!fileType) return showMessage('error', 'File location not specified');
+			let data;
+			if (fileType === 'local') {
+				const file = fileUpload.files[0];
+				if (!file) return showMessage('error', 'No file specified');
+				else if (file.type !== 'application/json')
+					return showMessage('error', 'Invalid file format');
+				const reader = new FileReader();
+				reader.addEventListener('load', () => {
+					data = JSON.parse(reader.result);
+					startGame(gameType, data.rounds);
+				});
+				reader.readAsText(file, 'utf-8');
+			} else if (fileType === 'remote') {
+				const filename = document
+					.querySelector('.file.selected')
+					?.getAttribute('data-file');
+				if (!filename) return showMessage('error', 'No file selected');
+				const handler = (res) => {
+					if (res.status === 'success') data = res.data.rounds;
+					else return showMessage('error', res.message);
+					startGame(gameType, data);
+				};
+				const url = `/games/${filename}`;
+				showMessage('info', 'Starting game...');
+				handleRequest(url, 'GET', null, handler);
+			} else return showMessage('error', 'Invalid file location specified');
+		});
 
 	sh.addWatcher(initContainer, (e) => {
+		if (!e?.detail) return;
 		if (e.detail) hidePanel(e.target);
 		else showPanel(e.target);
 	});
 
 	sh.addWatcher(gameContainer, (e) => {
-		if (!e.detail || e.detail.host.uid !== uid) hidePanel(e.target);
+		if (isKey) showPanel(e.target);
+		else if (!e.detail || e.detail.host.uid !== uid) hidePanel(e.target);
 		else showPanel(e.target);
 
 		if (!e.detail) e.target.setAttribute('data-round', 0);
@@ -261,45 +322,52 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	});
 
-	setKeyButton.addEventListener('click', (e) => {
-		const curr = e.target.getAttribute('data-toggled');
-		e.target.setAttribute('data-toggled', curr === 'false' ? 'true' : 'false');
-		e.target.innerHTML = curr === 'false' ? '[Press a key]' : 'Set key';
-	});
+	if (setKeyButton)
+		setKeyButton.addEventListener('click', (e) => {
+			const curr = e.target.getAttribute('data-toggled');
+			e.target.setAttribute(
+				'data-toggled',
+				curr === 'false' ? 'true' : 'false'
+			);
+			e.target.innerHTML = curr === 'false' ? '[Press a key]' : 'Set key';
+		});
 
-	confirmEditPlayer.addEventListener('click', () => {
-		const index = getPlayerIndex();
-		const state = sh.getState();
-		if (isNaN(index) || index < 0 || index >= state.players.length)
-			return pi.removeAttribute('value');
+	if (confirmEditPlayer)
+		confirmEditPlayer.addEventListener('click', () => {
+			const index = getPlayerIndex();
+			const state = sh.getState();
+			if (isNaN(index) || index < 0 || index >= state.players.length)
+				return pi.removeAttribute('value');
 
-		const lec = document.querySelector(`.lectern[data-index="${index}"]`);
-		if (!lec) return pi.removeAttribute('value');
+			const lec = document.querySelector(`.lectern[data-index="${index}"]`);
+			if (!lec) return pi.removeAttribute('value');
 
-		const key = buzzerKey.getAttribute('data-key');
+			const key = buzzerKey.getAttribute('data-key');
 
-		game.gameState.players[index].setName(playerName.value);
-		game.gameState.players[index].setKey(key);
-		game.updateGameState();
+			game.gameState.players[index].setName(playerName.value);
+			game.gameState.players[index].setKey(key);
+			game.updateGameState();
 
-		pi.removeAttribute('value');
+			pi.removeAttribute('value');
 
-		playerSettingsModal.hide();
-	});
+			playerSettingsModal.hide();
+		});
 
-	cancelEditPlayer.addEventListener('click', () => {
-		pi.removeAttribute('value');
-		playerName.value = '';
-		buzzerKey.innerHTML = '[None]';
-	});
+	if (cancelEditPlayer)
+		cancelEditPlayer.addEventListener('click', () => {
+			pi.removeAttribute('value');
+			playerName.value = '';
+			buzzerKey.innerHTML = '[None]';
+		});
 
-	removePlayer.addEventListener('click', () => {
-		const index = getPlayerIndex();
-		const state = sh.getState();
-		if (!state || state.state !== 'pregame') return;
-		game.resetPlayer(index);
-		playerSettingsModal.hide();
-	});
+	if (removePlayer)
+		removePlayer.addEventListener('click', () => {
+			const index = getPlayerIndex();
+			const state = sh.getState();
+			if (!state || state.state !== 'pregame') return;
+			game.resetPlayer(index);
+			playerSettingsModal.hide();
+		});
 
 	confirmStartGame.addEventListener('click', () => {
 		sendGameInput('start');
@@ -320,6 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		[liveClue, categoryScroll, gameBoard].forEach((el) =>
 			el.classList.add('d-none')
 		);
+
 		if (state.selectedClue[0] !== -1 && state.selectedClue[1] !== -1) {
 			liveClue.classList.remove('d-none');
 			categoryScroll.classList.add('d-none');
@@ -331,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			liveClueText.innerHTML = liveClueData.text;
 			liveValue.innerHTML = `$${liveClueData.value}`;
 			liveClueCategory.innerHTML = liveCategory.category;
-		} else if (state.state === 'boardIntro' && state.categoryShown >= 0) {
+		} else if (state.state === 'boardIntro' && state.categoryShown >= -1) {
 			liveClue.classList.add('d-none');
 			gameBoard.classList.add('d-none');
 			categoryScroll.classList.remove('d-none');
@@ -339,12 +408,12 @@ document.addEventListener('DOMContentLoaded', () => {
 				const ind = Number(cb.getAttribute('data-col'));
 				if (ind > state.categoryShown) cb.classList.add(`category-hidden`);
 				else if (ind === state.categoryShown) {
-					categoryScrollInner.style.left = `-${100 * state.categoryShown}%`;
 					setTimeout(() => cb.classList.remove('category-hidden'), 500);
 					const cd = cb.querySelector('.category-div');
 					cd.innerHTML = state.board[state.round][i].category;
 				}
 			});
+			categoryScrollInner.style.left = `${-100 * state.categoryShown}%`;
 		} else if (state.state === 'select') {
 			liveClue.classList.add('d-none');
 			categoryScroll.classList.add('d-none');
@@ -378,12 +447,57 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	});
 
+	let timerTimeout = null;
+	let timerInterval = null;
+
+	const tickLights = (lec) => {
+		const t = Number(lec.getAttribute('data-time'));
+		if (!t || t === 0) lec.removeAttribute('data-time');
+		else lec.setAttribute('data-time', t - 1);
+	};
+
+	const stopTimerLights = () => {
+		if (timerTimeout) clearTimeout(timerTimeout);
+		timerTimeout = null;
+		if (timerInterval) clearInterval(timerInterval);
+		timerInterval = null;
+		const current = gameContainer.querySelector('.lectern.lit');
+		if (current) {
+			current.classList.remove('lit');
+			current.removeAttribute('data-time');
+		}
+	};
+	const startTimerLights = (lec, elapsed) => {
+		//turn off the other timer lights if needed
+		if (timerTimeout) clearTimeout(timerTimeout);
+		timerTimeout = null;
+		if (timerInterval) clearInterval(timerInterval);
+		timerInterval = null;
+		const lit = getElementArray(gameContainer, '.lectern.lit');
+		lit.forEach((l) => {
+			if (l !== lec) l.classList.remove('lit');
+		});
+		//set it to 5 seconds
+		const timeLeft = 4000 - elapsed;
+		const secondsLeft = Math.min(4, Math.floor(timeLeft / 1000));
+		const residual = timeLeft - secondsLeft * 1000;
+		lec.setAttribute('data-time', secondsLeft);
+		timerTimeout = setTimeout(() => {
+			timerInterval = setInterval(() => {
+				tickLights(lec);
+			}, 1000);
+		}, residual);
+	};
 	lecterns.forEach((l) =>
 		sh.addWatcher(l, (e) => {
 			if (!e.detail) return;
-			if (e.detail.control === Number(l.getAttribute('data-index')))
-				e.target.classList.add('control');
+			const ind = Number(l.getAttribute('data-index'));
+			if (e.detail.control === ind) e.target.classList.add('control');
 			else e.target.classList.remove('control');
+			if (e.detail.buzzedIn === ind && e.detail.state === 'buzz') {
+				e.target.classList.add('lit');
+				startTimerLights(l, e.detail.currentTime - e.detail.buzzTime);
+			} else e.target.classList.remove('lit');
 		})
 	);
 
@@ -402,6 +516,17 @@ document.addEventListener('DOMContentLoaded', () => {
 		else e.target.classList.remove('live');
 	});
 
+	scoreDisplays.forEach((sd, i) => {
+		sh.addWatcher(sd, (e) => {
+			if (!e.detail) return;
+			const score = e.detail.players[i]?.getScore() || 0;
+			if (score >= 0) e.target.classList.remove('neg');
+			else e.target.classList.add('neg');
+
+			e.target.innerHTML = `$${Math.abs(score)}`;
+		});
+	});
+
 	sh.addWatcher(null, (state) => {
 		if (state?.message?.trim()) showMessage('info', state.message);
 		if (state?.isRemote) emit('update-game-state', state, 1500);
@@ -416,4 +541,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			console.log(e.detail);
 		}
 	});
+
+	//send game state to key window on state update
+	if (!isKey) sh.addWatcher(null, sendGameState);
+
+	//TODO: open host control panel, connect to game
+	//Can I make it a .pug file on its own, and somehow hook it to the existing page?
 });

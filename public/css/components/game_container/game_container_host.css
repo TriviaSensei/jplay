@@ -136,7 +136,9 @@
 	*/
 	@media (aspect-ratio > 0.89) {
 		.clue-display,
-		.value-display,
+		.value-display {
+			font-size: 4vh;
+		}
 		.category-display {
 			font-size: 3.5vh;
 		}
@@ -152,6 +154,7 @@
 
 .category-scroll-container {
 	overflow: hidden;
+	background-color: var(--blue);
 }
 .category-scroll {
 	width: 600%;
@@ -217,9 +220,12 @@
 				border: 1px solid var(--lt-gray);
 				background-color: #332c42;
 			}
-			.timer-light.lit {
-				background-color: red;
-			}
+		}
+		.light {
+			background-image: url('/img/light-bg.png');
+			background-repeat: no-repeat;
+			background-position: 0 0;
+			background-size: 105% 105%;
 		}
 
 		.lectern-body {
@@ -245,12 +251,13 @@
 					font-weight: bold;
 					text-align: center;
 				}
-
-				.light {
-					background-image: url('/img/light-bg.png');
-					background-repeat: no-repeat;
-					background-position: 0 0;
-					background-size: 105% 105%;
+				.score.neg {
+					color: red;
+				}
+				.score.neg::before {
+					content: '-';
+					color: red;
+					margin-right: 0.1em;
 				}
 
 				.light-top {
@@ -347,7 +354,39 @@
 	}
 	.lectern.lit {
 		.light {
+			background-image: unset;
 			background-color: white;
+		}
+	}
+	.lectern.lit[data-time='4'] {
+		.timer-light {
+			background-color: red;
+		}
+	}
+	.lectern.lit[data-time='3'] {
+		.timer-light[data-time='3'],
+		.timer-light[data-time='2'],
+		.timer-light[data-time='1'],
+		.timer-light[data-time='0'] {
+			background-color: red;
+		}
+	}
+	.lectern.lit[data-time='2'] {
+		.timer-light[data-time='2'],
+		.timer-light[data-time='1'],
+		.timer-light[data-time='0'] {
+			background-color: red;
+		}
+	}
+	.lectern.lit[data-time='1'] {
+		.timer-light[data-time='1'],
+		.timer-light[data-time='0'] {
+			background-color: red;
+		}
+	}
+	.lectern.lit[data-time='0'] {
+		.timer-light[data-time='0'] {
+			background-color: red;
 		}
 	}
 }

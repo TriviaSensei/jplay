@@ -16,7 +16,7 @@ const checkEqual = (a, b) => {
 	}
 };
 
-export class StateHandler {
+class StateHandler {
 	randomString(length) {
 		const chars =
 			'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -100,6 +100,8 @@ export class StateHandler {
 	}
 
 	setState(s, ...opts) {
+		console.log('SH setting state');
+		console.log(s);
 		const oldState = {
 			...this.state,
 		};
@@ -142,6 +144,7 @@ export class StateHandler {
 					if (checkEqual(a, b)) return;
 				}
 
+				if (o.updater.length === 0) o.updater();
 				if (o.updater.length === 1) o.updater(this.getState());
 				else if (o.updater.length === 2)
 					o.updater(oldState.value, this.getState());

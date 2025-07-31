@@ -24,11 +24,13 @@ exports.getHome = async (req, res, next) => {
 
 		res.status(200).render('home', {
 			title: 'This is...J-Play!',
+			key: false,
 			files,
 		});
 	} catch (err) {
 		res.status(200).render('home', {
 			title: 'This is...J-Play!',
+			key: false,
 			files: [],
 		});
 	}
@@ -45,6 +47,13 @@ exports.getGame = async (req, res, next) => {
 	res.status(200).json({
 		status: 'success',
 		data: JSON.parse(data),
+	});
+};
+
+exports.getControlPanel = async (req, res, next) => {
+	res.status(200).render('controlpanel', {
+		title: 'Control Panel',
+		key: true,
 	});
 };
 

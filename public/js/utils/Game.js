@@ -46,12 +46,15 @@ class Player {
 	}
 
 	lock(autoUnlock) {
+		console.log(`Locking ${this.name}`);
 		this.locked = true;
 		if (this.lockTimeout) clearTimeout(this.lockTimeout);
 		if (autoUnlock) this.lockTimeout = setTimeout(this.unlock, lockTimeout);
 	}
 
 	unlock() {
+		console.log(`Unocking ${this.name}`);
+		console.trace();
 		if (this.lockTimeout) {
 			clearTimeout(this.lockTimeout);
 			this.lockTimeout = null;
@@ -197,10 +200,6 @@ class Game {
 				else {
 					//lock this player out for the question
 					this.gameState.players[this.gameState.buzzedIn].lock(false);
-					//unlock every buzzer that is still eligible
-					this.gameState.players.forEach((p) => {
-						if (p.locked && !p.lockTimeout) p.unlock();
-					});
 					//if any one is elibible, go back to clueLive
 					if (this.gameState.players.some((p) => !p.isLocked()))
 						this.setGameState({
@@ -215,10 +214,11 @@ class Game {
 							return p + c.clues.reduce((cl) => (cl.selected ? 1 : 0));
 						}, 0) < cluesPerRound
 					) {
-						//give control to the player that originally had it
+						//unlock all buzzers
+						this.unlockAll();
+						//go back to select without changing control of board
 						this.setGameState({
 							state: 'select',
-							control: this.gameState.buzzedIn,
 						});
 					} //round is over
 					else {
@@ -228,6 +228,7 @@ class Game {
 						});
 					}
 				}
+				console.log(this.gameState);
 			} catch (err) {
 				return console.log(err);
 			}
@@ -279,6 +280,7 @@ class Game {
 
 	handleBuzz = (p) => {
 		try {
+			console.log(p);
 			//if the player is locked, don't do anything
 			if (this.gameState.players[p].isLocked()) return;
 			//stop the clue timeout, set the game state
@@ -338,7 +340,7 @@ class Game {
 					this.setGameState({
 						state: 'boardIntro',
 						round: 0,
-						categoryShown: -1,
+						categoryShown: -2,
 					});
 				} else throw new Error('You must have at least one player.');
 			},
@@ -524,7 +526,7 @@ class Game {
 				else
 					this.setGameState({
 						state: 'boardIntro',
-						categoryShown: -1,
+						categoryShown: -2,
 					});
 			},
 		},
@@ -647,7 +649,7 @@ class Game {
 			buzzedIn: -1, //which player (0,1,2) is buzzed in, -1 if no one
 			buzzTime: null,
 			timeout: false,
-			categoryShown: -1,
+			categoryShown: -2,
 			control: -1, //which player has control of the board, -1 if no one
 			wager: -1, //the DD wager for the active clue, -1 if N/A
 			host, //host info (socket ID, UID)
