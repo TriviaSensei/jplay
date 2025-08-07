@@ -57,6 +57,10 @@ exports.getControlPanel = async (req, res, next) => {
 	});
 };
 
+exports.getTest = async (req, res, next) => {
+	res.status(200).render('test');
+};
+
 exports.redirectToIndex = (req, res, next) => {
 	if (req.originalUrl !== '/favicon.ico') return res.redirect(`/`);
 	else

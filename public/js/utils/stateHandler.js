@@ -29,14 +29,16 @@ class StateHandler {
 		return result;
 	}
 
-	constructor(initialState, ...validator) {
+	constructor(initialState, ...args) {
 		if ((typeof initialState).toLowerCase() === 'function')
 			throw new Error('State cannot be set to a function');
 
 		this.state = { value: initialState };
-
-		if (validator) {
-			this.validator = validator[0];
+		if (args.length > 0) {
+			const settings = args[0];
+			if (settings.validator) this.validator = settings.validator;
+			if (settings.allowNull) this.allowNull = settings.allowNull;
+			else this.allowNull = true;
 		}
 		this.id = this.randomString(20);
 		this.objects = [];
@@ -77,11 +79,18 @@ class StateHandler {
 			obj.addEventListener(`update-state-${this.id}`, updater, {
 				once: inputSettings?.once === true,
 			});
-			updater({ target: obj, detail: this.state.value });
+			if (this.state.value || this.allowNull) {
+				console.log(this.state.value, this.allowNull);
+				updater({ target: obj, detail: this.state.value });
+			}
 		} else {
-			if (updater.length === 1) updater(this.state.value);
-			else if (updater.length === 2) {
-				updater(null, this.state.value);
+			if ((this.state.value || this.allowNull) && !inputSettings?.once) {
+				if (updater.length === 0) updater();
+				else if (updater.length === 1) updater(this.state.value);
+				else if (updater.length === 2) {
+					if (this.state.value || this.allowNull)
+						updater(null, this.state.value);
+				}
 			}
 		}
 	}
@@ -100,8 +109,6 @@ class StateHandler {
 	}
 
 	setState(s, ...opts) {
-		console.log('SH setting state');
-		console.log(s);
 		const oldState = {
 			...this.state,
 		};
@@ -118,6 +125,9 @@ class StateHandler {
 		if (opts.length > 0) {
 			if (opts[0].runUpdates === false) return;
 		}
+		if (!s && !this.allowNull) {
+			return console.log('Returning (null state not allowed)');
+		}
 
 		const evt = new CustomEvent(`update-state-${this.id}`, {
 			detail: this.state.value,
@@ -127,20 +137,16 @@ class StateHandler {
 				if (!document.body.contains(o.node)) return this.removeWatcher(o);
 				else {
 					if (o.checkDiff) {
-						console.log('checking diff');
 						const a = o.checkDiff(oldState.value);
 						const b = o.checkDiff(this.getState());
-						console.log(a, b);
 						if (checkEqual(a, b)) return;
 					}
 				}
 				o.node.dispatchEvent(evt);
 			} else {
 				if (o.checkDiff) {
-					console.log('checking diff');
 					const a = o.checkDiff(oldState.value);
 					const b = o.checkDiff(this.getState());
-					console.log(a, b);
 					if (checkEqual(a, b)) return;
 				}
 

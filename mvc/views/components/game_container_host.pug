@@ -26,8 +26,6 @@ mixin lectern(n)
                 .lectern-right
                     .lectern-image
 
-link(rel="stylesheet" href="/css/components/game_container/game_container_host.css")
-
 .ratio.ratio-4x3
     .category-scroll-container.d-none 
         .category-scroll
@@ -36,7 +34,8 @@ link(rel="stylesheet" href="/css/components/game_container/game_container_host.c
                 .category-box.category-hidden(data-col=`${cat}`)
                     .category-div(data-col=`${cat}`)
                 - cat++
-    .game-board 
+    .game-board
+        .dd-div
         - var row = 0
         - while (row < 6)
             - var col = 0;
@@ -58,6 +57,8 @@ link(rel="stylesheet" href="/css/components/game_container/game_container_host.c
             .value-text.m-auto
         .clue-display
             .clue-text.m-auto
+        .response-display 
+            .response-text.m-auto
 
 .lecterns
     +lectern(0)

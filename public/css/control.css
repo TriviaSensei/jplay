@@ -21,13 +21,60 @@ body {
 
 .game-container {
 	margin: unset;
-	background-color: var(--white);
 	/* .lecterns,
 	.lectern {
 		display: none;
 	} */
+	.game-board {
+		.clue-box {
+			box-sizing: border-box;
+		}
+		.clue-box.dd {
+			background-color: var(--yellow);
+			color: var(--blue);
+		}
+	}
 }
+
+.live-clue-display {
+	.clue-display,
+	.response-display {
+		padding: 5%;
+		border: 1px solid white;
+		font-family: 'Korinna Regular BT', serif;
+	}
+	.clue-display {
+		grid-row: 3/6;
+		grid-column: 2/6;
+	}
+
+	.response-display {
+		display: flex;
+		grid-row: 6/7;
+		grid-column: 2/6;
+	}
+
+	@media (max-aspect-ratio: 0.89) {
+		.clue-display,
+		.response-display {
+			font-size: 5vw;
+		}
+	}
+	/*
+		viewport is wide enough to fit everything - font size determined by the height of the window
+	*/
+	@media (aspect-ratio > 0.89) {
+		.clue-display,
+		.response-display {
+			font-size: 2.5vh;
+		}
+	}
+}
+
 #cover-div {
 	width: 100%;
 	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
 }

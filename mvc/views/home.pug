@@ -16,13 +16,13 @@ html
         .init-container
             h2.mx-auto This is...J-Play!
             include components/init_container
-        .game-container
+        .game-container.d-none
+            link(rel="stylesheet" href="/css/components/game_container/game_container_host.css")
             include components/game_container_host
         .host-panel.d-none
             
 
     script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous")
-    script(src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js")
     script(src="/socket.io/socket.io.js")
     script(src="/js/utils/stateHandler.js")
     script(src="/js/utils/Game.js" defer)

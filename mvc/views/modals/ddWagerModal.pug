@@ -1,0 +1,13 @@
+.modal#dd-wager-modal(tabindex="-1" aria-labelledby="dd-wager-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false")
+    .modal-dialog.modal-dialog-centered
+        .modal-content#dd-wager-modal-content
+            input#player-index(type="hidden")
+            .modal-header
+                h5.modal-title#dd-wager-label Daily Double Wager - #[span#dd-player-name]
+            .modal-body
+                .input-row-v 
+                    .input-label Enter wager (5 - #[span#dd-range]) 
+                    .input-container 
+                        input#dd-wager(type="number" placenolder="Wager" min="5")
+            .modal-footer
+                button#confirm-dd-wager.btn.btn-sm.btn-primary(type="button") Confirm

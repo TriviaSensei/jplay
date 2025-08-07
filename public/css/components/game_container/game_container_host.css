@@ -1,3 +1,19 @@
+@keyframes dd-animate {
+	0% {
+		display: block;
+		position: absolute;
+	}
+
+	50%,
+	100% {
+		top: 50%;
+		left: 50%;
+		width: 100%;
+		height: 100%;
+		transform: translate(-50%, -50%) rotateX(360deg);
+	}
+}
+
 .game-board,
 .live-clue-display {
 	display: grid;
@@ -78,6 +94,26 @@
 			}
 		}
 	}
+
+	.dd-div {
+		width: 16%;
+		height: 16%;
+		transform: translate(-50%, -50%);
+		position: absolute;
+		display: none;
+		background-image: url('/img/dd.jpg');
+		background-color: var(--blue);
+		background-repeat: no-repeat;
+		background-size: contain;
+		background-position: center;
+		z-index: 3;
+	}
+
+	.dd-div.animation {
+		display: block;
+		animation-name: dd-animate;
+		animation-duration: 3s;
+	}
 }
 
 .live-clue-display {
@@ -124,11 +160,16 @@
 
 		font-family: 'Korinna Regular BT', serif;
 	}
+
+	.response-display {
+		display: none;
+	}
+
 	@media (max-aspect-ratio: 0.89) {
 		.clue-display,
 		.value-display,
 		.category-display {
-			font-size: 8vw;
+			font-size: 7vw;
 		}
 	}
 	/*
@@ -137,7 +178,7 @@
 	@media (aspect-ratio > 0.89) {
 		.clue-display,
 		.value-display {
-			font-size: 4vh;
+			font-size: 3.5vh;
 		}
 		.category-display {
 			font-size: 3.5vh;

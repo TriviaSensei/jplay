@@ -257,6 +257,7 @@ class Game {
 				state: 'select',
 				wager: -1,
 			});
+			console.log(this.gameState);
 		}
 		//round is over
 		else {
@@ -401,12 +402,17 @@ class Game {
 				if (clue.selected) return;
 				clue.selected = true;
 				if (clue.dailyDouble)
-					this.setGameState({ state: 'waitingDD', playSound: true });
+					this.setGameState({
+						state: 'waitingDD',
+						playSound: true,
+						selectedClue: [cat, row],
+					});
 				else
 					this.setGameState({
 						state: 'showClue',
 						selectedClue: [cat, row],
 					});
+				console.log(cat, row);
 			},
 		},
 		//showClue: clue is showing, but buzzer is not active
@@ -469,7 +475,7 @@ class Game {
 		},
 		//waitingDD: showing DD screen, waiting for a DD wager
 		waitingDD: {
-			host: () => {
+			setWager: (wager) => {
 				if (this.gameState.control === -1)
 					throw new Error('Invalid game state');
 				//make sure a valid wager has been submitted,
@@ -477,11 +483,21 @@ class Game {
 				const minMaxWager = (this.gameState.round + 1) * 1000;
 				const p = this.gameState.players[this.gameState.control];
 				const maxWager = Math.max(minMaxWager, p.getScore());
-				if (this.gameState.wager < minWager && this.gameState.wager > maxWager)
+				if (wager < minWager || wager > maxWager)
 					throw new Error(
 						`Please submit a valid wager from $${minWager} to $${maxWager}`
 					);
 				//valid wager has been submitted - show the clue
+				this.setGameState({
+					wager,
+					state: 'showDD',
+				});
+			},
+		},
+		//showDD: DD being read, no timer, no buzzers
+		showDD: {
+			data: {},
+			host: () => {
 				this.setGameState({
 					state: 'DDLive',
 				});
@@ -831,7 +847,6 @@ class Game {
 	}
 
 	setGameState(state) {
-		console.log(state);
 		let newData = {};
 		if (state.state && state.gameState !== this.gameState.state) {
 			const newState = state.state;
@@ -898,6 +913,16 @@ class Game {
 	stopClueTimer() {
 		if (this.clueTimeout) clearTimeout(this.clueTimeout);
 		this.clueTimeout = null;
+	}
+
+	setDDWager(wager) {
+		if (this.state.state !== 'waitingDD') return;
+		else if (this.state.control === -1) return;
+		const player = this.state.players[this.state.control];
+		if (wager < 5) throw new Error('Minimum wager is $5');
+		const maxWager = Math.max((this.state.round + 1) * 1000, player.getScore());
+		if (wager > maxWager) throw new Error(`Maximum wager is $${maxWager}`);
+		this.state.wager = wager;
 	}
 }
 

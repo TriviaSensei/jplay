@@ -80,17 +80,29 @@ const liveClue = gameContainer.querySelector('.live-clue-display');
 const clueBoxes = getElementArray(gameContainer, '.clue-box');
 const clueValues = getElementArray(gameContainer, '.clue-value');
 
+const ddDiv = document.querySelector('.dd-div');
+
 const sideLights = getElementArray(liveClue, '.side-light');
 const liveClueText = liveClue.querySelector('.clue-text');
 const liveClueCategory = liveClue.querySelector('.category-text');
 const liveValue = liveClue.querySelector('.value-text');
+const liveResponse = isKey ? liveClue.querySelector('.response-text') : null;
 let liveClueData;
 
 const lecterns = getElementArray(gameContainer, '.lectern');
 const scoreDisplays = getElementArray(gameContainer, '.lectern .score');
 
 const timeoutSound = document.querySelector('#timeout-sound');
-
+const ddSound = document.querySelector('#dd-sound');
+const ddw = document.querySelector('#dd-wager-modal');
+const ddWagerModal = isKey ? new bootstrap.Modal(ddw) : null;
+let ddPlayerName, ddWager, maxWager, confirmDDWager;
+if (ddWagerModal) {
+	ddPlayerName = ddw.querySelector('#dd-player-name');
+	ddWager = ddw.querySelector('#dd-wager');
+	maxWager = ddw.querySelector('#dd-range');
+	confirmDDWager = ddw.querySelector('#confirm-dd-wager');
+}
 const hidePanel = (tgt) => {
 	tgt.classList.add('d-none');
 };
@@ -101,7 +113,15 @@ const getPlayerIndex = () => {
 };
 
 const sendGameInput = (...args) => {
-	if (!game) return;
+	if (isKey) {
+		const evt = new CustomEvent('receive-input', {
+			detail: {
+				args,
+			},
+		});
+		if (!window.opener) return;
+		return window.opener.document.dispatchEvent(evt);
+	} else if (!game) return;
 	try {
 		game.handleInput(...args);
 	} catch (err) {
@@ -124,6 +144,17 @@ const receiveGameState = (e) => {
 };
 if (isKey) document.addEventListener('receive-state', receiveGameState);
 
+//open key
+const openKey = () => {
+	if (keyWindow) keyWindow.close();
+	keyWindow = window.open(
+		`/control`,
+		'_blank',
+		`popup,menubar=false,statusbar=no,toolbar=false,location=false,scrollbars=false`
+	);
+	keyWindow.addEventListener('load', sendGameState, { once: true });
+};
+
 //handle key press
 const handleKeyPress = async (e) => {
 	const setKey = setKeyButton.getAttribute('data-toggled') === 'true';
@@ -131,17 +162,8 @@ const handleKeyPress = async (e) => {
 	if (!state) return;
 
 	//open up key window
-	if (e.key.toLowerCase() === 'k' && uid === state.host.uid && !isKey) {
-		if (keyWindow) keyWindow.close();
-		keyWindow = window.open(
-			`/control`,
-			'_blank',
-			'popup,menubar=false,statusbar=no,toolbar=false,location=false,scrollbars=false'
-		);
-		keyWindow.addEventListener('load', sendGameState, { once: true });
-
-		return;
-	}
+	if (e.key.toLowerCase() === 'k' && uid === state.host.uid && !isKey)
+		return openKey();
 
 	if (!state) return;
 	if (setKey && !state.active) {
@@ -205,6 +227,11 @@ if (!isKey) {
 	document.addEventListener('receive-key', (e) => {
 		handleKeyPress({ key: e.detail.key });
 	});
+	document.addEventListener('receive-input', (e) => {
+		const { args } = e.detail;
+		console.log(args);
+		if (game) game.handleInput(...args);
+	});
 }
 //control window - on key press, send it to the main window to manage the state
 else {
@@ -212,6 +239,8 @@ else {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+	if (isKey && !window.opener) location.href = '/';
+
 	const files = getElementArray(document, '.file');
 	if (files) {
 		const selectFile = (e) => {
@@ -383,23 +412,84 @@ document.addEventListener('DOMContentLoaded', () => {
 		e.target.innerHTML = key;
 	});
 
+	const getCategory = (cat) => {
+		const state = sh.getState();
+		if (!state) return null;
+		else if (Array.isArray(state.board[state.round]))
+			return state.board[state.round][cat];
+		else if (state.round === state.board.length - 1)
+			return state.board[state.round];
+	};
+	const getClue = (cat, row) => {
+		const state = sh.getState();
+		if (!state) return null;
+		else if (Array.isArray(state.board[state.round]))
+			return state.board[state.round][cat].clues[row];
+		else if (state.round === state.board.length - 1)
+			return state.board[state.round];
+	};
+
+	//main screen display as function of state
 	sh.addWatcher(null, (state) => {
 		if (!state) return;
 		[liveClue, categoryScroll, gameBoard].forEach((el) =>
 			el.classList.add('d-none')
 		);
 
-		if (state.selectedClue[0] !== -1 && state.selectedClue[1] !== -1) {
+		if (state.state === 'waitingDD') {
+			//waiting for a DD wager
+			liveClue.classList.add('d-none');
+			categoryScroll.classList.add('d-none');
+			gameBoard.classList.remove('d-none');
+			//play the sound
+			if (!isKey && ddSound && state.playSound) {
+				ddSound.play();
+			} else if (isKey) {
+				//set up and show the dd wager modal
+				const round = state.round;
+				const minMaxWager = (round + 1) * 1000;
+				const player = state.players[state.control];
+				if (!player) return;
+				maxWager.innerHTML = Math.max(minMaxWager, player.getScore());
+
+				ddPlayerName.innerHTML = player.getName();
+
+				if (state.playSound && ddWagerModal) {
+					setTimeout(() => {
+						ddWagerModal.show();
+					}, 3000);
+				} else if (isKey && ddWagerModal) ddWagerModal.show();
+			}
+
+			//show the animation
+			if (ddDiv) {
+				const [cat, row] = state.selectedClue;
+				ddDiv.setAttribute(
+					'style',
+					`left:${((100 * (cat + 0.5)) / 6).toFixed(3)}%;top:${(
+						(100 * (row + 1.5)) /
+						6
+					).toFixed(3)}%`
+				);
+				setTimeout(() => {
+					ddDiv.classList.add('animation');
+				}, 1);
+			}
+		} else if (state.selectedClue[0] !== -1 && state.selectedClue[1] !== -1) {
+			const [cat, row] = state.selectedClue;
+			if (cat === -1 || row === -1) return;
 			liveClue.classList.remove('d-none');
 			categoryScroll.classList.add('d-none');
 			gameBoard.classList.add('d-none');
-			const [cat, row] = state.selectedClue;
-			if (cat === -1 || row === -1) return;
-			const liveCategory = state.board[state.round][cat];
+			const liveCategory = getCategory(cat);
 			liveClueData = liveCategory.clues[row];
 			liveClueText.innerHTML = liveClueData.text;
-			liveValue.innerHTML = `$${liveClueData.value}`;
+			liveValue.innerHTML =
+				state.state === 'showDD' || state.state === 'DDLive'
+					? `DD: $${state.wager}`
+					: `$${liveClueData.value}`;
 			liveClueCategory.innerHTML = liveCategory.category;
+			if (isKey && liveResponse) liveResponse.innerHTML = liveClueData.response;
 		} else if (state.state === 'boardIntro' && state.categoryShown >= -1) {
 			liveClue.classList.add('d-none');
 			gameBoard.classList.add('d-none');
@@ -410,7 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				else if (ind === state.categoryShown) {
 					setTimeout(() => cb.classList.remove('category-hidden'), 500);
 					const cd = cb.querySelector('.category-div');
-					cd.innerHTML = state.board[state.round][i].category;
+					cd.innerHTML = getCategory(i)?.category || '';
 				}
 			});
 			categoryScrollInner.style.left = `${-100 * state.categoryShown}%`;
@@ -418,10 +508,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			liveClue.classList.add('d-none');
 			categoryScroll.classList.add('d-none');
 			gameBoard.classList.remove('d-none');
+
 			gameHeaders.forEach((g, i) => {
 				g.classList.remove('category-hidden');
 				const cd = g.querySelector('.category-div');
-				cd.innerHTML = state.board[state.round][i].category;
+				cd.innerHTML = getCategory(i)?.category || '';
 			});
 		} else {
 			liveClue.classList.add('d-none');
@@ -430,20 +521,22 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
-	clueValues.forEach((cb) => {
+	const getCatRow = (cb) => {
 		const cat = Number(cb.getAttribute('data-category'));
 		const row = Number(cb.getAttribute('data-row'));
+		return [cat, row];
+	};
+	clueValues.forEach((cb) => {
+		const [cat, row] = getCatRow(cb);
 		if (isNaN(cat) || isNaN(row)) return;
 		sh.addWatcher(cb, (e) => {
 			const state = e.detail;
 			if (!state) return;
 			if (state.round >= state.board.length - 1 || state.round < 0) return;
-			if (state.board[state.round][cat].clues[row].selected)
-				e.target.innerHTML = '';
-			else
-				e.target.innerHTML = `$${
-					state.board[state.round][cat].clues[row].value
-				}`;
+			const clue = getClue(cat, row);
+			if (!clue) return;
+			if (clue.selected) e.target.innerHTML = '';
+			else e.target.innerHTML = `$${clue.value}`;
 		});
 	});
 
@@ -501,18 +594,17 @@ document.addEventListener('DOMContentLoaded', () => {
 		})
 	);
 
-	clueBoxes.forEach((cb) => {
-		cb.addEventListener('click', (e) => {
-			const state = sh.getState();
-			if (state?.state !== 'select') return;
-			const cat = Number(e.target.getAttribute('data-category'));
-			const row = Number(e.target.getAttribute('data-row'));
-			sendGameInput('clue', cat, row);
-		});
-	});
+	const selectClue = (e) => {
+		const [cat, row] = getCatRow(e.target);
+		const state = sh.getState();
+		if (state?.state !== 'select') return;
+		sendGameInput('clue', cat, row);
+	};
+	clueBoxes.forEach((cb) => cb.addEventListener('click', selectClue));
 
 	sh.addWatcher(liveClue, (e) => {
-		if (e?.detail?.state === 'clueLive') e.target.classList.add('live');
+		if (e?.detail?.state === 'clueLive' || e?.detail?.state === 'DDLive')
+			e.target.classList.add('live');
 		else e.target.classList.remove('live');
 	});
 
@@ -527,6 +619,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	});
 
+	if (ddDiv)
+		sh.addWatcher(ddDiv, (e) => {
+			if (e.detail.state !== 'waitingDD')
+				e.target.classList.remove('animation');
+		});
+
 	sh.addWatcher(null, (state) => {
 		if (state?.message?.trim()) showMessage('info', state.message);
 		if (state?.isRemote) emit('update-game-state', state, 1500);
@@ -536,15 +634,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	sh.addWatcher(timeoutSound, (e) => {
 		if (!e.detail) return;
-		else if (e.detail.timeout && e.detail.playSound) {
-			e.target.play();
-			console.log(e.detail);
-		}
+		else if (!isKey && e.detail.timeout && e.detail.playSound) e.target.play();
 	});
+
+	if (!isKey)
+		sh.addWatcher(
+			null,
+			(state) => {
+				if (state && !keyWindow) openKey();
+			},
+			{ once: true }
+		);
 
 	//send game state to key window on state update
 	if (!isKey) sh.addWatcher(null, sendGameState);
+	else
+		sh.addWatcher(null, (state) => {
+			if (!state) return;
+			if (!Array.isArray(state.board[state.round])) return;
 
-	//TODO: open host control panel, connect to game
-	//Can I make it a .pug file on its own, and somehow hook it to the existing page?
+			clueBoxes.forEach((cb) => {
+				const [cat, row] = getCatRow(cb);
+				const clue = getClue(cat, row);
+				if (clue.dailyDouble && !clue.selected) cb.classList.add('dd');
+				else cb.classList.remove('dd');
+			});
+		});
+
+	if (confirmDDWager)
+		confirmDDWager.addEventListener('click', () => {
+			const state = sh.getState();
+			if (state.state !== 'waitingDD')
+				return showMessage('error', 'Invalid state');
+			const wager = Number(ddWager.value);
+			if (wager < 5)
+				return showMessage('error', 'Invalid wager - minimum wager is $5');
+			const player = state.players[state.control];
+			if (!player) return showMessage('error', 'Invalid state');
+			const maxWager = Math.max(player.getScore(), (state.round + 1) * 1000);
+			if (wager > maxWager)
+				return showMessage(
+					'error',
+					`Invalid wager - maximum wager is $${maxWager}`
+				);
+			try {
+				sendGameInput('setWager', wager);
+				ddWagerModal.hide();
+			} catch (err) {
+				showMessage('error', err.message);
+			}
+		});
 });
