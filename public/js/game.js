@@ -638,6 +638,13 @@ document.addEventListener('DOMContentLoaded', () => {
 				const cd = g.querySelector('.category-div');
 				cd.innerHTML = getCategory(i)?.category || '';
 			});
+		} else if (state.state === 'betweenRounds') {
+			liveClue.classList.add('d-none');
+			categoryScroll.classList.add('d-none');
+			gameBoard.classList.remove('d-none');
+			gameHeaders.forEach((g, i) => {
+				g.classList.add('category-hidden');
+			});
 		} else {
 			liveClue.classList.add('d-none');
 			categoryScroll.classList.add('d-none');

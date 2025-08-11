@@ -26,10 +26,10 @@ const randomString = (len, str) => {
 };
 
 const lockTimeout = 250;
-const clueTimeout = 3500;
-const ddTimeout = 7000;
+const clueTime = 3500;
+const ddTime = 7000;
 const FJTime = 30000;
-const cluesPerRound = 5;
+const cluesPerRound = 3;
 
 class Player {
 	constructor(name, nameData, uid, socketId, key, isRemote) {
@@ -47,15 +47,12 @@ class Player {
 	}
 
 	lock(autoUnlock) {
-		console.log(`Locking ${this.name}`);
 		this.locked = true;
 		if (this.lockTimeout) clearTimeout(this.lockTimeout);
 		if (autoUnlock) this.lockTimeout = setTimeout(this.unlock, lockTimeout);
 	}
 
 	unlock() {
-		console.log(`Unocking ${this.name}`);
-		console.trace();
 		if (this.lockTimeout) {
 			clearTimeout(this.lockTimeout);
 			this.lockTimeout = null;
@@ -164,7 +161,22 @@ class Player {
  */
 
 class Game {
-	handleResponse = (correct) => {
+	checkRoundOver() {
+		const cluesUsed = this.gameState.board[this.gameState.round].reduce(
+			(p, c) => {
+				console.log(c);
+				return p + c.clues.reduce((p2, c2) => p2 + (c2.selected ? 1 : 0), 0);
+			},
+			0
+		);
+		return !(
+			this.gameState.board[this.gameState.round].some((cat) => {
+				return cat.clues.some((cl) => !cl.selected);
+			}) && cluesUsed < cluesPerRound
+		);
+	}
+
+	handleResponse(correct) {
 		return () => {
 			try {
 				//someone has to be buzzed in, and there must be a selected clue
@@ -183,14 +195,7 @@ class Game {
 					//unlock all buzzers
 					this.unlockAll();
 					//are there clues left?
-					if (
-						this.gameState.board[this.gameState.round].some((cat) => {
-							return cat.clues.some((cl) => !cl.selected);
-						}) &&
-						this.gameState.board[this.gameState.round].reduce((p, c) => {
-							return p + c.clues.reduce((cl) => (cl.selected ? 1 : 0));
-						}, 0) < cluesPerRound
-					) {
+					if (!this.checkRoundOver()) {
 						//give control to the player that buzzed in and gave the correct response
 						this.setGameState({
 							state: 'select',
@@ -215,14 +220,7 @@ class Game {
 							state: 'clueLive',
 						});
 					//everyone is locked out - are there clues left?
-					else if (
-						this.gameState.board[this.gameState.round].some((cat) => {
-							return cat.clues.some((cl) => !cl.selected);
-						}) &&
-						this.gameState.board[this.gameState.round].reduce((p, c) => {
-							return p + c.clues.reduce((cl) => (cl.selected ? 1 : 0));
-						}, 0) < cluesPerRound
-					) {
+					else if (!this.checkRoundOver()) {
 						//unlock all buzzers
 						this.unlockAll();
 						//go back to select without changing control of board
@@ -242,9 +240,9 @@ class Game {
 				return console.log(err);
 			}
 		};
-	};
+	}
 
-	handleDDResponse = (correct) => {
+	handleDDResponse(correct) {
 		this.stopClueTimer();
 		const p = this.gameState.control;
 		if (p < 0)
@@ -253,14 +251,7 @@ class Game {
 			correct ? this.gameState.wager : -this.gameState.wager
 		);
 		//are there clues left?
-		if (
-			this.gameState.board[this.gameState.round].some((cat) => {
-				return cat.clues.some((cl) => !cl.selected);
-			}) &&
-			this.gameState.board[this.gameState.round].reduce((p, c) => {
-				return p + c.clues.reduce((cl) => (cl.selected ? 1 : 0));
-			}, 0) < cluesPerRound
-		) {
+		if (!this.checkRoundOver()) {
 			//clear the wager
 			this.setGameState({
 				state: 'select',
@@ -276,9 +267,9 @@ class Game {
 				wager: -1,
 			});
 		}
-	};
+	}
 
-	handleFJResponse = (correct) => {
+	handleFJResponse(correct) {
 		if (this.gameState.fjStep % 2 !== 1) return;
 		//player whose response we are judging
 		const p = this.gameState.fjOrder[(this.gameState.fjStep - 1) / 2];
@@ -286,9 +277,9 @@ class Game {
 		const wager = player.getFinalWager();
 		this.gameState.fjStep++;
 		this.modifyPlayerScore(p, correct ? wager : -wager);
-	};
+	}
 
-	handleBuzz = (p) => {
+	handleBuzz(p) {
 		try {
 			console.log(p);
 			//if the player is locked, don't do anything
@@ -305,7 +296,8 @@ class Game {
 		} catch (err) {
 			return console.log(err);
 		}
-	};
+	}
+
 	/**
 	 * General Game States:
 	 * - pregame: game has not started
@@ -444,18 +436,29 @@ class Game {
 					this.setGameState({
 						state: 'clueLive',
 					});
-					this.startClueTimer(clueTimeout, {
+					this.startClueTimer(clueTime, {
 						buzzerArmed: false,
 						buzzedIn: -1,
 						state: 'showClue',
 					});
 				}
-				//go back to select screen if the clue is timed out
+				//go back to select screen or between rounds if the clue is timed out
 				else {
-					this.setGameState({
-						state: 'select',
-						timeout: false,
-					});
+					//are there clues left?
+					if (!this.checkRoundOver()) {
+						//back to the select screen
+						this.setGameState({
+							state: 'select',
+							timeout: false,
+						});
+					}
+					//round is over
+					else {
+						this.setGameState({
+							state: 'betweenRounds',
+							round: this.gameState.round + 1,
+						});
+					}
 				}
 			},
 			//a player tries to buzz but it's too early
@@ -518,7 +521,7 @@ class Game {
 				this.setGameState({
 					state: 'DDLive',
 				});
-				this.startClueTimer(ddTimeout, null);
+				this.startClueTimer(ddTime, null);
 			},
 		},
 		//DDLive: DD is live, buzzers not active
@@ -560,7 +563,7 @@ class Game {
 				else
 					this.setGameState({
 						state: 'boardIntro',
-						categoryShown: -2,
+						categoryShown: -1,
 					});
 			},
 		},
