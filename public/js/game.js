@@ -147,7 +147,6 @@ const sendGameInput = (...args) => {
 	try {
 		game.handleInput(...args);
 	} catch (err) {
-		console.log(err);
 		showMessage('error', err.message);
 	}
 };

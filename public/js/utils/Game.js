@@ -539,6 +539,7 @@ class Game {
 				wager: -1,
 				buzzerArmed: false,
 				buzzedIn: -1,
+				selectedClue: [-1, -1],
 			},
 			host: () => {
 				//entering final jeopardy
