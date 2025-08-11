@@ -324,6 +324,13 @@ class Game {
 	 * - endGame: end of game
 	 */
 	stateMap = {
+		all: {
+			editPlayer: (ind, data) => {
+				this.gameState.players[ind].setName(data.name);
+				this.gameState.players[ind].setScore(data.score);
+				this.updateGameState();
+			},
+		},
 		//each state has a data attribute of game state attributes that are always true during that game state, but may change
 		//from the immediately previous state
 		//pregame: game has not started
@@ -339,6 +346,7 @@ class Game {
 				selectedClue: [-1, -1],
 				currentTime: null,
 			},
+
 			//representing an input when the game is in that state.
 			//if the input is not valid from that state, then there is no function
 			//for it. If it is a valid input, then the function will run and set the new game state.
@@ -723,7 +731,7 @@ class Game {
 		};
 
 		for (var i = 0; i < 3; i++) {
-			this.addPlayer(``, null, null, null);
+			this.addPlayer(`player${i + 1}`, null, null, null);
 		}
 
 		this.updateGameState();
@@ -805,6 +813,7 @@ class Game {
 			const keys = ['ArrowLeft', 'ArrowUp', 'ArrowRight'];
 			this.gameState.players[index].setName('');
 			this.gameState.players[index].uid = randomString(20, chars);
+			this.gameState.players[index].nameData = [];
 			this.gameState.players[index].setKey(keys[index]);
 			this.gameState.players[index].setRemote(this.isRemote);
 			this.gameState.players[index].setSocketId(null);
@@ -848,11 +857,12 @@ class Game {
 		//the current game state
 		const gs = this.gameState.state;
 		//the function to run as a result
-		const st = this.stateMap[gs];
+		let st = this.stateMap[gs];
 		if (!st) throw new Error(`Invalid game state (${gs})`);
-		const f = st[fn];
+		let f = st[fn];
+		if (!f) f = this.stateMap.all[fn];
 		//invalid input for this state - don't do anything
-		if (!f) return console.log('invalid input');
+		if (!f) throw new Error(`Invalid input`);
 		f(...args);
 	}
 

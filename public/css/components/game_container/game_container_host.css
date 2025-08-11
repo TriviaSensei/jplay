@@ -213,9 +213,11 @@
 		width: 16.667%;
 		background-color: var(--blue);
 		color: white;
-		display: flex;
+		/* display: flex; */
 		padding: 1%;
+		align-content: center;
 		.category-div {
+			width: 100%;
 			margin: auto;
 			text-align: center;
 		}

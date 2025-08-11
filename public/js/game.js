@@ -147,6 +147,7 @@ const sendGameInput = (...args) => {
 	try {
 		game.handleInput(...args);
 	} catch (err) {
+		console.log(err);
 		showMessage('error', err.message);
 	}
 };
@@ -221,7 +222,8 @@ const handleKeyPress = async (e) => {
 		setKeyButton.innerHTML = 'Set key';
 		return;
 	} else if (!state.active && state.host.keys.includes(e.key.toLowerCase())) {
-		if (state.players.some((p) => p.name)) startGameModal.show();
+		if (state.players.some((p) => p.name || p.nameData.length > 0))
+			startGameModal.show();
 		else
 			return showMessage('error', 'You must have at least one active player');
 	} else if (state.active) {
@@ -354,6 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		namePath.innerHTML = '';
 		if (nameData && Array.isArray(nameData)) {
+			const paths = [];
 			nameData.forEach((p) => {
 				const np = document.createElementNS(
 					'http://www.w3.org/2000/svg',
@@ -361,6 +364,11 @@ document.addEventListener('DOMContentLoaded', () => {
 				);
 				np.setAttribute('d', p);
 				namePath.appendChild(np);
+				paths.push(np);
+			});
+			csh.setState({
+				paths,
+				mousedown: false,
 			});
 		}
 
@@ -375,7 +383,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (isNaN(playerIndex) || playerIndex < 0 || playerIndex > 2) return;
 		pi.setAttribute('value', lec.getAttribute('data-index'));
 		const playerData = state.players[playerIndex];
-		console.log(playerData);
 
 		editPlayerHeader.innerHTML = playerData.name;
 		editPlayerName.setAttribute('value', playerData.name);
@@ -393,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			const ep = e.target.closest('.edit-player');
 			const player = e.detail.players[i];
-			if (ep && (player.getName() || player.getNameData().length > 0))
+			if (ep && (player?.getName() || player?.getNameData().length > 0))
 				ep?.classList.add('d-none');
 			else ep?.classList.remove('d-none');
 		});
@@ -419,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	};
 	svgDisplays.forEach((s, i) => {
 		if (!isKey) s.addEventListener('click', loadPlayerData);
-		// else nd.addEventListener('click', loadPlayerDataKey);
+		else s.addEventListener('click', loadPlayerDataKey);
 
 		sh.addWatcher(s, (e) => {
 			const path = e.target.querySelector('.player-name-path');
@@ -427,7 +434,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			const player = e.detail.players[i];
 			if (!player) return;
 			const nameData = player.getNameData();
-			console.log(nameData);
 			if (!nameData || nameData.length === 0) {
 				e.target.classList.add('d-none');
 				return;
@@ -454,48 +460,56 @@ document.addEventListener('DOMContentLoaded', () => {
 			e.target.innerHTML = curr === 'false' ? '[Press a key]' : 'Set key';
 		});
 
-	if (confirmEditPlayer)
-		confirmEditPlayer.addEventListener('click', () => {
-			const index = getPlayerIndex();
-			const state = sh.getState();
-			const nameData = csh.getState();
-			if (isNaN(index) || index < 0 || index >= state.players.length)
-				return pi.removeAttribute('value');
+	if (confirmEditPlayer) {
+		if (!isKey)
+			confirmEditPlayer.addEventListener('click', () => {
+				const index = getPlayerIndex();
+				const state = sh.getState();
+				const nameData = csh.getState();
+				if (isNaN(index) || index < 0 || index >= state.players.length)
+					return pi.removeAttribute('value');
 
-			const lec = document.querySelector(`.lectern[data-index="${index}"]`);
-			if (!lec) return pi.removeAttribute('value');
+				const lec = document.querySelector(`.lectern[data-index="${index}"]`);
+				if (!lec) return pi.removeAttribute('value');
 
-			const key = buzzerKey.getAttribute('data-key');
+				const key = buzzerKey.getAttribute('data-key');
 
-			game.gameState.players[index].setName(playerName.value);
-			game.gameState.players[index].setKey(key);
-			if (nameData.paths.length > 0) {
-				game.gameState.players[index].setNameData(
-					nameData.paths.map((p) => p.getAttribute('d'))
-				);
-			}
+				game.gameState.players[index].setName(playerName.value);
+				game.gameState.players[index].setKey(key);
+				if (Array.isArray(nameData.paths)) {
+					game.gameState.players[index].setNameData(
+						nameData.paths.map((p) => p.getAttribute('d'))
+					);
+				}
 
-			csh.setState({
-				paths: [],
-				mouseDown: false,
+				csh.setState({
+					paths: [],
+					mouseDown: false,
+				});
+				namePath.innerHTML = '';
+				game.updateGameState();
+				pi.removeAttribute('value');
+				playerSettingsModal.hide();
 			});
-
-			namePath.innerHTML = '';
-
-			game.updateGameState();
-
-			pi.removeAttribute('value');
-
-			playerSettingsModal.hide();
-
-			console.log(sh.getState());
-		});
+		else
+			confirmEditPlayer.addEventListener('click', () => {
+				const index = getPlayerIndex();
+				const data = {
+					name: editPlayerName.value,
+					score: isNaN(Number(editPlayerScore.value))
+						? null
+						: Number(editPlayerScore.value),
+				};
+				sendGameInput('editPlayer', index, data);
+				editPlayerModal.hide();
+			});
+	}
 
 	if (cancelEditPlayer)
 		cancelEditPlayer.addEventListener('click', () => {
 			pi.removeAttribute('value');
 			playerName.value = '';
-			buzzerKey.innerHTML = '[None]';
+			if (buzzerKey) buzzerKey.innerHTML = '[None]';
 		});
 
 	if (removePlayer)
@@ -831,7 +845,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (!state.mouseDown) return;
 			moveCount++;
 			if (moveCount % granularity === 1) {
-				const [x, y] = scaleCanvasDimensions(e.offsetX, e.offsetY);
+				const rect = nameCanvas.getBoundingClientRect();
+				const [offsetX, offsetY] = [e.pageX - rect.left, e.pageY - rect.top];
+				const [x, y] = scaleCanvasDimensions(offsetX, offsetY);
 
 				const currentPath = state.paths[state.paths.length - 1];
 				if (!currentPath) return;
