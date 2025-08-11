@@ -19,6 +19,12 @@ const emit = (eventName, data, timeout) => {
 };
 
 const sh = new StateHandler(null);
+const csh = new StateHandler({
+	paths: [],
+	mouseDown: false,
+});
+const granularity = 3;
+
 let uid;
 let game;
 const startGame = (type, data) => {
@@ -54,6 +60,7 @@ const initContainer = document.querySelector('.init-container');
 const gameContainer = document.querySelector('.game-container');
 const editPlayerButtons = getElementArray(document, '.edit-player-button');
 const nameDisplays = getElementArray(document, '.name-container');
+const svgDisplays = getElementArray(document, '.lectern-name-canvas');
 const cancelEditPlayer = document.querySelector('#cancel-edit-player');
 const removePlayer = document.querySelector('#remove-player');
 const confirmEditPlayer = document.querySelector('#confirm-edit-player');
@@ -64,7 +71,7 @@ const pi = document.querySelector('#player-index');
 const playerName = document.querySelector('#set-player-name');
 const setKeyButton = document.querySelector('#set-button');
 const buzzerKey = document.querySelector('#current-key');
-const startGameModal = new bootstrap.Modal('#start-game-modal');
+const startGameModal = isKey ? null : new bootstrap.Modal('#start-game-modal');
 const confirmStartGame = document.querySelector('#confirm-start');
 
 const gameBoard = gameContainer.querySelector('.game-board');
@@ -96,6 +103,7 @@ const timeoutSound = document.querySelector('#timeout-sound');
 const ddSound = document.querySelector('#dd-sound');
 const ddw = document.querySelector('#dd-wager-modal');
 const ddWagerModal = isKey ? new bootstrap.Modal(ddw) : null;
+
 let ddPlayerName, ddWager, maxWager, confirmDDWager;
 if (ddWagerModal) {
 	ddPlayerName = ddw.querySelector('#dd-player-name');
@@ -103,6 +111,20 @@ if (ddWagerModal) {
 	maxWager = ddw.querySelector('#dd-range');
 	confirmDDWager = ddw.querySelector('#confirm-dd-wager');
 }
+
+let editPlayerModal, editPlayerHeader, editPlayerName, editPlayerScore;
+if (isKey) {
+	editPlayerModal = new bootstrap.Modal('#edit-player-modal');
+	editPlayerHeader = document.querySelector('#edit-player-header');
+	editPlayerName = document.querySelector('#edit-player-name');
+	editPlayerScore = document.querySelector('#edit-player-score');
+}
+
+const nameCanvas = document.querySelector('.name-canvas');
+const namePath = document.querySelector('#name-path');
+const undoStroke = document.querySelector('#undo-stroke');
+const clearStroke = document.querySelector('#clear-stroke');
+
 const hidePanel = (tgt) => {
 	tgt.classList.add('d-none');
 };
@@ -146,11 +168,13 @@ if (isKey) document.addEventListener('receive-state', receiveGameState);
 
 //open key
 const openKey = () => {
+	const openModal = document.querySelector('.modal.show');
+	if (openModal) return;
 	if (keyWindow) keyWindow.close();
 	keyWindow = window.open(
 		`/control`,
 		'_blank',
-		`popup,menubar=false,statusbar=no,toolbar=false,location=false,scrollbars=false`
+		`popup,address=false,menubar=false,statusbar=no,status=false,toolbar=false,location=false,scrollbars=false`
 	);
 	keyWindow.addEventListener('load', sendGameState, { once: true });
 };
@@ -312,42 +336,111 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	const loadPlayerData = (e) => {
+		if (isKey) return;
 		const state = sh.getState();
 		if (state.state !== 'pregame') return;
-
 		const lec = e.target.closest('.lectern');
 		if (!lec) return;
 		const playerIndex = Number(lec.getAttribute('data-index'));
 		if (isNaN(playerIndex) || playerIndex < 0 || playerIndex > 2) return;
 		pi.setAttribute('value', lec.getAttribute('data-index'));
-		const gameState = sh.getState();
-		playerName.value = gameState.players[playerIndex].getName() || '';
-		let key = gameState.players[playerIndex].key || '[None]';
+		playerName.value = state.players[playerIndex]?.getName() || '';
+		let key = state.players[playerIndex]?.key || '[None]';
 		if (key.length === 1 && key.charCodeAt(0) === 32) key = 'Space';
 		buzzerKey.setAttribute('data-key', key);
 		buzzerKey.innerHTML = key;
+
+		const nameData = state.players[playerIndex]?.getNameData();
+
+		namePath.innerHTML = '';
+		if (nameData && Array.isArray(nameData)) {
+			nameData.forEach((p) => {
+				const np = document.createElementNS(
+					'http://www.w3.org/2000/svg',
+					'path'
+				);
+				np.setAttribute('d', p);
+				namePath.appendChild(np);
+			});
+		}
+
 		playerSettingsModal.show();
 	};
+	const loadPlayerDataKey = (e) => {
+		if (!isKey) return;
+		const state = sh.getState();
+		const lec = e.target.closest('.lectern');
+		if (!lec) return;
+		const playerIndex = Number(lec.getAttribute('data-index'));
+		if (isNaN(playerIndex) || playerIndex < 0 || playerIndex > 2) return;
+		pi.setAttribute('value', lec.getAttribute('data-index'));
+		const playerData = state.players[playerIndex];
+		console.log(playerData);
+
+		editPlayerHeader.innerHTML = playerData.name;
+		editPlayerName.setAttribute('value', playerData.name);
+		editPlayerScore.setAttribute('value', playerData.score);
+		editPlayerModal.show();
+	};
+
 	editPlayerButtons.forEach((b, i) => {
 		b.addEventListener('click', loadPlayerData);
 		sh.addWatcher(b, (e) => {
 			if (!e.detail) return;
-			if (e.detail.state !== 'pregame') return e.target.classList.add('d-none');
+			if (isKey || e.detail.state !== 'pregame')
+				e.target.classList.add('d-none');
 			else e.target.classList.remove('d-none');
 
 			const ep = e.target.closest('.edit-player');
-			if (ep && e.detail.players[i]?.name) ep?.classList.add('d-none');
+			const player = e.detail.players[i];
+			if (ep && (player.getName() || player.getNameData().length > 0))
+				ep?.classList.add('d-none');
 			else ep?.classList.remove('d-none');
 		});
 	});
 	nameDisplays.forEach((nd, i) => {
-		nd.addEventListener('click', loadPlayerData);
+		if (!isKey) nd.addEventListener('click', loadPlayerData);
+		else nd.addEventListener('click', loadPlayerDataKey);
 		sh.addWatcher(nd, (e) => {
 			if (!e.detail) return;
-			if (e.detail.players[i]?.name) {
+			if (
+				e.detail.players[i]?.name &&
+				(!e.detail.players[i]?.nameData ||
+					e.detail.players[i].nameData.length === 0)
+			) {
 				e.target.classList.remove('d-none');
 				e.target.innerHTML = e.detail.players[i].name;
 			} else e.target.classList.add('d-none');
+		});
+	});
+
+	const checkDiff = (i) => {
+		return (state) => state.players[i].getNameData();
+	};
+	svgDisplays.forEach((s, i) => {
+		if (!isKey) s.addEventListener('click', loadPlayerData);
+		// else nd.addEventListener('click', loadPlayerDataKey);
+
+		sh.addWatcher(s, (e) => {
+			const path = e.target.querySelector('.player-name-path');
+			path.innerHTML = '';
+			const player = e.detail.players[i];
+			if (!player) return;
+			const nameData = player.getNameData();
+			console.log(nameData);
+			if (!nameData || nameData.length === 0) {
+				e.target.classList.add('d-none');
+				return;
+			}
+			nameData.forEach((nd) => {
+				const np = document.createElementNS(
+					'http://www.w3.org/2000/svg',
+					'path'
+				);
+				np.setAttribute('d', nd);
+				path.appendChild(np);
+			});
+			e.target.classList.remove('d-none');
 		});
 	});
 
@@ -365,6 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		confirmEditPlayer.addEventListener('click', () => {
 			const index = getPlayerIndex();
 			const state = sh.getState();
+			const nameData = csh.getState();
 			if (isNaN(index) || index < 0 || index >= state.players.length)
 				return pi.removeAttribute('value');
 
@@ -375,11 +469,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			game.gameState.players[index].setName(playerName.value);
 			game.gameState.players[index].setKey(key);
+			if (nameData.paths.length > 0) {
+				game.gameState.players[index].setNameData(
+					nameData.paths.map((p) => p.getAttribute('d'))
+				);
+			}
+
+			csh.setState({
+				paths: [],
+				mouseDown: false,
+			});
+
+			namePath.innerHTML = '';
+
 			game.updateGameState();
 
 			pi.removeAttribute('value');
 
 			playerSettingsModal.hide();
+
+			console.log(sh.getState());
 		});
 
 	if (cancelEditPlayer)
@@ -398,14 +507,16 @@ document.addEventListener('DOMContentLoaded', () => {
 			playerSettingsModal.hide();
 		});
 
-	confirmStartGame.addEventListener('click', () => {
-		sendGameInput('start');
-		startGameModal.hide();
-	});
+	if (!isKey)
+		confirmStartGame.addEventListener('click', () => {
+			sendGameInput('start');
+			startGameModal.hide();
+		});
 
 	sh.addWatcher(buzzerKey, (e) => {
 		if (!e.detail) return;
 		const ind = getPlayerIndex();
+		if (ind >= e.detail.players.length) return;
 		let key = e.detail.players[ind].key;
 
 		if (key.charCodeAt(0) === 32) key = 'Space';
@@ -637,14 +748,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		else if (!isKey && e.detail.timeout && e.detail.playSound) e.target.play();
 	});
 
-	if (!isKey)
-		sh.addWatcher(
-			null,
-			(state) => {
-				if (state && !keyWindow) openKey();
-			},
-			{ once: true }
-		);
+	// if (!isKey)
+	// 	sh.addWatcher(
+	// 		null,
+	// 		(state) => {
+	// 			if (state && !keyWindow) openKey();
+	// 		},
+	// 		{ once: true }
+	// 	);
 
 	//send game state to key window on state update
 	if (!isKey) sh.addWatcher(null, sendGameState);
@@ -684,4 +795,80 @@ document.addEventListener('DOMContentLoaded', () => {
 				showMessage('error', err.message);
 			}
 		});
+
+	if (nameCanvas) {
+		const [vbw, vbh] = [400, 300];
+		const getCanvasDimensions = () => {
+			let rect = nameCanvas.getBoundingClientRect();
+			return [rect.width, rect.height];
+		};
+		const scaleCanvasDimensions = (x, y) => {
+			const [w, h] = getCanvasDimensions();
+			x = Math.min(Math.max(0, x), w);
+			y = Math.min(Math.max(0, y), h);
+			return [(x * vbw) / w, (y * vbh) / h];
+		};
+
+		let moveCount = 0;
+		nameCanvas.addEventListener('mousedown', (e) => {
+			moveCount = 0;
+			csh.setState((prev) => {
+				const [x, y] = scaleCanvasDimensions(e.offsetX, e.offsetY);
+				const newPath = document.createElementNS(
+					'http://www.w3.org/2000/svg',
+					'path'
+				);
+				newPath.setAttribute('d', `M ${x} ${y}`);
+				namePath.appendChild(newPath);
+				return {
+					paths: [...prev.paths, newPath],
+					mouseDown: true,
+				};
+			});
+		});
+		document.addEventListener('mousemove', (e) => {
+			const state = csh.getState();
+			if (!state.mouseDown) return;
+			moveCount++;
+			if (moveCount % granularity === 1) {
+				const [x, y] = scaleCanvasDimensions(e.offsetX, e.offsetY);
+
+				const currentPath = state.paths[state.paths.length - 1];
+				if (!currentPath) return;
+				currentPath.setAttribute(
+					'd',
+					`${currentPath.getAttribute('d')} L ${x} ${y}`
+				);
+			}
+		});
+		document.addEventListener('mouseup', () => {
+			csh.setState((prev) => {
+				return {
+					...prev,
+					mouseDown: false,
+				};
+			});
+		});
+		if (undoStroke)
+			undoStroke.addEventListener('click', () => {
+				const state = csh.getState();
+				if (!state) return;
+
+				const paths = getElementArray(namePath, 'path');
+				if (paths.length > 0) paths[paths.length - 1].remove();
+				state.paths.pop();
+				csh.setState(state);
+			});
+
+		if (clearStroke)
+			clearStroke.addEventListener('click', () => {
+				const state = csh.getState();
+				if (!state) return;
+
+				const paths = getElementArray(namePath, 'path');
+				paths.forEach((p) => p.remove());
+				state.paths = [];
+				csh.setState(state);
+			});
+	}
 });

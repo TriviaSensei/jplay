@@ -1,0 +1,18 @@
+.modal#edit-player-modal(tabindex="-1" aria-labelledby="edit-player-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false")
+    .modal-dialog.modal-dialog-centered
+        .modal-content#edit-player-modal-content
+            input#edit-player-index(type="hidden")
+            .modal-header
+                h5.modal-title#edit-player-label Edit Player - #[span#edit-player-header]
+            .modal-body
+                .input-row-v 
+                    .input-label Player name 
+                    .input-container 
+                        input#edit-player-name(type="text" placenolder="Name")
+                .input-row-v 
+                    .input-label Score 
+                    .input-container 
+                        input#edit-player-score(type="number" placenolder="Score")
+            .modal-footer
+                button#cancel-edit-player.btn.btn-sm.btn-secondary(type="button" data-bs-dismiss="modal") Cancel
+                button#confirm-edit-player.btn.btn-sm.btn-primary(type="button") Save

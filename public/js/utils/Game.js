@@ -32,8 +32,9 @@ const FJTime = 30000;
 const cluesPerRound = 5;
 
 class Player {
-	constructor(name, uid, socketId, key, isRemote) {
+	constructor(name, nameData, uid, socketId, key, isRemote) {
 		this.name = name;
+		this.nameData = Array.isArray(nameData) ? nameData : [];
 		this.socketId = socketId;
 		this.uid = uid || uuidV4();
 		this.score = 0;
@@ -86,6 +87,10 @@ class Player {
 		return this.name;
 	}
 
+	getNameData() {
+		return this.nameData;
+	}
+
 	getSocketId() {
 		return this.socketId;
 	}
@@ -104,6 +109,10 @@ class Player {
 
 	setName(name) {
 		this.name = name;
+	}
+
+	setNameData(data) {
+		this.nameData = Array.isArray(data) ? data : [];
 	}
 
 	setScore(score) {
@@ -714,7 +723,7 @@ class Game {
 		};
 
 		for (var i = 0; i < 3; i++) {
-			this.addPlayer(`player${i + 1}`, null, null);
+			this.addPlayer(``, null, null, null);
 		}
 
 		this.updateGameState();
@@ -776,11 +785,12 @@ class Game {
 		return this.isRemote;
 	}
 
-	addPlayer(name, id, socketId) {
+	addPlayer(name, nameData, id, socketId) {
 		if (this.gameState.players.length >= 3) return;
 		const keys = ['ArrowLeft', 'ArrowUp', 'ArrowRight'];
 		const toAdd = new Player(
 			name,
+			nameData,
 			id || randomString(20, chars),
 			this.isRemote ? socketId : null,
 			keys[this.gameState.players.length],
