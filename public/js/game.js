@@ -173,6 +173,7 @@ if (isKey) document.addEventListener('receive-state', receiveGameState);
 
 //open key
 const openKey = () => {
+	if (isKey) return;
 	const openModal = document.querySelector('.modal.show');
 	if (openModal) return;
 	if (keyWindow) keyWindow.close();
@@ -189,6 +190,24 @@ const handleKeyPress = async (e) => {
 	const setKey = setKeyButton.getAttribute('data-toggled') === 'true';
 	const state = sh.getState();
 	if (!state) return;
+
+	//is it a modal key?
+	const openModal = document.querySelector('.modal.show');
+	if (openModal) {
+		console.log(e.key);
+		const buttons = getElementArray(openModal, 'button');
+
+		buttons.some((btn) => {
+			const keys = btn.getAttribute('data-key');
+			if (!keys) return false;
+			return keys.split(',').some((key) => {
+				if (key.toLowerCase() === e.key.toLowerCase()) {
+					btn.click();
+					return true;
+				}
+			});
+		});
+	}
 
 	//open up key window
 	if (e.key.toLowerCase() === 'k' && uid === state.host.uid && !isKey)
@@ -246,9 +265,25 @@ const handleKeyPress = async (e) => {
 	}
 };
 const sendKey = (e) => {
-	const key = e.key;
+	//is it a modal key?
+	const openModal = document.querySelector('.modal.show');
+	if (openModal) {
+		const buttons = getElementArray(openModal, 'button');
+
+		buttons.some((btn) => {
+			const keys = btn.getAttribute('data-key');
+			if (!keys) return false;
+			return keys.split(',').some((key) => {
+				if (key.toLowerCase() === e.key.toLowerCase()) {
+					btn.click();
+					return true;
+				}
+			});
+		});
+	}
+
 	if (!window.opener) return;
-	const evt = new CustomEvent('receive-key', { detail: { key } });
+	const evt = new CustomEvent('receive-key', { detail: { key: e.key } });
 	window.opener.document.dispatchEvent(evt);
 };
 //main game - handle key press on keydown, receive key from control window
@@ -269,10 +304,19 @@ else {
 
 document.addEventListener('DOMContentLoaded', () => {
 	if (isKey && !window.opener) location.href = '/';
-	if (!isKey)
+	if (!isKey) {
 		window.addEventListener('beforeunload', () => {
 			if (keyWindow) keyWindow.close();
 		});
+		window.addEventListener('key-closed', () => {
+			keyWindow = null;
+		});
+	} else {
+		window.addEventListener('beforeunload', () => {
+			const evt = new CustomEvent('key-closed', { detail: null });
+			window.opener.dispatchEvent(evt);
+		});
+	}
 
 	const files = getElementArray(document, '.file');
 	if (files) {
@@ -341,6 +385,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		else showPanel(e.target);
 
 		if (!e.detail) e.target.setAttribute('data-round', 0);
+		else if (e.detail.round === e.detail.board.length - 1)
+			e.target.setAttribute('data-round', 'fj');
 		else e.target.setAttribute('data-round', Math.max(0, e.detail.round) + 1);
 	});
 
@@ -572,6 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (!state) return;
 
 		if (state.state === 'waitingDD') {
+			if (!keyWindow) openKey();
 			//waiting for a DD wager
 			showView(gameBoard);
 			//play the sound
@@ -647,13 +694,17 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 		} else if (state.state === 'FJIntro') {
 			showView(fjCategory);
-			fjCategory.classList.add('category-hidden');
+			const catInner = fjCategory.querySelector('.category-box');
+			catInner.classList.add('category-hidden');
 		} else if (state.state === 'FJCategory') {
 			showView(fjCategory);
-			const catInner = fjCategory.querySelector('.category-div');
-			if (catInner) catInner.innerHTML = state.board.slice(-1).pop().category;
-			fjCategory.classList.remove('category-hidden');
+			const catInner = fjCategory.querySelector('.category-box');
+			if (catInner) catInner.classList.remove('category-hidden');
+			else return;
+			const catText = catInner.querySelector('.category-div');
+			if (catText) catText.innerHTML = state.board.slice(-1).pop().category;
 			if (state.playSound && fjSound) fjSound.play();
+			if (!isKey && !keyWindow) openKey();
 		} else {
 			showView(gameBoard);
 		}

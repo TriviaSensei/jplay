@@ -32,6 +32,12 @@
 	}
 }
 
+.game-container[data-round='fj'] {
+	.category-hidden {
+		background-image: url('/img/fj.jpg');
+	}
+}
+
 .category-box.category-hidden {
 	background-repeat: no-repeat;
 	background-size: contain;

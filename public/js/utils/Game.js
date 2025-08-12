@@ -29,7 +29,7 @@ const lockTimeout = 250;
 const clueTime = 3500;
 const ddTime = 7000;
 const FJTime = 30000;
-const cluesPerRound = 3;
+const cluesPerRound = 2;
 
 class Player {
 	constructor(name, nameData, uid, socketId, key, isRemote) {
