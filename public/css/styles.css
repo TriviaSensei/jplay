@@ -52,6 +52,12 @@ body.dark {
 	font-family: 'Korinna Regular BT', serif;
 }
 
+.response-display {
+	font-family: 'Shadows Into Light Two', cursive;
+	font-weight: 400;
+	font-style: normal;
+}
+
 .no-select {
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none; /* Safari */

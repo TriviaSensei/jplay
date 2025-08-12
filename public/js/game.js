@@ -125,6 +125,11 @@ const namePath = document.querySelector('#name-path');
 const undoStroke = document.querySelector('#undo-stroke');
 const clearStroke = document.querySelector('#clear-stroke');
 
+const fjCategory = document.querySelector('.fj-category');
+const fjSound = document.querySelector('#fj-reveal-sound');
+
+const views = [liveClue, categoryScroll, gameBoard, fjCategory];
+
 const hidePanel = (tgt) => {
 	tgt.classList.add('d-none');
 };
@@ -254,7 +259,6 @@ if (!isKey) {
 	});
 	document.addEventListener('receive-input', (e) => {
 		const { args } = e.detail;
-		console.log(args);
 		if (game) game.handleInput(...args);
 	});
 }
@@ -265,6 +269,10 @@ else {
 
 document.addEventListener('DOMContentLoaded', () => {
 	if (isKey && !window.opener) location.href = '/';
+	if (!isKey)
+		window.addEventListener('beforeunload', () => {
+			if (keyWindow) keyWindow.close();
+		});
 
 	const files = getElementArray(document, '.file');
 	if (files) {
@@ -553,18 +561,19 @@ document.addEventListener('DOMContentLoaded', () => {
 			return state.board[state.round];
 	};
 
+	const showView = (div) => {
+		views.forEach((v) => {
+			if (v === div) v.classList.remove('d-none');
+			else v.classList.add('d-none');
+		});
+	};
 	//main screen display as function of state
 	sh.addWatcher(null, (state) => {
 		if (!state) return;
-		[liveClue, categoryScroll, gameBoard].forEach((el) =>
-			el.classList.add('d-none')
-		);
 
 		if (state.state === 'waitingDD') {
 			//waiting for a DD wager
-			liveClue.classList.add('d-none');
-			categoryScroll.classList.add('d-none');
-			gameBoard.classList.remove('d-none');
+			showView(gameBoard);
 			//play the sound
 			if (!isKey && ddSound && state.playSound) {
 				ddSound.play();
@@ -602,9 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		} else if (state.selectedClue[0] !== -1 && state.selectedClue[1] !== -1) {
 			const [cat, row] = state.selectedClue;
 			if (cat === -1 || row === -1) return;
-			liveClue.classList.remove('d-none');
-			categoryScroll.classList.add('d-none');
-			gameBoard.classList.add('d-none');
+			showView(liveClue);
 			const liveCategory = getCategory(cat);
 			liveClueData = liveCategory.clues[row];
 			liveClueText.innerHTML = liveClueData.text;
@@ -615,9 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			liveClueCategory.innerHTML = liveCategory.category;
 			if (isKey && liveResponse) liveResponse.innerHTML = liveClueData.response;
 		} else if (state.state === 'boardIntro' && state.categoryShown >= -1) {
-			liveClue.classList.add('d-none');
-			gameBoard.classList.add('d-none');
-			categoryScroll.classList.remove('d-none');
+			showView(categoryScroll);
 			categoryDisplays.forEach((cb, i) => {
 				const ind = Number(cb.getAttribute('data-col'));
 				if (ind > state.categoryShown) cb.classList.add(`category-hidden`);
@@ -629,26 +634,28 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 			categoryScrollInner.style.left = `${-100 * state.categoryShown}%`;
 		} else if (state.state === 'select') {
-			liveClue.classList.add('d-none');
-			categoryScroll.classList.add('d-none');
-			gameBoard.classList.remove('d-none');
-
+			showView(gameBoard);
 			gameHeaders.forEach((g, i) => {
 				g.classList.remove('category-hidden');
 				const cd = g.querySelector('.category-div');
 				cd.innerHTML = getCategory(i)?.category || '';
 			});
 		} else if (state.state === 'betweenRounds') {
-			liveClue.classList.add('d-none');
-			categoryScroll.classList.add('d-none');
-			gameBoard.classList.remove('d-none');
+			showView(gameBoard);
 			gameHeaders.forEach((g, i) => {
 				g.classList.add('category-hidden');
 			});
+		} else if (state.state === 'FJIntro') {
+			showView(fjCategory);
+			fjCategory.classList.add('category-hidden');
+		} else if (state.state === 'FJCategory') {
+			showView(fjCategory);
+			const catInner = fjCategory.querySelector('.category-div');
+			if (catInner) catInner.innerHTML = state.board.slice(-1).pop().category;
+			fjCategory.classList.remove('category-hidden');
+			if (state.playSound && fjSound) fjSound.play();
 		} else {
-			liveClue.classList.add('d-none');
-			categoryScroll.classList.add('d-none');
-			gameBoard.classList.remove('d-none');
+			showView(gameBoard);
 		}
 	});
 

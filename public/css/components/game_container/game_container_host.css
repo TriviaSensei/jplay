@@ -31,11 +31,6 @@
 		background-image: url('/img/cat_header_2.jpg');
 	}
 }
-.game-container[data-round='3'] {
-	.category-hidden {
-		background-image: url('/img/cat_header_3.jpg');
-	}
-}
 
 .category-box.category-hidden {
 	background-repeat: no-repeat;
@@ -430,6 +425,35 @@
 	.lectern.lit[data-time='0'] {
 		.timer-light[data-time='0'] {
 			background-color: red;
+		}
+	}
+}
+
+.fj-category {
+	width: 100%;
+	height: 100%;
+	align-content: center;
+	font-family: 'Swiss 911 Compressed', sans-serif;
+	.category-box {
+		height: 100%;
+		width: 100%;
+		background-color: var(--blue);
+		color: var(--white);
+		border: 1px solid var(--white);
+		padding: 5%;
+		display: flex;
+		.category-div {
+			margin: auto;
+		}
+	}
+	@media (max-aspect-ratio: 0.89) {
+		.category-div {
+			font-size: 12vw;
+		}
+	}
+	@media (aspect-ratio > 0.89) {
+		.category-div {
+			font-size: 12vh;
 		}
 	}
 }

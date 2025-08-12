@@ -13,9 +13,10 @@ body {
 		background-image: url('/img/cat_header_2.jpg');
 	}
 }
-.game-container[data-round='3'] {
+
+.game-container[data-round='fj'] {
 	.category-hidden {
-		background-image: url('/img/cat_header_3.jpg');
+		background-image: url('/img/fj.jpg');
 	}
 }
 

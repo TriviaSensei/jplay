@@ -548,14 +548,14 @@ class Game {
 				//entering final jeopardy
 				if (this.gameState.round === this.gameState.board.length - 1) {
 					//make sure at least one player is eligible for FJ
-					if (this.gameState.players.some((p) => p.getScore > 0)) {
+					if (this.gameState.players.some((p) => p.getScore() > 0)) {
 						this.setGameState({
-							state: 'FJCategory',
+							state: 'FJIntro',
 						});
 					} else {
 						this.setGameState({
 							state: 'endGame',
-							message: 'Game over - no player was eligible for Final Jeopardy.',
+							message: 'No player was eligible for Final Jeopardy.',
 						});
 					}
 				}
@@ -565,6 +565,15 @@ class Game {
 						state: 'boardIntro',
 						categoryShown: -1,
 					});
+			},
+		},
+		FJIntro: {
+			data: {},
+			host: () => {
+				this.setGameState({
+					state: 'FJCategory',
+					playSound: true,
+				});
 			},
 		},
 		//FJCategory: showing FJ category, waiting for wagers
@@ -866,7 +875,7 @@ class Game {
 		let f = st[fn];
 		if (!f) f = this.stateMap.all[fn];
 		//invalid input for this state - don't do anything
-		if (!f) throw new Error(`Invalid input`);
+		if (!f) return;
 		f(...args);
 	}
 
