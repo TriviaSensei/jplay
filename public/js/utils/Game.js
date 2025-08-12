@@ -38,6 +38,7 @@ class Player {
 		this.socketId = socketId;
 		this.uid = uid || uuidV4();
 		this.score = 0;
+		this.scoreHistory = [];
 		this.locked = false;
 		this.lockTimeout = null;
 		this.key = key;
@@ -121,8 +122,10 @@ class Player {
 	}
 
 	setFinalWager(wager) {
-		if (wager >= 0) this.finalWager = wager;
-		else throw new Error('Your final wager must be at least 0');
+		if (wager < 0) throw new Error('Your final wager must be at least 0');
+		else if (wager > this.getScore())
+			throw new Error('Your final wager cannot exceed your score');
+		this.finalWager = wager;
 	}
 
 	setFinalResponse(response) {
@@ -169,6 +172,16 @@ class Game {
 			},
 			0
 		);
+
+		if (
+			cluesUsed ===
+				Math.floor(cluesPerRound / 2 && this.gameState.round === 0) ||
+			cluesUsed === cluesPerRound
+		)
+			this.gameState.players.forEach((p) =>
+				p.scoreHistory.unshift(p.getScore())
+			);
+
 		return !(
 			this.gameState.board[this.gameState.round].some((cat) => {
 				return cat.clues.some((cl) => !cl.selected);
@@ -594,6 +607,34 @@ class Game {
 					state: 'showFJ',
 				});
 			},
+			setWager: (wagers) => {
+				const inv = wagers.find((w) => {
+					if (w.player >= 0 && w.player < this.gameState.players.length) {
+						if (
+							w.wager >= 0 &&
+							w.wager <= this.gameState.players[w.player].getScore()
+						) {
+							this.gameState.players[w.player].finalWager = w.wager;
+							return false;
+						}
+					}
+					return true;
+				});
+				if (inv) {
+					console.log(this.gameState.players[inv.player]);
+					console.log(inv);
+					console.log(this.gameState.players[inv.player].getScore());
+					throw new Error(
+						`Invalid wager data for player ${this.gameState.players[
+							inv.player
+						].getName()}`
+					);
+				} else {
+					this.setGameState({
+						state: 'showFJ',
+					});
+				}
+			},
 		},
 		//showfJ: showing FJ clue, timer not live
 		showFJ: {
@@ -606,20 +647,36 @@ class Game {
 				const fjOrder = this.gameState.players
 					.map((p, i) => {
 						return {
-							score: p.getScore(),
+							scoreHistory: p.scoreHistory,
 							index: i,
 						};
 					})
-					.sort((a, b) => a.score - b.score)
+					.sort((a, b) => {
+						for (var i = 0; i < a.scoreHistory; i++) {
+							const diff = a.scoreHistory[i] - b.scoreHistory[i];
+							if (diff !== 0) return diff;
+						}
+						return a.index - b.index;
+					})
 					.map((el) => el.index);
-				this.startClueTimer(FJTime, { fjOrder, fjStep: 0, fjLock: true });
+				this.startClueTimer(FJTime, {
+					state: 'FJOver',
+					fjOrder,
+					fjStep: 0,
+					fjLock: true,
+				});
 			},
 		},
 		//FJLive: showing FJ clue, timer live
 		FJLive: {
 			data: {},
+		},
+		FJOver: {
+			data: {},
 			host: () => {
-				this.setGameState({ state: 'FJResults' });
+				this.setGameState({
+					state: 'FJResults',
+				});
 			},
 		},
 		FJResults: {
@@ -931,8 +988,8 @@ class Game {
 		this.clueTimeout = null;
 		this.setGameState({
 			...nextState,
-			timeout: true,
-			playSound: true,
+			timeout: nextState.state !== 'FJOver',
+			playSound: nextState.state !== 'FJOver',
 		});
 		this.gameState.playSound = false;
 	}

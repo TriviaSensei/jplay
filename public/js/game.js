@@ -130,6 +130,18 @@ const fjSound = document.querySelector('#fj-reveal-sound');
 
 const views = [liveClue, categoryScroll, gameBoard, fjCategory];
 
+let fjw, fjWagerModal, confirmFJWagers, fjWagerLabels, fjMaxWagers;
+
+if (isKey) {
+	fjw = document.querySelector('#fj-wager-modal');
+	fjWagerModal = new bootstrap.Modal(fjw);
+	confirmFJWagers = document.querySelector('#confirm-fj-wager');
+	fjWagerLabels = getElementArray(fjw, '.fj-wager-label');
+	fjMaxWagers = getElementArray(fjw, '.fj-max-wager');
+}
+
+const thinkMusic = document.querySelector('#think-sound');
+
 const hidePanel = (tgt) => {
 	tgt.classList.add('d-none');
 };
@@ -294,12 +306,23 @@ if (!isKey) {
 	});
 	document.addEventListener('receive-input', (e) => {
 		const { args } = e.detail;
-		if (game) game.handleInput(...args);
+		try {
+			console.log(args);
+			if (game) game.handleInput(...args);
+		} catch (err) {
+			const evt = new CustomEvent('receive-message', {
+				detail: { type: 'error', message: err.message },
+			});
+			if (keyWindow) keyWindow.document.dispatchEvent(evt);
+		}
 	});
 }
 //control window - on key press, send it to the main window to manage the state
 else {
 	document.addEventListener('keydown', sendKey);
+	document.addEventListener('receive-message', (e) => {
+		showMessage(e.detail.type, e.detail.message);
+	});
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -705,6 +728,40 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (catText) catText.innerHTML = state.board.slice(-1).pop().category;
 			if (state.playSound && fjSound) fjSound.play();
 			if (!isKey && !keyWindow) openKey();
+			if (isKey) {
+				fjWagerLabels.forEach((lbl) => {
+					const ind = Number(lbl.getAttribute('data-index'));
+					if (isNaN(ind) || !state.players[ind].getName()) {
+						lbl.classList.add('d-none');
+					} else lbl.innerHTML = state.players[ind].getName();
+				});
+				fjMaxWagers.forEach((mw) => {
+					const ind = Number(mw.getAttribute('data-index'));
+					if (
+						isNaN(ind) ||
+						!state.players[ind].getName() ||
+						state.players[ind].getScore() <= 0
+					)
+						return;
+					const maxWager = state.players[ind].getScore();
+					mw.innerHTML = maxWager;
+					mw.closest('.fj-wager-container')
+						.querySelector('input.fj-wager')
+						.setAttribute('max', maxWager);
+				});
+				fjWagerModal.show();
+			}
+		} else if (state.state === 'showFJ') {
+			if (fjWagerModal) fjWagerModal.hide();
+			showView(liveClue);
+			const fj = state.board.slice(-1).pop();
+			liveClueText.innerHTML = fj.text;
+			liveValue.innerHTML = ``;
+			liveClueCategory.innerHTML = fj.category;
+			if (isKey && liveResponse) liveResponse.innerHTML = fj.response;
+		} else if (state.state === 'FJLive' || state.state === 'FJOver') {
+			showView(liveClue);
+			if (state.playSound && thinkMusic) thinkMusic.play();
 		} else {
 			showView(gameBoard);
 		}
@@ -792,7 +849,11 @@ document.addEventListener('DOMContentLoaded', () => {
 	clueBoxes.forEach((cb) => cb.addEventListener('click', selectClue));
 
 	sh.addWatcher(liveClue, (e) => {
-		if (e?.detail?.state === 'clueLive' || e?.detail?.state === 'DDLive')
+		if (
+			e?.detail?.state === 'clueLive' ||
+			e?.detail?.state === 'DDLive' ||
+			e?.detail?.state === 'FJLive'
+		)
 			e.target.classList.add('live');
 		else e.target.classList.remove('live');
 	});
@@ -866,12 +927,22 @@ document.addEventListener('DOMContentLoaded', () => {
 					'error',
 					`Invalid wager - maximum wager is $${maxWager}`
 				);
-			try {
-				sendGameInput('setWager', wager);
-				ddWagerModal.hide();
-			} catch (err) {
-				showMessage('error', err.message);
-			}
+			sendGameInput('setWager', wager);
+		});
+
+	if (confirmFJWagers)
+		confirmFJWagers.addEventListener('click', () => {
+			const wagers = getElementArray(fjw, '.fj-wager').map((inp, i) => {
+				const index = Number(inp.getAttribute('data-index'));
+				const player = index >= 0 ? index : null;
+				const wager = Number(inp.value) || 0;
+				if (isNaN(index)) return null;
+				return {
+					player,
+					wager,
+				};
+			});
+			sendGameInput('setWager', wagers);
 		});
 
 	if (nameCanvas) {

@@ -1,0 +1,29 @@
+.modal#fj-wager-modal(tabindex="-1" aria-labelledby="fj-wager-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false")
+    .modal-dialog.modal-dialog-centered
+        .modal-content#fj-wager-modal-content
+            input#player-index(type="hidden")
+            .modal-header
+                h5.modal-title#fj-wager-label Final Jeopardy Wagers
+            .modal-body
+                .input-row-v 
+                    .d-flex.flex-row.mb-2
+                        - var i = 0
+                        - while (i<3)
+                            - if (i===0) 
+                                input(id=`fj-wager-${i}` data-index=`${i}` name="fj-wager-radio" type="radio" value=`${i}` checked)
+                            - else 
+                                input(id=`fj-wager-${i}` data-index=`${i}` name="fj-wager-radio" type="radio" value=`${i}`)
+                            label.fj-wager-label(for=`fj-wager-${i}` data-index=`${i}`)
+                            - i++;
+                    .input-row-h
+                        - var j = 0
+                        - while (j<3)
+                            .fj-wager-container.w-50.me-2(data-index=`${j}`)
+                                .input-label Enter wager (Max #[span.fj-max-wager(id=`max-wager-${j}` data-index=`${j}`)]) 
+                                .input-container
+                                    input.fj-wager(id=`fj-wager-${j}` data-index=`${j}` type="number" placenolder="Wager" min="0")
+                            - j++
+                        button.btn.btn-sm.btn-warning.me-2.wager-0 0
+                        button.btn.btn-sm.btn-primary.wager-max Max
+            .modal-footer
+                button#confirm-fj-wager.btn.btn-sm.btn-primary(type="button" data-key="Enter,Return") Save
