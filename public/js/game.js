@@ -130,14 +130,36 @@ const fjSound = document.querySelector('#fj-reveal-sound');
 
 const views = [liveClue, categoryScroll, gameBoard, fjCategory];
 
-let fjw, fjWagerModal, confirmFJWagers, fjWagerLabels, fjMaxWagers;
+let fjw,
+	fjr,
+	fjWagerModal,
+	fjResponseModal,
+	confirmFJWagers,
+	fjWagerLabels,
+	fjMaxWagers,
+	wagerZero,
+	wagerMax,
+	fjPrefixDiv,
+	fjPrefixes,
+	fjResponseLabels,
+	fjResponses,
+	confirmFJResponses;
 
 if (isKey) {
 	fjw = document.querySelector('#fj-wager-modal');
+	fjr = document.querySelector('#fj-response-modal');
 	fjWagerModal = new bootstrap.Modal(fjw);
+	fjResponseModal = new bootstrap.Modal(fjr);
 	confirmFJWagers = document.querySelector('#confirm-fj-wager');
 	fjWagerLabels = getElementArray(fjw, '.fj-wager-label');
 	fjMaxWagers = getElementArray(fjw, '.fj-max-wager');
+	wagerZero = fjw.querySelector('.wager-0');
+	wagerMax = fjw.querySelector('.wager-max');
+	fjPrefixDiv = fjr.querySelector('#fj-prefix');
+	fjPrefixes = getElementArray(fjr, '.fj-prefix-container input[type="radio"]');
+	fjResponseLabels = getElementArray(fjr, 'label.fj-response-label');
+	fjResponses = getElementArray(fjr, '.fj-response');
+	confirmFJResponses = fjr.querySelector('#confirm-fj-response');
 }
 
 const thinkMusic = document.querySelector('#think-sound');
@@ -729,12 +751,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (state.playSound && fjSound) fjSound.play();
 			if (!isKey && !keyWindow) openKey();
 			if (isKey) {
-				fjWagerLabels.forEach((lbl) => {
+				const populateLabels = (lbl) => {
 					const ind = Number(lbl.getAttribute('data-index'));
 					if (isNaN(ind) || !state.players[ind].getName()) {
 						lbl.classList.add('d-none');
 					} else lbl.innerHTML = state.players[ind].getName();
-				});
+				};
+				fjWagerLabels.forEach(populateLabels);
+				fjResponseLabels.forEach(populateLabels);
 				fjMaxWagers.forEach((mw) => {
 					const ind = Number(mw.getAttribute('data-index'));
 					if (
@@ -762,6 +786,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		} else if (state.state === 'FJLive' || state.state === 'FJOver') {
 			showView(liveClue);
 			if (state.playSound && thinkMusic) thinkMusic.play();
+			else if (state.state === 'FJOver' && thinkMusic) thinkMusic.pause();
+
+			if (state.state === 'FJLive' && fjResponseModal) fjResponseModal.show();
 		} else {
 			showView(gameBoard);
 		}
@@ -865,7 +892,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (score >= 0) e.target.classList.remove('neg');
 			else e.target.classList.add('neg');
 
-			e.target.innerHTML = `$${Math.abs(score)}`;
+			const str = Math.abs(score).toLocaleString('en');
+			e.target.innerHTML = `$${str}`;
 		});
 	});
 
@@ -887,14 +915,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		else if (!isKey && e.detail.timeout && e.detail.playSound) e.target.play();
 	});
 
-	// if (!isKey)
-	// 	sh.addWatcher(
-	// 		null,
-	// 		(state) => {
-	// 			if (state && !keyWindow) openKey();
-	// 		},
-	// 		{ once: true }
-	// 	);
+	if (!isKey)
+		sh.addWatcher(
+			null,
+			(state) => {
+				if (state && !keyWindow) openKey();
+			},
+			{ once: true }
+		);
 
 	//send game state to key window on state update
 	if (!isKey) sh.addWatcher(null, sendGameState);
@@ -943,6 +971,81 @@ document.addEventListener('DOMContentLoaded', () => {
 				};
 			});
 			sendGameInput('setWager', wagers);
+		});
+
+	const wagerSetter = (isMax) => {
+		return () => {
+			const checked = fjw.querySelector(
+				'input[type="radio"][name="fj-wager-radio"]:checked'
+			);
+			if (!checked) return;
+			const ind = checked.getAttribute('data-index');
+			const inp = fjw.querySelector(`input.fj-wager[data-index="${ind}"]`);
+			if (!inp) return;
+			inp.value = isMax ? Number(inp.getAttribute('max')) : 0;
+		};
+	};
+	if (wagerZero) wagerZero.addEventListener('click', wagerSetter(false));
+	if (wagerMax) wagerMax.addEventListener('click', wagerSetter(true));
+	const handlePrefixChange = (e) => {
+		if (!e.target.checked) return;
+		let val = e.target.value;
+		if (val === '[None]') val = '';
+		sh.setState((prev) => {
+			return {
+				...prev,
+				fjPrefix: val,
+			};
+		});
+	};
+	if (fjPrefixDiv) {
+		sh.addWatcher(fjPrefixDiv, (e) => {
+			e.target.innerHTML = e.detail.fjPrefix;
+		});
+		const pf = fjr.querySelector(
+			'.fj-prefix-container input[type="radio"]:checked'
+		);
+		if (pf) {
+			const val = pf.value;
+			if (val === '[None]') fjPrefixDiv.innerHTML = '';
+			else fjPrefixDiv.innerHTML = val;
+		}
+	}
+	if (fjPrefixes) {
+		fjPrefixes.forEach((p) => {
+			p.addEventListener('change', handlePrefixChange);
+		});
+		const ps1 = getElementArray(fjw, 'input[name="fj-wager-radio"]');
+		const ps2 = getElementArray(fjr, 'input[name="fj-response-radio"]');
+
+		sh.addWatcher(null, (state) => {
+			const handleDisableRadios = (el) => {
+				const ind = Number(el.value);
+				const score = state.players[ind]?.getScore();
+				if (!score || score <= 0) {
+					el.disabled = true;
+					el.checked = false;
+				} else {
+					el.disabled = false;
+					if (!el.parentElement.querySelector('input[type="radio"]:checked'))
+						el.checked = true;
+				}
+			};
+			ps1.forEach(handleDisableRadios);
+			ps2.forEach(handleDisableRadios);
+		});
+	}
+
+	if (confirmFJResponses)
+		confirmFJResponses.addEventListener('click', () => {
+			fjResponses.forEach((res) => {
+				const ind = Number(res.getAttribute('data-index'));
+				const state = sh.getState();
+				state.players[ind].finalResponse = res.value;
+			});
+			fjResponseModal.hide();
+			const state = sh.getState();
+			console.log(state);
 		});
 
 	if (nameCanvas) {

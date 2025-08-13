@@ -135,6 +135,11 @@ input[type='radio']:checked + label {
 	background-color: var(--green);
 }
 
+input[type='radio']:disabled + label {
+	color: var(--dk-gray);
+	background-color: var(--lt-gray);
+}
+
 .input-row-h,
 .input-row-v {
 	margin: 1em auto auto auto;

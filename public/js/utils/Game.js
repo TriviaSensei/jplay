@@ -28,7 +28,7 @@ const randomString = (len, str) => {
 const lockTimeout = 250;
 const clueTime = 3500;
 const ddTime = 7000;
-const FJTime = 30000;
+const FJTime = 31000;
 const cluesPerRound = 2;
 
 class Player {
@@ -611,10 +611,11 @@ class Game {
 				const inv = wagers.find((w) => {
 					if (w.player >= 0 && w.player < this.gameState.players.length) {
 						if (
-							w.wager >= 0 &&
-							w.wager <= this.gameState.players[w.player].getScore()
+							this.gameState.players[w.player].getScore() <= 0 ||
+							(w.wager >= 0 &&
+								w.wager <= this.gameState.players[w.player].getScore())
 						) {
-							this.gameState.players[w.player].finalWager = w.wager;
+							this.gameState.players[w.player].finalWager = w.wager || 0;
 							return false;
 						}
 					}
@@ -640,17 +641,14 @@ class Game {
 		showFJ: {
 			data: {},
 			host: () => {
-				this.setGameState({
-					state: 'FJLive',
-					playSound: true,
-				});
 				const fjOrder = this.gameState.players
 					.map((p, i) => {
 						return {
-							scoreHistory: p.scoreHistory,
+							...p,
 							index: i,
 						};
 					})
+					.filter((p) => p.score > 0)
 					.sort((a, b) => {
 						for (var i = 0; i < a.scoreHistory; i++) {
 							const diff = a.scoreHistory[i] - b.scoreHistory[i];
@@ -659,9 +657,13 @@ class Game {
 						return a.index - b.index;
 					})
 					.map((el) => el.index);
+				this.setGameState({
+					state: 'FJLive',
+					fjOrder,
+					playSound: true,
+				});
 				this.startClueTimer(FJTime, {
 					state: 'FJOver',
-					fjOrder,
 					fjStep: 0,
 					fjLock: true,
 				});
@@ -670,6 +672,14 @@ class Game {
 		//FJLive: showing FJ clue, timer live
 		FJLive: {
 			data: {},
+			host: () => {
+				this.setGameState({ state: 'FJOver' });
+			},
+			setFJResponse: (player, response) => {
+				if (player >= 0 && player < this.gameState.players.length) {
+					this.gameState.players[player].finalResponse = response;
+				}
+			},
 		},
 		FJOver: {
 			data: {},
@@ -797,6 +807,7 @@ class Game {
 			fjOrder: null,
 			fjStep: -1,
 			fjLock: false,
+			fjPrefix: 'What is',
 			round: -1,
 		};
 

@@ -1,0 +1,40 @@
+.modal#fj-response-modal(tabindex="-1" aria-labelledby="fj-response-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false")
+    .modal-dialog.modal-dialog-centered
+        .modal-content#fj-response-modal-content
+            input#player-index(type="hidden")
+            .modal-header
+                h5.modal-title#fj-response-label Final Jeopardy Responses
+            .modal-body
+                .input-row-v
+                    .mb-1 Question prefix 
+                    .d-flex.flex-row.mb-2.fj-prefix-container
+                        each prefix,index in ['What is', 'Who is', '[None]']
+                            - if (index===0)
+                                input(id=`qp-${index}` name="fj-qp" type="radio" value=`${prefix}` checked)
+                            - else 
+                                input(id=`qp-${index}` name="fj-qp" type="radio" value=`${prefix}`)
+                            label.fj-prefix(for=`qp-${index}`)= prefix
+                .input-row-v 
+                    .d-flex.flex-row.mb-2
+                        - var i = 0
+                        - while (i<3)
+                            - if (i===0) 
+                                input(id=`fj-response-${i}` data-index=`${i}` name="fj-response-radio" type="radio" value=`${i}` checked)
+                            - else 
+                                input(id=`fj-response-${i}` data-index=`${i}` name="fj-response-radio" type="radio" value=`${i}`)
+                            label.fj-response-label(for=`fj-response-${i}` data-index=`${i}`)
+                            - i++;
+                    .input-row-h
+                        .fj-response-container.w-100.me-2
+                            .input-label Enter Response 
+                            .input-container
+                                .d-flex.me-1
+                                    #fj-prefix.m-auto What is
+                                - var j = 0
+                                - while (j<3)
+                                    input.fj-response(id=`fj-response-${j}` data-index=`${j}` type="text" placeholder="Response")
+                                    - j++
+                                .d-flex.ms-1
+                                    .m-auto ?
+            .modal-footer
+                button#confirm-fj-response.btn.btn-sm.btn-primary(type="button" data-key="Enter,Return") Save

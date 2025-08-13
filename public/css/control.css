@@ -99,6 +99,45 @@ body {
 	}
 }
 
+#fj-response-modal {
+	.fj-response {
+		display: none;
+	}
+
+	div:has(input[type='radio'][value='0']:checked)
+		> .input-row-h
+		.fj-response[data-index='0'],
+	div:has(input[type='radio'][value='1']:checked)
+		> .input-row-h
+		.fj-response[data-index='1'],
+	div:has(input[type='radio'][value='2']:checked)
+		> .input-row-h
+		.fj-response[data-index='2'] {
+		display: unset;
+	}
+
+	.input-container {
+		display: flex;
+		flex-direction: row;
+	}
+	.input-container .fj-response {
+		width: unset;
+		flex: 1;
+	}
+
+	.input-row-v:has(input.fj-response[data-index='0']:placeholder-shown)
+		input[type='radio']:not(:disabled)
+		+ .fj-response-label[data-index='0']::after,
+	.input-row-v:has(input.fj-response[data-index='1']:placeholder-shown)
+		input[type='radio']:not(:disabled)
+		+ .fj-response-label[data-index='1']::after,
+	.input-row-v:has(input.fj-response[data-index='2']:placeholder-shown)
+		input[type='radio']:not(:disabled)
+		+ .fj-response-label[data-index='2']::after {
+		content: '⚠️';
+	}
+}
+
 #cover-div {
 	width: 100%;
 	height: 100%;
