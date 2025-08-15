@@ -15,7 +15,8 @@
 }
 
 .game-board,
-.live-clue-display {
+.live-clue-display,
+.fj-response-div {
 	display: grid;
 	grid-template-columns: repeat(6, 1fr);
 	grid-template-rows: repeat(6, 1fr);
@@ -460,6 +461,56 @@
 	@media (aspect-ratio > 0.89) {
 		.category-div {
 			font-size: 12vh;
+		}
+	}
+}
+
+.fj-response-div {
+	width: 100%;
+	height: 100%;
+	.fj-response-display,
+	.fj-wager-display {
+		font-family: 'Shadows Into Light Two', cursive;
+		font-weight: 400;
+		font-style: normal;
+		background-color: var(--blue);
+		color: white;
+	}
+	.fj-response-display {
+		grid-column: 2/6;
+		grid-row: 2/5;
+	}
+	.fj-wager-display {
+		grid-column: 2/6;
+		grid-row: 5/6;
+	}
+
+	.display-inner {
+		height: 0%;
+		width: 100%;
+		padding: 5%;
+		text-align: center;
+	}
+
+	.display-inner.animate {
+		transition: 0.5s;
+	}
+
+	.display-inner.revealed {
+		height: 100%;
+	}
+
+	@media (max-aspect-ratio: 0.89) {
+		.display-inner {
+			font-size: 7vw;
+		}
+	}
+	/*
+		viewport is wide enough to fit everything - font size determined by the height of the window
+	*/
+	@media (aspect-ratio > 0.89) {
+		.display-inner {
+			font-size: 3.5vh;
 		}
 	}
 }

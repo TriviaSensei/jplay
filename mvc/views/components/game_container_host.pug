@@ -65,6 +65,11 @@ mixin lectern(n)
     .fj-category.d-none
         .category-box
             .category-div
+    .fj-response-div.d-none
+        .fj-response-display
+            .display-inner
+        .fj-wager-display
+            .display-inner
 
 
 .lecterns
@@ -72,11 +77,3 @@ mixin lectern(n)
     +lectern(1)
     +lectern(2)
 
-audio#timeout-sound
-    source(src="/media/Jeopardy-time.mp3" type="audio/mpeg")
-audio#dd-sound
-    source(src="/media/dailydouble.mp3" type="audio/mpeg")
-audio#fj-reveal-sound
-    source(src="/media/FJreveal.mp3" type="audio/mpeg")
-audio#think-sound
-    source(src="/media/think.mp3" type="audio/mpeg")

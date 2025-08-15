@@ -128,7 +128,15 @@ const clearStroke = document.querySelector('#clear-stroke');
 const fjCategory = document.querySelector('.fj-category');
 const fjSound = document.querySelector('#fj-reveal-sound');
 
-const views = [liveClue, categoryScroll, gameBoard, fjCategory];
+const fjResponseDiv = document.querySelector('.fj-response-div');
+const fjResponseDisplay = fjResponseDiv.querySelector(
+	'.fj-response-display > .display-inner'
+);
+const fjWagerDisplay = fjResponseDiv.querySelector(
+	'.fj-wager-display > .display-inner'
+);
+
+const views = [liveClue, categoryScroll, gameBoard, fjCategory, fjResponseDiv];
 
 let fjw,
 	fjr,
@@ -228,7 +236,6 @@ const handleKeyPress = async (e) => {
 	//is it a modal key?
 	const openModal = document.querySelector('.modal.show');
 	if (openModal) {
-		console.log(e.key);
 		const buttons = getElementArray(openModal, 'button');
 
 		buttons.some((btn) => {
@@ -329,7 +336,6 @@ if (!isKey) {
 	document.addEventListener('receive-input', (e) => {
 		const { args } = e.detail;
 		try {
-			console.log(args);
 			if (game) game.handleInput(...args);
 		} catch (err) {
 			const evt = new CustomEvent('receive-message', {
@@ -362,6 +368,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			window.opener.dispatchEvent(evt);
 		});
 	}
+
+	const sounds = getElementArray(document, 'audio');
+	sounds.forEach((s) => s.load());
 
 	const files = getElementArray(document, '.file');
 	if (files) {
@@ -713,6 +722,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					: `$${liveClueData.value}`;
 			liveClueCategory.innerHTML = liveCategory.category;
 			if (isKey && liveResponse) liveResponse.innerHTML = liveClueData.response;
+			if (isKey) ddWagerModal.hide();
 		} else if (state.state === 'boardIntro' && state.categoryShown >= -1) {
 			showView(categoryScroll);
 			categoryDisplays.forEach((cb, i) => {
@@ -783,14 +793,57 @@ document.addEventListener('DOMContentLoaded', () => {
 			liveValue.innerHTML = ``;
 			liveClueCategory.innerHTML = fj.category;
 			if (isKey && liveResponse) liveResponse.innerHTML = fj.response;
-		} else if (state.state === 'FJLive' || state.state === 'FJOver') {
+		} else if (state.state === 'FJLive') {
 			showView(liveClue);
 			if (state.playSound && thinkMusic) thinkMusic.play();
-			else if (state.state === 'FJOver' && thinkMusic) thinkMusic.pause();
-
-			if (state.state === 'FJLive' && fjResponseModal) fjResponseModal.show();
+			if (fjResponseModal) fjResponseModal.show();
+		} else if (state.state === 'FJOver') {
+			if (thinkMusic) thinkMusic.pause();
+			showView(fjResponseDiv);
 		} else {
 			showView(gameBoard);
+		}
+	});
+
+	sh.addWatcher(fjResponseDisplay, (e) => {
+		const state = e.detail;
+		if (state.state !== 'FJOver' || state.fjStep === -1) return;
+		if (state.fjStep % 4 === 0) {
+			e.target.classList.remove('animate');
+			e.target.classList.remove('revealed');
+			e.target.innerHTML = '';
+		} else {
+			const p = Math.floor(state.fjStep / 4);
+			const ind = state.fjOrder[p];
+			const player = state.players[ind];
+			e.target.innerHTML = `${state.fjPrefix ? state.fjPrefix + ' ' : ''}${
+				player.finalResponse
+			}?`;
+			e.target.classList.add('animate');
+			setTimeout(() => {
+				e.target.classList.add('revealed');
+			}, 1);
+		}
+	});
+
+	sh.addWatcher(fjWagerDisplay, (e) => {
+		const state = e.detail;
+		if (state.state !== 'FJOver' || state.fjStep === -1) return;
+
+		if (state.fjStep % 4 <= 1) {
+			e.target.classList.remove('animate');
+			e.target.classList.remove('revealed');
+			e.target.innerHTML = '';
+		} else {
+			const p = Math.floor(state.fjStep / 4);
+			const ind = state.fjOrder[p];
+			const player = state.players[ind];
+
+			e.target.innerHTML = `$${player.finalWager}`;
+			e.target.classList.add('animate');
+			setTimeout(() => {
+				e.target.classList.add('revealed');
+			}, 1);
 		}
 	});
 
@@ -863,6 +916,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (e.detail.buzzedIn === ind && e.detail.state === 'buzz') {
 				e.target.classList.add('lit');
 				startTimerLights(l, e.detail.currentTime - e.detail.buzzTime);
+			} else if (
+				e.detail.state === 'FJOver' &&
+				e.detail.fjOrder[Math.floor(e.detail.fjStep / 4)] === ind
+			) {
+				e.target.classList.add('lit');
 			} else e.target.classList.remove('lit');
 		})
 	);
@@ -912,8 +970,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	sh.addWatcher(timeoutSound, (e) => {
 		if (!e.detail) return;
-		else if (!isKey && e.detail.timeout && e.detail.playSound) e.target.play();
+		else if (!isKey && e.detail.timeout && e.detail.playSound) {
+			e.target.play();
+			console.log(`Timeout sound`);
+			console.log(e.detail);
+		}
 	});
+
+	// if (!isKey)
+	// 	sh.addWatcher(null, (state) => {
+	// 		console.log(state);
+	// 	});
 
 	if (!isKey)
 		sh.addWatcher(
@@ -1045,7 +1112,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 			fjResponseModal.hide();
 			const state = sh.getState();
-			console.log(state);
 		});
 
 	if (nameCanvas) {

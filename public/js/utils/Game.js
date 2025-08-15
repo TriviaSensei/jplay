@@ -29,7 +29,7 @@ const lockTimeout = 250;
 const clueTime = 3500;
 const ddTime = 7000;
 const FJTime = 31000;
-const cluesPerRound = 2;
+const cluesPerRound = 30;
 
 class Player {
 	constructor(name, nameData, uid, socketId, key, isRemote) {
@@ -45,20 +45,7 @@ class Player {
 		this.isRemote = isRemote;
 		this.finalWager = -1;
 		this.finalResponse = '';
-	}
-
-	lock(autoUnlock) {
-		this.locked = true;
-		if (this.lockTimeout) clearTimeout(this.lockTimeout);
-		if (autoUnlock) this.lockTimeout = setTimeout(this.unlock, lockTimeout);
-	}
-
-	unlock() {
-		if (this.lockTimeout) {
-			clearTimeout(this.lockTimeout);
-			this.lockTimeout = null;
-		}
-		this.locked = false;
+		this.finalCorrect = null;
 	}
 
 	isLocked() {
@@ -226,7 +213,7 @@ class Game {
 				//an incorrect answer was given
 				else {
 					//lock this player out for the question
-					this.gameState.players[this.gameState.buzzedIn].lock(false);
+					this.gameState.players[this.gameState.buzzedIn].locked = true;
 					//if any one is elibible, go back to clueLive
 					if (this.gameState.players.some((p) => !p.isLocked()))
 						this.setGameState({
@@ -283,20 +270,20 @@ class Game {
 	}
 
 	handleFJResponse(correct) {
-		if (this.gameState.fjStep % 2 !== 1) return;
+		if (this.gameState.fjStep % 4 !== 1) return;
 		//player whose response we are judging
-		const p = this.gameState.fjOrder[(this.gameState.fjStep - 1) / 2];
+		const p = this.gameState.fjOrder[(this.gameState.fjStep - 1) / 4];
 		const player = this.gameState.players[p];
-		const wager = player.getFinalWager();
-		this.gameState.fjStep++;
-		this.modifyPlayerScore(p, correct ? wager : -wager);
+		player.finalCorrect = correct;
+		this.setGameState({ fjStep: this.gameState.fjStep + 1 });
 	}
 
 	handleBuzz(p) {
 		try {
-			console.log(p);
 			//if the player is locked, don't do anything
-			if (this.gameState.players[p].isLocked()) return;
+			if (this.gameState.players[p].isLocked())
+				return console.log(`Player ${p} is locked`);
+			console.log(`Buzz - ${p}`);
 			//stop the clue timeout, set the game state
 			this.stopClueTimer();
 			const now = Date.now();
@@ -434,7 +421,6 @@ class Game {
 						state: 'showClue',
 						selectedClue: [cat, row],
 					});
-				console.log(cat, row);
 			},
 		},
 		//showClue: clue is showing, but buzzer is not active
@@ -474,10 +460,13 @@ class Game {
 					}
 				}
 			},
-			//a player tries to buzz but it's too early
+			//a player tries to buzz but the clue isn't live
 			player: (p) => {
 				try {
-					this.gameState.players[p].lock(false);
+					//if the clue is already timed out, do nothing
+					if (this.gameState.timeout) return;
+					//if the clue is not yet started, lock them out for a period
+					this.lockPlayer(p, true);
 					this.updateGameState(p);
 				} catch (err) {
 					return console.log(err);
@@ -650,7 +639,7 @@ class Game {
 					})
 					.filter((p) => p.score > 0)
 					.sort((a, b) => {
-						for (var i = 0; i < a.scoreHistory; i++) {
+						for (var i = 0; i < a.scoreHistory.length; i++) {
 							const diff = a.scoreHistory[i] - b.scoreHistory[i];
 							if (diff !== 0) return diff;
 						}
@@ -664,7 +653,7 @@ class Game {
 				});
 				this.startClueTimer(FJTime, {
 					state: 'FJOver',
-					fjStep: 0,
+					fjStep: -1,
 					fjLock: true,
 				});
 			},
@@ -673,7 +662,8 @@ class Game {
 		FJLive: {
 			data: {},
 			host: () => {
-				this.setGameState({ state: 'FJOver' });
+				this.stopClueTimer();
+				this.setGameState({ state: 'FJOver', fjStep: -1 });
 			},
 			setFJResponse: (player, response) => {
 				if (player >= 0 && player < this.gameState.players.length) {
@@ -684,9 +674,25 @@ class Game {
 		FJOver: {
 			data: {},
 			host: () => {
-				this.setGameState({
-					state: 'FJResults',
-				});
+				const maxStep = this.gameState.fjOrder.length * 4 - 1;
+				if (this.gameState.fjStep % 4 === 1) return;
+				if (this.gameState.fjStep < maxStep)
+					this.setGameState({ fjStep: this.gameState.fjStep + 1 });
+				else return this.setGameState({ state: 'FJResults' });
+
+				if (this.gameState.fjStep % 4 === 3) {
+					const ind =
+						this.gameState.fjOrder[Math.floor(this.gameState.fjStep / 4)];
+					const p = this.gameState.players[ind];
+					p.setScore(p.getScore() + (p.finalCorrect ? 1 : -1) * p.finalWager);
+					this.updateGameState();
+				}
+			},
+			correct: () => {
+				this.handleFJResponse(true);
+			},
+			incorrect: () => {
+				this.handleFJResponse(false);
 			},
 		},
 		FJResults: {
@@ -710,19 +716,13 @@ class Game {
 					} else {
 						winners[winners.length - 1] = `and ${winners[length - 1]}`;
 						message = `${winners.join(', ')} tie with $${hs.toLocaleString(
-							'en-US'
+							'en'
 						)}!}`;
 					}
 					this.setGameState({ state: 'endGame', message });
 				}
 				if (this.gameState.fjStep % 2 === 0)
 					this.setGameState({ fjStep: this.gameState.fjStep + 1 });
-			},
-			correct: () => {
-				this.handleFJResponse(true);
-			},
-			incorrect: () => {
-				this.handleFJResponse(false);
 			},
 		},
 		endGame: {
@@ -814,6 +814,14 @@ class Game {
 		for (var i = 0; i < 3; i++) {
 			this.addPlayer(`player${i + 1}`, null, null, null);
 		}
+		//start in FJ for testing
+		// this.gameState.active = true;
+		// this.gameState.state = 'betweenRounds';
+		// this.gameState.round = 2;
+		// this.gameState.players.forEach((p, i) => {
+		// 	p.score = (i + 1) * 200;
+		// });
+		//***************** */
 
 		this.updateGameState();
 	}
@@ -976,21 +984,29 @@ class Game {
 	}
 
 	lockPlayer(player, autoUnlock) {
+		console.log(`Locking out player ${player}, auto-unlock: ${autoUnlock}`);
 		if (player >= 0 && player < this.gameState.players.length) {
-			this.gameState.players[player].lock(autoUnlock);
+			this.gameState.players[player].locked = true;
 			this.updateGameState(player);
+			if (autoUnlock)
+				setTimeout(() => {
+					console.log(`Unlocking player ${player}`);
+					this.gameState.players[player].locked = false;
+				}, lockTimeout);
 		}
 	}
 
 	unlockPlayer(player) {
 		if (player >= 0 && player < this.gameState.players.length) {
-			this.gameState.players[player].unlock();
+			this.gameState.players[player].locked = false;
 			this.updateGameState(player);
 		}
 	}
 
 	unlockAll() {
-		this.gameState.players.forEach((p) => p.unlock());
+		this.gameState.players.forEach((p) => {
+			p.locked = false;
+		});
 		this.updateGameState();
 	}
 
