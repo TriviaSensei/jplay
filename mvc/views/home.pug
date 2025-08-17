@@ -23,13 +23,13 @@ html
             link(rel="stylesheet" href="/css/components/game_container/game_container_host.css")
             include components/game_container_host
         .host-panel.d-none
-        audio#timeout-sound(preload="auto")
+        audio#timeout-sound(preload="auto" data-name="timeout")
             source(src="/media/Jeopardy-time.mp3" type="audio/mpeg")
-        audio#dd-sound(preload="auto")
+        audio#dd-sound(preload="auto" data-name="dd")
             source(src="/media/dailydouble.mp3" type="audio/mpeg")
-        audio#fj-reveal-sound(preload="auto")
+        audio#fj-reveal-sound(preload="auto" data-name="ping")
             source(src="/media/fj_ding.mp3" type="audio/mpeg")
-        audio#think-sound(preload="auto")
+        audio#think-sound(preload="auto" data-name="think")
             source(src="/media/think.mp3" type="audio/mpeg")
 
     script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous")

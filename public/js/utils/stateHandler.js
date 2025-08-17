@@ -66,10 +66,7 @@ class StateHandler {
 				`Updater function can take up to 1 argument with non-null object.`
 			);
 		let inputSettings = settings.length === 1 ? settings[0] : null;
-		if (settings.length > 0) console.log(inputSettings);
-		if (inputSettings?.checkDiff) {
-			console.log(obj);
-		}
+
 		this.objects.push({
 			node: obj,
 			updater,
@@ -80,7 +77,6 @@ class StateHandler {
 				once: inputSettings?.once === true,
 			});
 			if (this.state.value || this.allowNull) {
-				console.log(this.state.value, this.allowNull);
 				updater({ target: obj, detail: this.state.value });
 			}
 		} else {
@@ -125,9 +121,7 @@ class StateHandler {
 		if (opts.length > 0) {
 			if (opts[0].runUpdates === false) return;
 		}
-		if (!s && !this.allowNull) {
-			return console.log('Returning (null state not allowed)');
-		}
+		if (!s && !this.allowNull) return;
 
 		const evt = new CustomEvent(`update-state-${this.id}`, {
 			detail: this.state.value,

@@ -23,7 +23,12 @@ const csh = new StateHandler({
 	paths: [],
 	mouseDown: false,
 });
-const granularity = 3;
+const psh = new StateHandler({
+	name: '',
+	key: '',
+	nameData: '',
+});
+const granularity = 2;
 
 let uid;
 let game;
@@ -151,7 +156,12 @@ let fjw,
 	fjPrefixes,
 	fjResponseLabels,
 	fjResponses,
-	confirmFJResponses;
+	confirmFJResponses,
+	openModalPanel,
+	openModal,
+	advanceButton,
+	correctButton,
+	incorrectButton;
 
 if (isKey) {
 	fjw = document.querySelector('#fj-wager-modal');
@@ -168,6 +178,11 @@ if (isKey) {
 	fjResponseLabels = getElementArray(fjr, 'label.fj-response-label');
 	fjResponses = getElementArray(fjr, '.fj-response');
 	confirmFJResponses = fjr.querySelector('#confirm-fj-response');
+	openModalPanel = document.querySelector('.modal-open');
+	openModal = openModalPanel.querySelector('#open-modal');
+	advanceButton = document.querySelector('#advance-btn');
+	correctButton = document.querySelector('#correct-btn');
+	incorrectButton = document.querySelector('#incorrect-btn');
 }
 
 const thinkMusic = document.querySelector('#think-sound');
@@ -268,29 +283,35 @@ const handleKeyPress = async (e) => {
 		) {
 			showMessage('warning', `Duplicated buzzer key - no changes made`);
 		} else if (
-			!state.players[playerIndex].isRemote &&
+			!state.players[playerIndex]?.isRemote &&
 			state.host.keys.includes(e.key.toLowerCase())
 		) {
 			showMessage('warning', `Key is reserved for host - no changes made`);
 		} else if (
-			!state.players[playerIndex].isRemote &&
+			!state.players[playerIndex]?.isRemote &&
 			['C', 'X'].includes(e.key.toUpperCase())
 		) {
 			showMessage('warning', `Key is reserved for host - no changes made`);
 		} else {
-			state.players[playerIndex].key = e.key;
-			buzzerKey.setAttribute('data-key', e.key);
-			sh.setState(state);
+			if (playerIndex < state.players.length) {
+				state.players[playerIndex].key = e.key;
+				buzzerKey.setAttribute('data-key', e.key);
+				sh.setState(state);
+			}
 		}
 		setKeyButton.setAttribute('data-toggled', 'false');
 		setKeyButton.innerHTML = 'Set key';
 		return;
-	} else if (!state.active && state.host.keys.includes(e.key.toLowerCase())) {
+	} else if (
+		!state.active &&
+		state.host.keys.includes(e.key.toLowerCase()) &&
+		state.buzzedIn === -1
+	) {
 		if (state.players.some((p) => p.name || p.nameData.length > 0))
 			startGameModal.show();
 		else
 			return showMessage('error', 'You must have at least one active player');
-	} else if (state.active) {
+	} else {
 		if ([...state.host.keys, 'c', 'x', 'k'].includes(e.key.toLowerCase())) {
 			if (uid !== state.host.uid) return;
 			if (state.host.keys.includes(e.key.toLowerCase())) sendGameInput('host');
@@ -344,6 +365,15 @@ if (!isKey) {
 			if (keyWindow) keyWindow.document.dispatchEvent(evt);
 		}
 	});
+	if (!isKey) {
+		document.addEventListener('key-input', (e) => {
+			const state = sh.getState();
+			if (state.state === 'pregame' && e.detail.input === 'host') {
+				handleKeyPress({ key: 'ArrowDown' });
+			}
+			sendGameInput(e.detail.input);
+		});
+	}
 }
 //control window - on key press, send it to the main window to manage the state
 else {
@@ -370,7 +400,14 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	const sounds = getElementArray(document, 'audio');
-	sounds.forEach((s) => s.load());
+	sounds.forEach((s) => {
+		const name = s.getAttribute('data-name');
+		s.load();
+		s.addEventListener('ended', () => {
+			s.pause();
+			s.currentTime = 0;
+		});
+	});
 
 	const files = getElementArray(document, '.file');
 	if (files) {
@@ -581,12 +618,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				const key = buzzerKey.getAttribute('data-key');
 
-				game.gameState.players[index].setName(playerName.value);
-				game.gameState.players[index].setKey(key);
-				if (Array.isArray(nameData.paths)) {
-					game.gameState.players[index].setNameData(
-						nameData.paths.map((p) => p.getAttribute('d'))
-					);
+				if (
+					index < game.gameState.players.length &&
+					game.gameState.players[index]
+				) {
+					if (!playerName.value)
+						return showMessage('error', 'You must specify a name');
+					game.gameState.players[index].setName(playerName.value);
+					game.gameState.players[index].setKey(key);
+					if (Array.isArray(nameData.paths)) {
+						game.gameState.players[index].setNameData(
+							nameData.paths.map((p) => p.getAttribute('d'))
+						);
+					}
 				}
 
 				csh.setState({
@@ -634,15 +678,23 @@ document.addEventListener('DOMContentLoaded', () => {
 			startGameModal.hide();
 		});
 
-	sh.addWatcher(buzzerKey, (e) => {
-		if (!e.detail) return;
-		const ind = getPlayerIndex();
-		if (ind >= e.detail.players.length) return;
-		let key = e.detail.players[ind].key;
+	if (!isKey)
+		sh.addWatcher(buzzerKey, (e) => {
+			const ind = getPlayerIndex();
+			if (isNaN(ind) && !e.detail) return;
 
-		if (key.charCodeAt(0) === 32) key = 'Space';
-		e.target.innerHTML = key;
-	});
+			if (!e.detail) {
+				const defaultKeys = ['ArrowLeft', 'ArrowUp', 'ArrowRight'];
+				e.target.innerHTML = defaultKeys[ind];
+				return;
+			}
+
+			if (ind >= e.detail.players.length) return;
+			let key = e.detail.players[ind].key;
+
+			if (key.charCodeAt(0) === 32) key = 'Space';
+			e.target.innerHTML = key;
+		});
 
 	const getCategory = (cat) => {
 		const state = sh.getState();
@@ -913,7 +965,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			const ind = Number(l.getAttribute('data-index'));
 			if (e.detail.control === ind) e.target.classList.add('control');
 			else e.target.classList.remove('control');
-			if (e.detail.buzzedIn === ind && e.detail.state === 'buzz') {
+			if (
+				e.detail.buzzedIn === ind &&
+				(e.detail.state === 'buzz' || e.detail.state === 'pregame')
+			) {
 				e.target.classList.add('lit');
 				startTimerLights(l, e.detail.currentTime - e.detail.buzzTime);
 			} else if (
@@ -971,16 +1026,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	sh.addWatcher(timeoutSound, (e) => {
 		if (!e.detail) return;
 		else if (!isKey && e.detail.timeout && e.detail.playSound) {
-			e.target.play();
-			console.log(`Timeout sound`);
-			console.log(e.detail);
+			timeoutSound.play();
 		}
 	});
-
-	// if (!isKey)
-	// 	sh.addWatcher(null, (state) => {
-	// 		console.log(state);
-	// 	});
 
 	if (!isKey)
 		sh.addWatcher(
@@ -1128,29 +1176,52 @@ document.addEventListener('DOMContentLoaded', () => {
 		};
 
 		let moveCount = 0;
-		nameCanvas.addEventListener('mousedown', (e) => {
+		const startPath = (e) => {
+			if (isMobile && e.type !== 'touchstart') return;
+			else if (!isMobile && e.type !== 'mousedown') return;
+
 			moveCount = 0;
 			csh.setState((prev) => {
-				const [x, y] = scaleCanvasDimensions(e.offsetX, e.offsetY);
+				const rect = e.target.getBoundingClientRect();
+				const { pageX, pageY } =
+					e.type === 'touchstart' ? e.targetTouches[0] : e;
+				const [offsetX, offsetY] = [pageX - rect.left, pageY - rect.top];
+				const [x, y] = scaleCanvasDimensions(offsetX, offsetY);
 				const newPath = document.createElementNS(
 					'http://www.w3.org/2000/svg',
 					'path'
 				);
-				newPath.setAttribute('d', `M ${x} ${y}`);
+				newPath.setAttribute('d', `M ${x} ${y} l 0 0`);
 				namePath.appendChild(newPath);
 				return {
 					paths: [...prev.paths, newPath],
 					mouseDown: true,
 				};
 			});
-		});
-		document.addEventListener('mousemove', (e) => {
+		};
+		let isMobile = false;
+		document.addEventListener(
+			'touchstart',
+			() => {
+				isMobile = true;
+			},
+			{ once: true }
+		);
+		nameCanvas.addEventListener('mousedown', startPath);
+		nameCanvas.addEventListener('touchstart', startPath);
+
+		const drawPath = (e) => {
+			if (isMobile && e.type !== 'touchmove') return;
+			else if (!isMobile && e.type !== 'mousemove') return;
+
 			const state = csh.getState();
 			if (!state.mouseDown) return;
 			moveCount++;
 			if (moveCount % granularity === 1) {
 				const rect = nameCanvas.getBoundingClientRect();
-				const [offsetX, offsetY] = [e.pageX - rect.left, e.pageY - rect.top];
+				const { pageX, pageY } =
+					e.type === 'touchmove' ? e.targetTouches[0] : e;
+				const [offsetX, offsetY] = [pageX - rect.left, pageY - rect.top];
 				const [x, y] = scaleCanvasDimensions(offsetX, offsetY);
 
 				const currentPath = state.paths[state.paths.length - 1];
@@ -1160,15 +1231,25 @@ document.addEventListener('DOMContentLoaded', () => {
 					`${currentPath.getAttribute('d')} L ${x} ${y}`
 				);
 			}
-		});
-		document.addEventListener('mouseup', () => {
+		};
+
+		document.addEventListener('mousemove', drawPath);
+		document.addEventListener('touchmove', drawPath);
+
+		const endPath = (e) => {
+			if (isMobile && e.type !== 'touchend') return;
+			else if (!isMobile && e.type !== 'mouseup') return;
 			csh.setState((prev) => {
 				return {
 					...prev,
 					mouseDown: false,
 				};
 			});
-		});
+		};
+
+		document.addEventListener('mouseup', endPath);
+		document.addEventListener('touchend', endPath);
+
 		if (undoStroke)
 			undoStroke.addEventListener('click', () => {
 				const state = csh.getState();
@@ -1190,5 +1271,30 @@ document.addEventListener('DOMContentLoaded', () => {
 				state.paths = [];
 				csh.setState(state);
 			});
+	}
+
+	if (isKey) {
+		const statusPanel = document.querySelector('.status-panel');
+		sh.addWatcher(statusPanel, (e) => {
+			e.target.innerHTML = e.detail.status;
+		});
+		sh.addWatcher(openModalPanel, (e) => {
+			if (e.detail.modal) {
+				e.target.classList.remove('d-none');
+				openModal.innerHTML = e.detail.modalDescription;
+				openModal.setAttribute('data-bs-target', `#${e.detail.modal}`);
+			} else {
+				e.target.classList.add('d-none');
+			}
+		});
+		const sendInputFromKey = (e) => {
+			const inp = e.target.getAttribute('data-input');
+			window.opener.document.dispatchEvent(
+				new CustomEvent('key-input', { detail: { input: inp } })
+			);
+		};
+		[advanceButton, correctButton, incorrectButton].forEach((b) =>
+			b.addEventListener('click', sendInputFromKey)
+		);
 	}
 });

@@ -154,7 +154,6 @@ class Game {
 	checkRoundOver() {
 		const cluesUsed = this.gameState.board[this.gameState.round].reduce(
 			(p, c) => {
-				console.log(c);
 				return p + c.clues.reduce((p2, c2) => p2 + (c2.selected ? 1 : 0), 0);
 			},
 			0
@@ -200,6 +199,9 @@ class Game {
 						this.setGameState({
 							state: 'select',
 							control: this.gameState.buzzedIn,
+							status: `${this.gameState.players[
+								this.gameState.buzzedIn
+							].getName()} to select a clue`,
 						});
 					}
 					//round is over
@@ -215,10 +217,18 @@ class Game {
 					//lock this player out for the question
 					this.gameState.players[this.gameState.buzzedIn].locked = true;
 					//if any one is elibible, go back to clueLive
-					if (this.gameState.players.some((p) => !p.isLocked()))
+					if (this.gameState.players.some((p) => !p.isLocked())) {
 						this.setGameState({
 							state: 'clueLive',
+							status: `Waiting for buzz`,
 						});
+						this.startClueTimer(clueTime, {
+							buzzerArmed: false,
+							buzzedIn: -1,
+							state: 'showClue',
+							status: 'Clue timed out',
+						});
+					}
 					//everyone is locked out - are there clues left?
 					else if (!this.checkRoundOver()) {
 						//unlock all buzzers
@@ -226,6 +236,9 @@ class Game {
 						//go back to select without changing control of board
 						this.setGameState({
 							state: 'select',
+							status: `${this.gameState.players[
+								this.gameState.control
+							].getName()} to select clue`,
 						});
 					} //round is over
 					else {
@@ -235,7 +248,6 @@ class Game {
 						});
 					}
 				}
-				console.log(this.gameState);
 			} catch (err) {
 				return console.log(err);
 			}
@@ -255,9 +267,11 @@ class Game {
 			//clear the wager
 			this.setGameState({
 				state: 'select',
+				status: `${this.gameState.players[
+					this.gameState.control
+				].getName()} to select a clue`,
 				wager: -1,
 			});
-			console.log(this.gameState);
 		}
 		//round is over
 		else {
@@ -281,9 +295,7 @@ class Game {
 	handleBuzz(p) {
 		try {
 			//if the player is locked, don't do anything
-			if (this.gameState.players[p].isLocked())
-				return console.log(`Player ${p} is locked`);
-			console.log(`Buzz - ${p}`);
+			if (this.gameState.players[p].isLocked()) return;
 			//stop the clue timeout, set the game state
 			this.stopClueTimer();
 			const now = Date.now();
@@ -292,6 +304,7 @@ class Game {
 				buzzedIn: p,
 				buzzTime: now,
 				currentTime: now,
+				status: `${this.gameState.players[p].name} buzzed in`,
 			});
 		} catch (err) {
 			return console.log(err);
@@ -315,6 +328,7 @@ class Game {
 	 * - FJResults: progressing through FJ responses, wagers, and final scores
 	 * - endGame: end of game
 	 */
+
 	stateMap = {
 		all: {
 			editPlayer: (ind, data) => {
@@ -329,7 +343,7 @@ class Game {
 		pregame: {
 			data: {
 				active: false,
-				buzzerArmed: false,
+				buzzerArmed: true,
 				buzzedIn: -1,
 				buzzTime: null,
 				timeout: false,
@@ -351,11 +365,12 @@ class Game {
 						state: 'boardIntro',
 						round: 0,
 						categoryShown: -2,
+						status: 'Board intro - press advance to display next category',
 					});
 				} else throw new Error('You must have at least one player.');
 			},
 			player: (p) => {
-				this.handleBuzz(p);
+				if (this.gameState.buzzedIn === -1) this.setGameState({ buzzedIn: p });
 			},
 			host: () => {
 				this.setGameState({
@@ -375,6 +390,7 @@ class Game {
 				) {
 					this.setGameState({
 						categoryShown: this.gameState.categoryShown + 1,
+						status: `Press advance for next category`,
 					});
 				} else if (
 					this.gameState.categoryShown ===
@@ -391,6 +407,9 @@ class Game {
 						message: `${this.gameState.players[control].getName()} starts the ${
 							roundNames[this.gameState.round]
 						}Jeopardy round.`,
+						status: `${this.gameState.players[
+							control
+						].getName()} to select clue`,
 					});
 				}
 			},
@@ -415,6 +434,9 @@ class Game {
 						state: 'waitingDD',
 						playSound: true,
 						selectedClue: [cat, row],
+						status: `Waiting for Daily Double wager from ${this.gameState.players[
+							this.gameState.control
+						].getName()}`,
 					});
 				else
 					this.setGameState({
@@ -427,7 +449,7 @@ class Game {
 		showClue: {
 			//this only comes from the select state, and nothing changes between those states except for selected clue, which
 			//is variable
-			data: {},
+			data: { status: `Reading clue. Press advance to arm buzzers` },
 			//the host activates the buzzers
 			host: () => {
 				//if the clue hasn't timed out, set it live on host input
@@ -439,6 +461,7 @@ class Game {
 						buzzerArmed: false,
 						buzzedIn: -1,
 						state: 'showClue',
+						status: 'Clue timed out. Press advance to continue.',
 					});
 				}
 				//go back to select screen or between rounds if the clue is timed out
@@ -449,6 +472,9 @@ class Game {
 						this.setGameState({
 							state: 'select',
 							timeout: false,
+							status: `${this.gameState.players[
+								this.gameState.control
+							].getName()} to select clue`,
 						});
 					}
 					//round is over
@@ -481,6 +507,7 @@ class Game {
 				buzzedIn: -1,
 				buzzTime: null,
 				currentTime: null,
+				status: 'Waiting for buzz',
 			},
 			player: (p) => {
 				this.handleBuzz(p);
@@ -497,6 +524,7 @@ class Game {
 		},
 		//waitingDD: showing DD screen, waiting for a DD wager
 		waitingDD: {
+			data: { modal: 'dd-wager-modal', modalDescription: 'Enter DD Wager' },
 			setWager: (wager) => {
 				if (this.gameState.control === -1)
 					throw new Error('Invalid game state');
@@ -518,7 +546,9 @@ class Game {
 		},
 		//showDD: DD being read, no timer, no buzzers
 		showDD: {
-			data: {},
+			data: {
+				status: `Reading Daily Double clue - press advance to start timer`,
+			},
 			host: () => {
 				this.setGameState({
 					state: 'DDLive',
@@ -528,7 +558,9 @@ class Game {
 		},
 		//DDLive: DD is live, buzzers not active
 		DDLive: {
-			data: {},
+			data: {
+				status: `Waiting for Daily Double response`,
+			},
 			correct: () => {
 				this.handleDDResponse(true);
 			},
@@ -545,6 +577,7 @@ class Game {
 				buzzerArmed: false,
 				buzzedIn: -1,
 				selectedClue: [-1, -1],
+				status: `Between rounds. Press advance to continue`,
 			},
 			host: () => {
 				//entering final jeopardy
@@ -553,6 +586,7 @@ class Game {
 					if (this.gameState.players.some((p) => p.getScore() > 0)) {
 						this.setGameState({
 							state: 'FJIntro',
+							status: 'Introducing final Jeopardy. Press advane to continue.',
 						});
 					} else {
 						this.setGameState({
@@ -570,7 +604,6 @@ class Game {
 			},
 		},
 		FJIntro: {
-			data: {},
 			host: () => {
 				this.setGameState({
 					state: 'FJCategory',
@@ -580,7 +613,10 @@ class Game {
 		},
 		//FJCategory: showing FJ category, waiting for wagers
 		FJCategory: {
-			data: {},
+			data: {
+				status: 'Showing Final Jeopardy category. Enter wagers.',
+				data: { modal: 'fj-wager-modal', modalDescription: 'Enter FJ Wagers' },
+			},
 			host: () => {
 				//make sure valid wagers have been submitted for anyone still in the game
 				const inv = this.gameState.players.find(
@@ -594,6 +630,7 @@ class Game {
 				//valid wager has been submitted - show the clue
 				this.setGameState({
 					state: 'showFJ',
+					status: `Showing Final Jeopardy - press advance to start timer.`,
 				});
 			},
 			setWager: (wagers) => {
@@ -611,9 +648,6 @@ class Game {
 					return true;
 				});
 				if (inv) {
-					console.log(this.gameState.players[inv.player]);
-					console.log(inv);
-					console.log(this.gameState.players[inv.player].getScore());
 					throw new Error(
 						`Invalid wager data for player ${this.gameState.players[
 							inv.player
@@ -628,7 +662,9 @@ class Game {
 		},
 		//showfJ: showing FJ clue, timer not live
 		showFJ: {
-			data: {},
+			data: {
+				status: `Showing Final Jeopardy - press advance to start timer.`,
+			},
 			host: () => {
 				const fjOrder = this.gameState.players
 					.map((p, i) => {
@@ -660,11 +696,15 @@ class Game {
 		},
 		//FJLive: showing FJ clue, timer live
 		FJLive: {
-			data: {},
-			host: () => {
-				this.stopClueTimer();
-				this.setGameState({ state: 'FJOver', fjStep: -1 });
+			data: {
+				status: `Final Jeopardy is live.`,
+				modal: 'fj-response-modal',
+				modalDescription: 'Enter FJ Responses',
 			},
+			// host: () => {
+			// 	this.stopClueTimer();
+			// 	this.setGameState({ state: 'FJOver', fjStep: -1 });
+			// },
 			setFJResponse: (player, response) => {
 				if (player >= 0 && player < this.gameState.players.length) {
 					this.gameState.players[player].finalResponse = response;
@@ -672,13 +712,44 @@ class Game {
 			},
 		},
 		FJOver: {
-			data: {},
+			data: {
+				status: `Final Jeopardy timer has expired. Host may finish entering responses.`,
+				modal: 'fj-response-modal',
+				modalDescription: 'Enter FJ Responses',
+			},
 			host: () => {
 				const maxStep = this.gameState.fjOrder.length * 4 - 1;
 				if (this.gameState.fjStep % 4 === 1) return;
-				if (this.gameState.fjStep < maxStep)
-					this.setGameState({ fjStep: this.gameState.fjStep + 1 });
-				else return this.setGameState({ state: 'FJResults' });
+				if (this.gameState.fjStep < maxStep) {
+					const fjStep = this.gameState.fjStep + 1;
+					const fjPlayer =
+						this.gameState.players[
+							this.gameState.fjOrder[Math.floor(fjStep / 4)]
+						];
+					const fjSubstep = fjStep % 4;
+					const newStatus =
+						fjSubstep === 0
+							? `Revealing Final Jeopardy for ${fjPlayer.name}. Press advance to continue.`
+							: fjSubstep === 1
+							? `${fjPlayer.name}'s Final Jeopardy response revealed. Press correct/incorrect to set result.`
+							: fjSubstep === 2
+							? `${fjPlayer.name}'s Final Jeopardy wager revealed. Press advance to continue`
+							: `${fjPlayer.name}'s result set. Press advance to continue.`;
+					this.setGameState({ fjStep, status: newStatus });
+				} else {
+					const maxScore = this.gameState.players.reduce((p, c) => {
+						if (c.score > p) return c.score;
+						return p;
+					}, 0);
+					const winners = this.gameState.players
+						.filter((p) => p.score === maxScore)
+						.map((p) => p.name)
+						.join(', ');
+					const newStatus = `Results finalized. ${winners} ${
+						winners.length === 1 ? 'wins' : 'win'
+					} with $${maxScore.toLocaleString('en')}`;
+					this.setGameState({ state: 'FJResults', status: newStatus });
+				}
 
 				if (this.gameState.fjStep % 4 === 3) {
 					const ind =
@@ -708,11 +779,11 @@ class Game {
 						.map((p) => p.getName());
 					let message;
 					if (winners.length === 1) {
-						message = `${winners[0]} wins with $${hs.toLocaleString('en-US')}!`;
+						message = `${winners[0]} wins with $${hs.toLocaleString('en')}!`;
 					} else if (winners.length === 2) {
 						message = `${winners[0]} and ${
 							winners[1]
-						} tie with $${hs.toLocaleString('en-US')}!`;
+						} tie with $${hs.toLocaleString('en')}!`;
 					} else {
 						winners[winners.length - 1] = `and ${winners[length - 1]}`;
 						message = `${winners.join(', ')} tie with $${hs.toLocaleString(
@@ -756,6 +827,11 @@ class Game {
 		this.gameState = {
 			active: false, //whether the game is active
 			state: 'pregame',
+			status: `Pregame - ${
+				this.isRemote
+					? 'share join code or have players join locally'
+					: 'enter player names on main screen'
+			}, test the buzzers, then press "advance" when ready.`,
 			joinCode: this.joinCode,
 			isRemote: this.isRemote,
 			buzzerArmed: false, //whether a buzz will be accepted
@@ -812,7 +888,7 @@ class Game {
 		};
 
 		for (var i = 0; i < 3; i++) {
-			this.addPlayer(`player${i + 1}`, null, null, null);
+			this.addPlayer(``, null, null, null);
 		}
 		//start in FJ for testing
 		// this.gameState.active = true;
@@ -945,6 +1021,8 @@ class Game {
 		const fn = args.shift();
 		//the current game state
 		const gs = this.gameState.state;
+		console.log(fn);
+		console.log(gs);
 		//the function to run as a result
 		let st = this.stateMap[gs];
 		if (!st) throw new Error(`Invalid game state (${gs})`);
@@ -952,11 +1030,14 @@ class Game {
 		if (!f) f = this.stateMap.all[fn];
 		//invalid input for this state - don't do anything
 		if (!f) return;
+		console.log('running');
 		f(...args);
 	}
 
 	setGameState(state) {
 		let newData = {};
+		this.gameState.modal = '';
+		this.gameState.modalDescription = '';
 		if (state.state && state.gameState !== this.gameState.state) {
 			const newState = state.state;
 			if (this.stateMap[newState]?.data) newData = this.stateMap[newState].data;
@@ -984,13 +1065,11 @@ class Game {
 	}
 
 	lockPlayer(player, autoUnlock) {
-		console.log(`Locking out player ${player}, auto-unlock: ${autoUnlock}`);
 		if (player >= 0 && player < this.gameState.players.length) {
 			this.gameState.players[player].locked = true;
 			this.updateGameState(player);
 			if (autoUnlock)
 				setTimeout(() => {
-					console.log(`Unlocking player ${player}`);
 					this.gameState.players[player].locked = false;
 				}, lockTimeout);
 		}
@@ -1033,13 +1112,16 @@ class Game {
 	}
 
 	setDDWager(wager) {
-		if (this.state.state !== 'waitingDD') return;
-		else if (this.state.control === -1) return;
-		const player = this.state.players[this.state.control];
+		if (this.gameState.state !== 'waitingDD') return;
+		else if (this.gameState.control === -1) return;
+		const player = this.gameState.players[this.gameState.control];
 		if (wager < 5) throw new Error('Minimum wager is $5');
-		const maxWager = Math.max((this.state.round + 1) * 1000, player.getScore());
+		const maxWager = Math.max(
+			(this.gameState.round + 1) * 1000,
+			player.getScore()
+		);
 		if (wager > maxWager) throw new Error(`Maximum wager is $${maxWager}`);
-		this.state.wager = wager;
+		this.gameState.wager = wager;
 	}
 }
 

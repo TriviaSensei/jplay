@@ -9,4 +9,5 @@ const gameContainer = document.querySelector('#game-container');
 document.addEventListener('DOMContentLoaded', () => {
 	if (!window.opener) return (location.href = '/');
 	document.addEventListener('update-game-state', receiveGameState);
+	sh = new StateHandler(null);
 });
