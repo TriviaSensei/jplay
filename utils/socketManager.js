@@ -46,7 +46,9 @@ const sanitizeData = (game) => {
 
 const getGameForUser = (id) => {
 	return activeGames.find(
-		(g) => g.host.uid === id || g.gameState.players.some((p) => p.uid === id)
+		(g) =>
+			(g.host?.uid && g.host.uid === id) ||
+			g.gameState.players.some((p) => p.uid === id)
 	);
 };
 
@@ -71,14 +73,37 @@ const removeGame = (id) => {
 	});
 };
 
+const getGameById = (id) => {
+	return activeGames.find((g) => g.id === id);
+};
+
+const getGameByPlayer = (uid) => {
+	return activeGames.find(
+		(g) =>
+			g.gameState.host.uid === uid ||
+			g.gameState.players.some((p) => p.uid === uid)
+	);
+};
+
+const getGameForSocketId = (id) => {
+	return activeGames.find(
+		(g) =>
+			g.gameState.host.socketId === id ||
+			g.gameState.players.some((p) => p.socketId === id)
+	);
+};
+
 const socket = async (http, server) => {
 	io = require('socket.io')(http, {
 		pingInterval,
 		pingTimeout,
 	});
-	io.listen(server);
 
 	io.on('connection', async (socket) => {
+		const sendError = (message) => {
+			io.to(socket.id).emit('error', { message });
+		};
+
 		//get the user, see if they're reconnecting or something
 		console.log(
 			`A user has connected from ${socket.handshake.address} with socket ID ${socket.id}`
@@ -115,13 +140,19 @@ const socket = async (http, server) => {
 			);
 		};
 
+		//Things the host can emit
 		socket.on('create-game', (data, cb) => {
+			console.log('Creating remote game...');
 			const g = new Game(
 				data.rounds,
-				{ uid: data.uid, socketId: socket.id },
-				socket,
+				{ uid: data.uid, socketId: socket.id, keys: data.hostKeys },
+				io,
+				null,
 				null
 			);
+			console.log(`Game ${g.gameState.id} created`);
+			activeGames.push(g);
+			socket.join(g.id);
 			cb({ status: 'OK', gameState: g.getGameState() });
 		});
 
@@ -129,13 +160,103 @@ const socket = async (http, server) => {
 			cb({ status: 'OK' });
 		});
 
-		socket.on('join-game', (data, cb) => {
-			const gameToJoin = availableGames.find((g) => {
-				return g.gameManager.getMatchId() === data.matchId;
+		socket.on('edit-player', (data, cb) => {
+			const game = getGameByPlayer(data.uid);
+			//if it's not the host doing the editing, return an error
+			if (game.gameState.host.uid !== data.uid)
+				return cb({
+					status: 'fail',
+					message: 'Only the host may edit players.',
+				});
+
+			const player = game.gameState.players[data.player];
+			if (data.name) player.setName(data.name);
+			if (data.nameData) player.setNameData(data.nameData);
+			if (data.key) player.setKey(data.key);
+
+			game.updateGameState();
+			cb({ status: 'OK', gameState: game.getGameState() });
+		});
+
+		socket.on('edit-game-data', (data, cb) => {
+			const game = getGameByPlayer(data.uid);
+			//if it's not the host doing the editing, return an error
+			if (game.gameState.host.uid !== data.uid)
+				return cb({
+					status: 'fail',
+					message: 'Only the host may edit game data.',
+				});
+
+			game.gameState = {
+				...game.gameState,
+				...data.gameData,
+			};
+
+			socket.to(game.id).emit('update-game-state', game.getGameState());
+			cb({
+				status: 'OK',
+				gameState: game.getGameState(),
 			});
-			if (!gameToJoin) return cb({ status: 'fail', message: 'Game not found' });
+		});
+
+		//game input
+		socket.on('game-input', (data, cb) => {
+			if (!Array.isArray(data) || data.length === 0)
+				return cb({ status: 'fail', message: 'Invalid input' });
+			const inp = data[0];
+			let game;
+			if (['host', 'correct', 'incorrect'].includes(inp)) {
+				game = activeGames.find((g) => g.gameState.host.socketId === socket.id);
+				if (game) {
+					game.handleInput(data);
+					return cb({ status: 'OK' });
+				} else
+					return cb({
+						status: 'fail',
+						message: 'Only the host may issue this command',
+					});
+			}
+			game = getGameForSocketId(socket.id);
+			if (!game)
+				return cb({ status: 'fail', message: 'You are not in a game' });
+			const player = game.gameState.players.findIndex(
+				(p) => p.socketId === socket.id
+			);
+			game.handleInput('player', player);
 			cb({ status: 'OK' });
-			joinGame(gameToJoin);
+		});
+
+		//Things players can emit
+		socket.on('join-game', (data, cb) => {
+			const game = activeGames.find((g) => g.joinCode === data.joinCode);
+			if (!game) return cb({ status: 'fail', message: 'Game not found' });
+
+			try {
+				game.acceptNewPlayer({
+					...data,
+					socketId: socket.id,
+				});
+				socket.join(game.id);
+				cb({ status: 'OK', gameState: game.gameState });
+				socket
+					.to(game.id)
+					.emit('update-game-state', game.getGameData(['players']));
+			} catch (err) {
+				console.log(err);
+				sendError(err.message);
+			}
+		});
+
+		socket.on('buzz', (cb) => {
+			console.log(`Buzz (ID: ${socket.id})`);
+			const g = getGameForSocketId(socket.id);
+			if (!g) return cb({ status: 'fail', message: 'You are not in a game' });
+
+			const ind = g.gameState.players.findIndex(
+				(p) => p.socketId === socket.id
+			);
+			g.handleInput('player', ind);
+			cb({ status: 'OK' });
 		});
 
 		socket.on('disconnect', (reason) => {
@@ -156,6 +277,8 @@ const socket = async (http, server) => {
 			console.log(JSON.stringify(result));
 		});
 	});
+
+	io.listen(server);
 };
 
 module.exports = socket;

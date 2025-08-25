@@ -4,9 +4,9 @@ link(rel="stylesheet" href="/css/components/init_container/host_tab.css")
         .input-label Game type 
         .input-container 
             .d-flex.flex-row 
-                input#play-local(type="radio" name="play-type" value="local" checked)
+                input#play-local(type="radio" name="play-type" value="local")
                 label(for="play-local" data-bs-toggle="tooltip" data-bs-title="Requires keyboard, pen, and paper, and all players and host to be present. Best done with a dual screen. Not recommended with mobile") Local
-                input#play-remote(type="radio" name="play-type" value="remote")
+                input#play-remote(type="radio" name="play-type" value="remote" checked)
                 label(for="play-remote" data-bs-toggle="tooltip" data-bs-title="Requires internet connection. Players may join with join code on mobile devices or use a keyboard and/or buzzer on this device. Host may open the control panel on this device or another device") Remote
     .input-row-v
         .input-label Load game file

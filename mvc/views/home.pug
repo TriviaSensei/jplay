@@ -23,6 +23,10 @@ html
             link(rel="stylesheet" href="/css/components/game_container/game_container_host.css")
             include components/game_container_host
         .host-panel.d-none
+        .player-container.d-none 
+            link(rel="stylesheet" href="/css/components/game_container/game_container_host.css")
+            link(rel="stylesheet" href="/css/components/game_container/game_container_player.css")
+            include components/game_container_player
         audio#timeout-sound(preload="auto" data-name="timeout")
             source(src="/media/Jeopardy-time.mp3" type="audio/mpeg")
         audio#dd-sound(preload="auto" data-name="dd")
@@ -36,6 +40,5 @@ html
     script(src="/socket.io/socket.io.js")
     script(src="/js/utils/stateHandler.js")
     script(src="/js/utils/Game.js" defer)
-    script(src="/js/game.js" type="module" defer)
-    script(Src="/js/socket.js" type="module" defer)
+    script(src="/js/host.js" type="module" defer)
     script(src="/js/index.js" type="module" defer)

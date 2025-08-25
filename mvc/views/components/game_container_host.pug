@@ -1,33 +1,4 @@
-mixin lectern(n)
-    .lectern(data-index=`${n}`)
-        .ratio(style="--bs-aspect-ratio:3.7%;")
-            div.d-flex
-                .timer
-                    - var i = 0
-                    - while (i<9)
-                        .timer-light(data-time=`${Math.abs(i-4)}`)
-                        - i++
-        .ratio.ratio-1x1
-            .lectern-body    
-                .lectern-left
-                    .lectern-image
-                .lectern-center
-                    .score-display.d-flex
-                        .score.m-auto $0
-                    .light.light-top
-                    .ratio.ratio-4x3.name-display
-                        div
-                            .w-100.h-100.d-flex
-                                .m-auto.edit-player 
-                                    //- nice to have later - ability to draw name
-                                    button.btn.btn-primary.edit-player-button Edit Player
-                                .m-auto.name-container.d-none
-                                svg.lectern-name-canvas.d-none(version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 400 300")
-                                    rect(x="0" y="0" height="300" width="400" fill="var(--blue)")
-                                    g.player-name-path(stroke-width="8" stroke="#fff" fill="transparent" stroke-linecap="round")
-                    .light.light-bottom
-                .lectern-right
-                    .lectern-image
+include lectern
 
 .ratio.ratio-4x3
     .category-scroll-container.d-none 

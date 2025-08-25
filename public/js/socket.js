@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
 							localStorage.setItem('jp-client-id', data.id);
 							clientId = data.id;
 						}
-						console.log(data);
 					},
 					() => {
 						showMessage('error', 'Could not connect to server');
@@ -51,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	document.addEventListener('emit-event', (e) => {
+		console.log(e);
 		socket.emit(
 			e.detail.eventName,
 			e.detail.data,

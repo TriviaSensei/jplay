@@ -88,7 +88,8 @@ body.dark {
 
 .init-container,
 .game-container,
-.host-panel {
+.host-panel,
+.player-container {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
@@ -195,4 +196,7 @@ input[type='radio']:disabled + label {
 }
 .input-row-v {
 	flex-direction: column;
+}
+.f-1 {
+	flex: 1;
 }

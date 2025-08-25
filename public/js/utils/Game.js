@@ -29,14 +29,14 @@ const lockTimeout = 250;
 const clueTime = 3500;
 const ddTime = 7000;
 const FJTime = 31000;
-const cluesPerRound = 30;
+const cluesPerRound = 2;
 
 class Player {
 	constructor(name, nameData, uid, socketId, key, isRemote) {
 		this.name = name;
 		this.nameData = Array.isArray(nameData) ? nameData : [];
 		this.socketId = socketId;
-		this.uid = uid || uuidV4();
+		this.uid = uid || randomString(20, chars);
 		this.score = 0;
 		this.scoreHistory = [];
 		this.locked = false;
@@ -102,6 +102,10 @@ class Player {
 
 	setScore(score) {
 		this.score = score;
+	}
+
+	setUID(uid) {
+		this.uid = uid;
 	}
 
 	modifyScore(diff) {
@@ -296,11 +300,13 @@ class Game {
 		try {
 			//if the player is locked, don't do anything
 			if (this.gameState.players[p].isLocked()) return;
+			console.log(`buzz ${p}`);
+
 			//stop the clue timeout, set the game state
 			this.stopClueTimer();
 			const now = Date.now();
 			this.setGameState({
-				state: 'buzz',
+				state: this.gameState.active ? 'buzz' : 'pregame',
 				buzzedIn: p,
 				buzzTime: now,
 				currentTime: now,
@@ -344,7 +350,6 @@ class Game {
 			data: {
 				active: false,
 				buzzerArmed: true,
-				buzzedIn: -1,
 				buzzTime: null,
 				timeout: false,
 				control: -1,
@@ -370,7 +375,10 @@ class Game {
 				} else throw new Error('You must have at least one player.');
 			},
 			player: (p) => {
-				if (this.gameState.buzzedIn === -1) this.setGameState({ buzzedIn: p });
+				this.handleBuzz(p);
+				// this.setGameState({
+				// 	buzzedIn: p,
+				// });
 			},
 			host: () => {
 				this.setGameState({
@@ -441,6 +449,7 @@ class Game {
 				else
 					this.setGameState({
 						state: 'showClue',
+						status: `Reading clue. Press advance to arm buzzers`,
 						selectedClue: [cat, row],
 					});
 			},
@@ -449,7 +458,7 @@ class Game {
 		showClue: {
 			//this only comes from the select state, and nothing changes between those states except for selected clue, which
 			//is variable
-			data: { status: `Reading clue. Press advance to arm buzzers` },
+			data: {},
 			//the host activates the buzzers
 			host: () => {
 				//if the clue hasn't timed out, set it live on host input
@@ -803,12 +812,31 @@ class Game {
 		},
 	};
 
-	constructor(board, host, socket, stateHandler) {
+	constructor(board, host, io, socket, stateHandler) {
 		this.id = randomString(20, chars);
-		this.joinCode = randomString(4, letters);
+		// this.joinCode = randomString(4, letters);
+		this.joinCode = 'a';
+		this.io = io;
 		this.socket = socket;
+		if (this.socket) {
+			this.socket.on('update-game-state', (data) => {
+				console.log(data);
+				if (data.reset) {
+					delete data.reset;
+					if (this.stateHandler) this.stateHandler.setState(data);
+				} else if (this.stateHandler) {
+					const state = this.stateHandler.getState();
+					const newState = {
+						...state,
+						...data,
+					};
+					this.stateHandler.setState(newState);
+				}
+				this.setGameState(data);
+			});
+		}
 		this.stateHandler = stateHandler;
-		this.isRemote = socket ? true : false;
+		this.isRemote = io ? true : false;
 		this.clueTimeout = null;
 		//randomly place the DDs by distribution
 		const dd1c = Math.floor(Math.random() * board[0].length);
@@ -823,7 +851,6 @@ class Game {
 		}
 
 		const dd2r = dd2c.map((el) => generateRandom(ddDistribution[1]));
-
 		this.gameState = {
 			active: false, //whether the game is active
 			state: 'pregame',
@@ -831,7 +858,9 @@ class Game {
 				this.isRemote
 					? 'share join code or have players join locally'
 					: 'enter player names on main screen'
-			}, test the buzzers, then press "advance" when ready.`,
+			}, test the buzzers, then press "advance" when ready.${
+				this.isRemote ? `<br>Join code: ${this.joinCode.toUpperCase()}` : ''
+			}`,
 			joinCode: this.joinCode,
 			isRemote: this.isRemote,
 			buzzerArmed: false, //whether a buzz will be accepted
@@ -842,6 +871,7 @@ class Game {
 			control: -1, //which player has control of the board, -1 if no one
 			wager: -1, //the DD wager for the active clue, -1 if N/A
 			host, //host info (socket ID, UID)
+			id: this.id,
 			players: [], //player info (name, socketID, UID, key, score)
 			board: board.map((r, i) => {
 				if (i === 2) return r;
@@ -888,7 +918,7 @@ class Game {
 		};
 
 		for (var i = 0; i < 3; i++) {
-			this.addPlayer(``, null, null, null);
+			this.addBlankPlayer();
 		}
 		//start in FJ for testing
 		// this.gameState.active = true;
@@ -938,18 +968,29 @@ class Game {
 		};
 	}
 
+	getGameData(items) {
+		const toReturn = {};
+		items.forEach((item) => (toReturn[item] = this.gameState[item]));
+		return toReturn;
+	}
+
+	//update the state handler.
+	//if it's the host for a remote game (io is not null), send the new state
 	updateGameState(player) {
 		if (this.stateHandler) this.stateHandler.setState(this.gameState);
-		if (this.socket) {
+		if (this.io?.to) {
 			if (
 				(typeof player).toLowerCase() === 'number' &&
 				player >= 0 &&
 				player < this.gameState.players.length
 			) {
 				const p = this.gameState.players[player];
-				this.socket.to(p.socketId).emit('update-game-state', this.gameState);
-			} else
-				this.socket.to(this.getId()).emit('update-game-state', this.gameState);
+				if (!p.socketId)
+					this.io
+						.to(this.gameState.host.socketId)
+						.emit('update-game-state', this.gameState);
+				else this.io.to(p.socketId).emit('update-game-state', this.gameState);
+			} else this.io.to(this.getId()).emit('update-game-state', this.gameState);
 		}
 		this.gameState.playSound = false;
 	}
@@ -958,19 +999,36 @@ class Game {
 		return this.isRemote;
 	}
 
-	addPlayer(name, nameData, id, socketId) {
+	addPlayer(name, nameData, id) {
 		if (this.gameState.players.length >= 3) return;
 		const keys = ['ArrowLeft', 'ArrowUp', 'ArrowRight'];
 		const toAdd = new Player(
 			name,
 			nameData,
 			id || randomString(20, chars),
-			this.isRemote ? socketId : null,
+			null,
 			keys[this.gameState.players.length],
-			this.isRemote
+			false
 		);
 		this.gameState.players.push(toAdd);
 		this.updateGameState();
+	}
+
+	addBlankPlayer() {
+		this.addPlayer('', null, null);
+	}
+
+	acceptNewPlayer(data) {
+		const ind = this.gameState.players.findIndex((p) => p.name === '');
+		if (ind === -1) throw new Error('Game is full');
+		else {
+			const player = this.gameState.players[ind];
+			player.setName(data.name);
+			player.setNameData(data.nameData);
+			player.setSocketId(data.socketId);
+			player.setUID(data.uid);
+			player.setRemote(true);
+		}
 	}
 
 	resetPlayer(index) {
@@ -1021,8 +1079,6 @@ class Game {
 		const fn = args.shift();
 		//the current game state
 		const gs = this.gameState.state;
-		console.log(fn);
-		console.log(gs);
 		//the function to run as a result
 		let st = this.stateMap[gs];
 		if (!st) throw new Error(`Invalid game state (${gs})`);
@@ -1030,14 +1086,16 @@ class Game {
 		if (!f) f = this.stateMap.all[fn];
 		//invalid input for this state - don't do anything
 		if (!f) return;
-		console.log('running');
 		f(...args);
 	}
 
 	setGameState(state) {
+		console.log('setting game state');
+		console.log(state);
 		let newData = {};
 		this.gameState.modal = '';
 		this.gameState.modalDescription = '';
+		//if we are entering a new general game state, populate the basic data
 		if (state.state && state.gameState !== this.gameState.state) {
 			const newState = state.state;
 			if (this.stateMap[newState]?.data) newData = this.stateMap[newState].data;
@@ -1047,6 +1105,7 @@ class Game {
 			...state,
 			...newData,
 		};
+		console.log(this.gameState);
 		this.updateGameState();
 		if (this.gameState.message) this.gameState.message = '';
 		if (this.gameState.playSound) this.gameState.playSound = false;
@@ -1056,6 +1115,12 @@ class Game {
 		if (player >= this.gameState.players.length) return this.gameState;
 		else this.gameState.players[player].setScore(score);
 		this.updateGameState();
+	}
+
+	setPlayerKey(player, key) {
+		if (player >= this.gameState.players.length) return this.gameState;
+		else this.gameState.players[player].setKey(key);
+		this.updateGameState(player);
 	}
 
 	modifyPlayerScore(player, diff) {

@@ -104,6 +104,10 @@ class StateHandler {
 		}
 	}
 
+	clearWatchers() {
+		this.objects = [];
+	}
+
 	setState(s, ...opts) {
 		const oldState = {
 			...this.state,

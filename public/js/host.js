@@ -4,53 +4,37 @@ import { handleRequest } from './utils/requestHandler.js';
 import { withTimeout } from './utils/socketTimeout.js';
 const createButton = document.querySelector('#create-game');
 const fileUpload = document.querySelector('#game-file');
-
+let socket;
+const hostKeys = ['arrowdown', 'space', 'spacebar'];
 const isKey = location.href.indexOf('control') >= 0;
-
-const emit = (eventName, data, timeout) => {
-	const evt = new CustomEvent('emit-event', {
-		detail: {
-			eventName,
-			data,
-			timeout,
-		},
-	});
-	document.dispatchEvent(evt);
-};
+let uid;
 
 const sh = new StateHandler(null);
 const csh = new StateHandler({
 	paths: [],
 	mouseDown: false,
 });
-const psh = new StateHandler({
-	name: '',
-	key: '',
-	nameData: '',
-});
+
 const granularity = 2;
 
-let uid;
 let game;
 const startGame = (type, data) => {
 	if (type === 'local') {
 		uid = localStorage.getItem('jp-client-id');
-		game = new Game(
-			data,
-			{ uid, keys: ['arrowdown', 'space', 'spacebar'] },
-			null,
-			sh
-		);
+		game = new Game(data, { uid, keys: hostKeys }, null, null, sh);
 	} else if (type === 'remote') {
-		emit(
+		uid = localStorage.getItem('jp-client-id');
+		socket.emit(
 			'create-game',
 			{
 				rounds: data,
-				uid: localStorage.getItem('jp-client-id'),
+				uid,
+				hostKeys,
 			},
 			withTimeout(
 				(data) => {
 					if (data.status !== 'OK') return showMessage('error', data.message);
+					console.log(data.gameState);
 					sh.setState(data.gameState);
 				},
 				() => {
@@ -125,7 +109,7 @@ if (isKey) {
 	editPlayerScore = document.querySelector('#edit-player-score');
 }
 
-const nameCanvas = document.querySelector('.name-canvas');
+const nameCanvas = document.querySelector('#draw-player-name .name-canvas');
 const namePath = document.querySelector('#name-path');
 const undoStroke = document.querySelector('#undo-stroke');
 const clearStroke = document.querySelector('#clear-stroke');
@@ -187,27 +171,55 @@ if (isKey) {
 
 const thinkMusic = document.querySelector('#think-sound');
 
+const socketCB = () =>
+	withTimeout(
+		(data) => {
+			if (data.status !== 'OK') return showMessage('error', data.message);
+
+			const newState = data.gameState;
+			if (!newState) return;
+
+			if (data.reset) sh.setState(newState);
+			else
+				sh.setState((prev) => {
+					return {
+						...prev,
+						...newState,
+					};
+				});
+		},
+		() => {
+			console.trace();
+			showMessage('error', 'Input timed out');
+		}
+	);
+
 const hidePanel = (tgt) => {
+	if (!tgt) return;
 	tgt.classList.add('d-none');
 };
-const showPanel = (tgt) => tgt.classList.remove('d-none');
+const showPanel = (tgt) => (tgt ? tgt.classList.remove('d-none') : null);
 
 const getPlayerIndex = () => {
 	return Number(pi.getAttribute('value'));
 };
 
 const sendGameInput = (...args) => {
+	//if this is the key window, pass the input forward to the main window
 	if (isKey) {
+		if (!window.opener) return;
 		const evt = new CustomEvent('receive-input', {
 			detail: {
 				args,
 			},
 		});
-		if (!window.opener) return;
 		return window.opener.document.dispatchEvent(evt);
-	} else if (!game) return;
+	}
 	try {
-		game.handleInput(...args);
+		//if this is a local game, handle the input here
+		if (game) game.handleInput(...args);
+		//otherwise, send the input to the server
+		else socket.emit('game-input', args || [], socketCB());
 	} catch (err) {
 		showMessage('error', err.message);
 	}
@@ -247,6 +259,9 @@ const handleKeyPress = async (e) => {
 	const setKey = setKeyButton.getAttribute('data-toggled') === 'true';
 	const state = sh.getState();
 	if (!state) return;
+	const isHost = state.host.uid === uid;
+	const isPlayer = state.players.some((p) => p.uid && p.uid === uid);
+	if (!isHost && !isPlayer) return;
 
 	//is it a modal key?
 	const openModal = document.querySelector('.modal.show');
@@ -269,8 +284,26 @@ const handleKeyPress = async (e) => {
 	if (e.key.toLowerCase() === 'k' && uid === state.host.uid && !isKey)
 		return openKey();
 
-	if (!state) return;
-	if (setKey && !state.active) {
+	//player input (remote game only)
+	if (
+		state.isRemote &&
+		state.players.some((p) => p.uid && p.uid === uid) &&
+		(e.key === ' ' || e.key === 'ArrowLeft')
+	) {
+		return socket.emit(
+			'buzz',
+			withTimeout(
+				(data) => {
+					if (data.status !== 'OK') showMessage('error', data.message);
+				},
+				() => {
+					showMessage('error', 'Buzz timed out');
+				}
+			)
+		);
+	}
+	//game is not active, local player setting their buzzer key
+	else if (setKey && !state.active) {
 		setKeyButton.blur();
 		const playerIndex = getPlayerIndex();
 		if (isNaN(playerIndex) || playerIndex < 0 || playerIndex > 2) return;
@@ -282,48 +315,63 @@ const handleKeyPress = async (e) => {
 			})
 		) {
 			showMessage('warning', `Duplicated buzzer key - no changes made`);
-		} else if (
+		}
+		//local players cannot have a key reserved for the host
+		else if (
 			!state.players[playerIndex]?.isRemote &&
-			state.host.keys.includes(e.key.toLowerCase())
+			[...state.host.keys, 'c', 'x'].includes(e.key.toLowerCase())
 		) {
 			showMessage('warning', `Key is reserved for host - no changes made`);
-		} else if (
-			!state.players[playerIndex]?.isRemote &&
-			['C', 'X'].includes(e.key.toUpperCase())
-		) {
-			showMessage('warning', `Key is reserved for host - no changes made`);
-		} else {
+		}
+		//set the key if we passed muster
+		//edited to account for remote/local
+		else {
 			if (playerIndex < state.players.length) {
-				state.players[playerIndex].key = e.key;
-				buzzerKey.setAttribute('data-key', e.key);
-				sh.setState(state);
+				if (state.isRemote) {
+					console.log(2);
+					socket.emit(
+						'edit-player',
+						{
+							uid,
+							player: playerIndex,
+							key: e.key,
+						},
+						socketCB()
+					);
+				} else {
+					game.gameState.players[playerIndex].setKey(e.key);
+					buzzerKey.setAttribute('data-key', e.key);
+					sh.setState(state);
+				}
 			}
 		}
 		setKeyButton.setAttribute('data-toggled', 'false');
 		setKeyButton.innerHTML = 'Set key';
 		return;
-	} else if (
-		!state.active &&
-		state.host.keys.includes(e.key.toLowerCase()) &&
-		state.buzzedIn === -1
+	}
+	//game is not active, host key pressed to start game
+	else if (
+		!state?.active &&
+		state?.host?.keys?.includes(e.key.toLowerCase()) &&
+		state?.buzzedIn === -1
 	) {
 		if (state.players.some((p) => p.name || p.nameData.length > 0))
 			startGameModal.show();
 		else
 			return showMessage('error', 'You must have at least one active player');
+	}
+	//host key pressed
+	else if ([...state.host.keys, 'c', 'x', 'k'].includes(e.key.toLowerCase())) {
+		if (uid !== state.host.uid) return;
+		if (state.host.keys.includes(e.key.toLowerCase())) sendGameInput('host');
+		else if (e.key.toLowerCase() === 'c') sendGameInput('correct');
+		else if (e.key.toLowerCase() === 'x') sendGameInput('incorrect');
 	} else {
-		if ([...state.host.keys, 'c', 'x', 'k'].includes(e.key.toLowerCase())) {
-			if (uid !== state.host.uid) return;
-			if (state.host.keys.includes(e.key.toLowerCase())) sendGameInput('host');
-			else if (e.key.toLowerCase() === 'c') sendGameInput('correct');
-			else if (e.key.toLowerCase() === 'x') sendGameInput('incorrect');
-		} else {
-			const ind = state.players.findIndex(
-				(p) => e.key === p.key && p.name !== ''
-			);
-			if (ind < 0) return;
-			sendGameInput('player', ind);
-		}
+		const ind = state.players.findIndex(
+			(p) => e.key === p.key && p.name !== ''
+		);
+		if (ind < 0) return;
+		sendGameInput('player', ind);
 	}
 };
 const sendKey = (e) => {
@@ -354,10 +402,13 @@ if (!isKey) {
 	document.addEventListener('receive-key', (e) => {
 		handleKeyPress({ key: e.detail.key });
 	});
+	//main window - handling input sent from key window
 	document.addEventListener('receive-input', (e) => {
 		const { args } = e.detail;
+		console.log(3);
 		try {
 			if (game) game.handleInput(...args);
+			else if (socket) socket.emit('game-input', ...(args || []), socketCB());
 		} catch (err) {
 			const evt = new CustomEvent('receive-message', {
 				detail: { type: 'error', message: err.message },
@@ -365,11 +416,14 @@ if (!isKey) {
 			if (keyWindow) keyWindow.document.dispatchEvent(evt);
 		}
 	});
+	//main window - handling game input sent from key window
 	if (!isKey) {
 		document.addEventListener('key-input', (e) => {
 			const state = sh.getState();
+			//special case - pregame host input pops up the "start game" prompt.
+			//almost everything else actually sends an input
 			if (state.state === 'pregame' && e.detail.input === 'host') {
-				handleKeyPress({ key: 'ArrowDown' });
+				return handleKeyPress({ key: 'ArrowDown' });
 			}
 			sendGameInput(e.detail.input);
 		});
@@ -385,7 +439,60 @@ else {
 
 document.addEventListener('DOMContentLoaded', () => {
 	if (isKey && !window.opener) location.href = '/';
+
 	if (!isKey) {
+		socket = io();
+		socket.once('ack-connection', () => {
+			//see if a client id is stored in local storage
+			const myId = localStorage.getItem('jp-client-id');
+			//if not, get one and store it
+			if (!myId) {
+				socket.emit(
+					'request-id',
+					null,
+					withTimeout(
+						(data) => {
+							if (data.status !== 'OK') showMessage('error', data.message);
+							if (data.id) uid = data.id;
+						},
+						() => {
+							showMessage('error', 'Could not connect to server');
+						}
+					)
+				);
+			}
+			//if so, send it to get our state back
+			else {
+				socket.emit(
+					'verify-id',
+					{ id: myId },
+					withTimeout(
+						(data) => {
+							if (data.status !== 'OK') showMessage('error', data.message);
+							if (data.id) uid = data.id;
+						},
+						() => {
+							showMessage('error', 'Could not connect to server');
+						}
+					)
+				);
+			}
+		});
+
+		socket.on('update-game-state', (data) => {
+			console.log(data);
+			if (data.reset) {
+				delete data.reset;
+				sh.setState(data);
+			} else {
+				const state = sh.getState();
+				const newState = {
+					...state,
+					...data,
+				};
+				sh.setState(newState);
+			}
+		});
 		window.addEventListener('beforeunload', () => {
 			if (keyWindow) keyWindow.close();
 		});
@@ -401,7 +508,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const sounds = getElementArray(document, 'audio');
 	sounds.forEach((s) => {
-		const name = s.getAttribute('data-name');
 		s.load();
 		s.addEventListener('ended', () => {
 			s.pause();
@@ -471,6 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	sh.addWatcher(gameContainer, (e) => {
+		if (!uid) uid = localStorage.getItem('jp-client-id');
 		if (isKey) showPanel(e.target);
 		else if (!e.detail || e.detail.host.uid !== uid) hidePanel(e.target);
 		else showPanel(e.target);
@@ -490,13 +597,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		const playerIndex = Number(lec.getAttribute('data-index'));
 		if (isNaN(playerIndex) || playerIndex < 0 || playerIndex > 2) return;
 		pi.setAttribute('value', lec.getAttribute('data-index'));
-		playerName.value = state.players[playerIndex]?.getName() || '';
+		playerName.value = state.players[playerIndex]?.name || '';
 		let key = state.players[playerIndex]?.key || '[None]';
 		if (key.length === 1 && key.charCodeAt(0) === 32) key = 'Space';
 		buzzerKey.setAttribute('data-key', key);
 		buzzerKey.innerHTML = key;
 
-		const nameData = state.players[playerIndex]?.getNameData();
+		const nameData = state.players[playerIndex]?.nameData;
 
 		namePath.innerHTML = '';
 		if (nameData && Array.isArray(nameData)) {
@@ -544,7 +651,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			const ep = e.target.closest('.edit-player');
 			const player = e.detail.players[i];
-			if (ep && (player?.getName() || player?.getNameData().length > 0))
+			if (ep && (player?.name || player?.nameData.length > 0))
 				ep?.classList.add('d-none');
 			else ep?.classList.remove('d-none');
 		});
@@ -565,9 +672,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	});
 
-	const checkDiff = (i) => {
-		return (state) => state.players[i].getNameData();
-	};
 	svgDisplays.forEach((s, i) => {
 		if (!isKey) s.addEventListener('click', loadPlayerData);
 		else s.addEventListener('click', loadPlayerDataKey);
@@ -577,7 +681,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			path.innerHTML = '';
 			const player = e.detail.players[i];
 			if (!player) return;
-			const nameData = player.getNameData();
+			const nameData = player.nameData;
 			if (!nameData || nameData.length === 0) {
 				e.target.classList.add('d-none');
 				return;
@@ -615,32 +719,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				const lec = document.querySelector(`.lectern[data-index="${index}"]`);
 				if (!lec) return pi.removeAttribute('value');
-
 				const key = buzzerKey.getAttribute('data-key');
 
-				if (
-					index < game.gameState.players.length &&
-					game.gameState.players[index]
-				) {
-					if (!playerName.value)
-						return showMessage('error', 'You must specify a name');
-					game.gameState.players[index].setName(playerName.value);
-					game.gameState.players[index].setKey(key);
-					if (Array.isArray(nameData.paths)) {
-						game.gameState.players[index].setNameData(
-							nameData.paths.map((p) => p.getAttribute('d'))
-						);
+				if (!state.isRemote) {
+					if (
+						index < game.gameState.players.length &&
+						game.gameState.players[index]
+					) {
+						if (!playerName.value)
+							return showMessage('error', 'You must specify a name');
+						game.gameState.players[index].setName(playerName.value);
+						game.gameState.players[index].setKey(key);
+						if (Array.isArray(nameData.paths)) {
+							game.gameState.players[index].setNameData(
+								nameData.paths.map((p) => p.getAttribute('d'))
+							);
+						}
 					}
-				}
 
-				csh.setState({
-					paths: [],
-					mouseDown: false,
-				});
-				namePath.innerHTML = '';
-				game.updateGameState();
-				pi.removeAttribute('value');
-				playerSettingsModal.hide();
+					csh.setState({
+						paths: [],
+						mouseDown: false,
+					});
+					namePath.innerHTML = '';
+					game.updateGameState();
+					pi.removeAttribute('value');
+					playerSettingsModal.hide();
+				} else {
+					socket.emit(
+						'edit-player',
+						{
+							player: index,
+							gameId: state.id,
+							uid,
+							name: playerName.value,
+							key,
+							nameData: Array.isArray(nameData.paths)
+								? nameData.paths.map((p) => p.getAttribute('d'))
+								: [],
+						},
+						withTimeout(
+							(data) => {
+								if (data.status === 'OK') playerSettingsModal.hide();
+								else showMessage('error', data.message);
+							},
+							() => {
+								showMessage('error', 'Request timed out');
+							}
+						)
+					);
+				}
 			});
 		else
 			confirmEditPlayer.addEventListener('click', () => {
@@ -736,9 +864,9 @@ document.addEventListener('DOMContentLoaded', () => {
 				const minMaxWager = (round + 1) * 1000;
 				const player = state.players[state.control];
 				if (!player) return;
-				maxWager.innerHTML = Math.max(minMaxWager, player.getScore());
+				maxWager.innerHTML = Math.max(minMaxWager, player.score);
 
-				ddPlayerName.innerHTML = player.getName();
+				ddPlayerName.innerHTML = player.name;
 
 				if (state.playSound && ddWagerModal) {
 					setTimeout(() => {
@@ -815,9 +943,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (isKey) {
 				const populateLabels = (lbl) => {
 					const ind = Number(lbl.getAttribute('data-index'));
-					if (isNaN(ind) || !state.players[ind].getName()) {
+					if (isNaN(ind) || !state.players[ind].name) {
 						lbl.classList.add('d-none');
-					} else lbl.innerHTML = state.players[ind].getName();
+					} else lbl.innerHTML = state.players[ind].name;
 				};
 				fjWagerLabels.forEach(populateLabels);
 				fjResponseLabels.forEach(populateLabels);
@@ -825,11 +953,11 @@ document.addEventListener('DOMContentLoaded', () => {
 					const ind = Number(mw.getAttribute('data-index'));
 					if (
 						isNaN(ind) ||
-						!state.players[ind].getName() ||
-						state.players[ind].getScore() <= 0
+						!state.players[ind].name ||
+						state.players[ind].score <= 0
 					)
 						return;
-					const maxWager = state.players[ind].getScore();
+					const maxWager = state.players[ind].score;
 					mw.innerHTML = maxWager;
 					mw.closest('.fj-wager-container')
 						.querySelector('input.fj-wager')
@@ -1001,7 +1129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	scoreDisplays.forEach((sd, i) => {
 		sh.addWatcher(sd, (e) => {
 			if (!e.detail) return;
-			const score = e.detail.players[i]?.getScore() || 0;
+			const score = e.detail.players[i]?.score || 0;
 			if (score >= 0) e.target.classList.remove('neg');
 			else e.target.classList.add('neg');
 
@@ -1018,7 +1146,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	sh.addWatcher(null, (state) => {
 		if (state?.message?.trim()) showMessage('info', state.message);
-		if (state?.isRemote) emit('update-game-state', state, 1500);
+		if (state?.isRemote && socket)
+			socket.emit('update-game-state', state, 1500);
 		if (state) document.body.classList.add('dark');
 		else document.body.classList.remove('dark');
 	});
@@ -1034,7 +1163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		sh.addWatcher(
 			null,
 			(state) => {
-				if (state && !keyWindow) openKey();
+				// if (state && !keyWindow) openKey();
 			},
 			{ once: true }
 		);
@@ -1064,7 +1193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				return showMessage('error', 'Invalid wager - minimum wager is $5');
 			const player = state.players[state.control];
 			if (!player) return showMessage('error', 'Invalid state');
-			const maxWager = Math.max(player.getScore(), (state.round + 1) * 1000);
+			const maxWager = Math.max(player.score, (state.round + 1) * 1000);
 			if (wager > maxWager)
 				return showMessage(
 					'error',
@@ -1102,16 +1231,33 @@ document.addEventListener('DOMContentLoaded', () => {
 	};
 	if (wagerZero) wagerZero.addEventListener('click', wagerSetter(false));
 	if (wagerMax) wagerMax.addEventListener('click', wagerSetter(true));
+
+	//change default prefix for final jeopardy answers
+	//edited to handle both socket and local
 	const handlePrefixChange = (e) => {
 		if (!e.target.checked) return;
 		let val = e.target.value;
 		if (val === '[None]') val = '';
-		sh.setState((prev) => {
-			return {
-				...prev,
-				fjPrefix: val,
-			};
-		});
+		const state = sh.getState();
+		console.log(4);
+		if (state.isRemote) {
+			socket.emit(
+				'edit-game-data',
+				{
+					uid,
+					gameData: {
+						fjPrefix: val,
+					},
+				},
+				socketCB()
+			);
+		} else
+			sh.setState((prev) => {
+				return {
+					...prev,
+					fjPrefix: val,
+				};
+			});
 	};
 	if (fjPrefixDiv) {
 		sh.addWatcher(fjPrefixDiv, (e) => {
@@ -1136,7 +1282,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		sh.addWatcher(null, (state) => {
 			const handleDisableRadios = (el) => {
 				const ind = Number(el.value);
-				const score = state.players[ind]?.getScore();
+				const score = state.players[ind]?.score;
 				if (!score || score <= 0) {
 					el.disabled = true;
 					el.checked = false;
@@ -1151,25 +1297,48 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	if (confirmFJResponses)
-		confirmFJResponses.addEventListener('click', () => {
-			fjResponses.forEach((res) => {
-				const ind = Number(res.getAttribute('data-index'));
-				const state = sh.getState();
-				state.players[ind].finalResponse = res.value;
+	if (confirmFJResponses) {
+		if (fjResponses)
+			fjResponses.forEach((fjr, i) => {
+				sh.addWatcher(fjr, (e) => {
+					if (e.detail.players[i].isRemote) e.target.disabled = true;
+					else e.target.disabled = false;
+				});
 			});
-			fjResponseModal.hide();
+		confirmFJResponses.addEventListener('click', () => {
 			const state = sh.getState();
+			if (!state.isRemote) {
+				fjResponses.forEach((res) => {
+					const ind = Number(res.getAttribute('data-index'));
+					state.players[ind].finalResponse = res.value;
+				});
+				sh.setState(state);
+				fjResponseModal.hide();
+			} else {
+				const toSend = fjResponses
+					.map((fjr, i) => {
+						return {
+							player: i,
+							response: fjr.value,
+						};
+					})
+					.filter((fjr, i) => {
+						return !state.players[i].isRemote;
+					});
+				console.log(5);
+				socket.emit('set-final-response', toSend, socketCB());
+			}
 		});
+	}
 
 	if (nameCanvas) {
 		const [vbw, vbh] = [400, 300];
-		const getCanvasDimensions = () => {
-			let rect = nameCanvas.getBoundingClientRect();
+		const getCanvasDimensions = (canvas) => {
+			let rect = canvas.getBoundingClientRect();
 			return [rect.width, rect.height];
 		};
-		const scaleCanvasDimensions = (x, y) => {
-			const [w, h] = getCanvasDimensions();
+		const scaleCanvasDimensions = (canvas, x, y) => {
+			const [w, h] = getCanvasDimensions(canvas);
 			x = Math.min(Math.max(0, x), w);
 			y = Math.min(Math.max(0, y), h);
 			return [(x * vbw) / w, (y * vbh) / h];
@@ -1179,21 +1348,25 @@ document.addEventListener('DOMContentLoaded', () => {
 		const startPath = (e) => {
 			if (isMobile && e.type !== 'touchstart') return;
 			else if (!isMobile && e.type !== 'mousedown') return;
+			const canvas = e.target.closest('svg');
 
 			moveCount = 0;
 			csh.setState((prev) => {
-				const rect = e.target.getBoundingClientRect();
+				const rect = canvas.getBoundingClientRect();
 				const { pageX, pageY } =
 					e.type === 'touchstart' ? e.targetTouches[0] : e;
 				const [offsetX, offsetY] = [pageX - rect.left, pageY - rect.top];
-				const [x, y] = scaleCanvasDimensions(offsetX, offsetY);
+				const [x, y] = scaleCanvasDimensions(canvas, offsetX, offsetY);
+
 				const newPath = document.createElementNS(
 					'http://www.w3.org/2000/svg',
 					'path'
 				);
-				newPath.setAttribute('d', `M ${x} ${y} l 0 0`);
-				namePath.appendChild(newPath);
+				newPath.setAttribute('d', `M ${x} ${y} l 0 0 `);
+				const path = canvas.querySelector('.name-path');
+				path.appendChild(newPath);
 				return {
+					canvas,
 					paths: [...prev.paths, newPath],
 					mouseDown: true,
 				};
@@ -1207,8 +1380,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			},
 			{ once: true }
 		);
-		nameCanvas.addEventListener('mousedown', startPath);
-		nameCanvas.addEventListener('touchstart', startPath);
+		getElementArray(document, '.name-canvas').forEach((nc) => {
+			nc.addEventListener('mousedown', startPath);
+			nc.addEventListener('touchstart', startPath, { passive: true });
+		});
 
 		const drawPath = (e) => {
 			if (isMobile && e.type !== 'touchmove') return;
@@ -1218,11 +1393,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (!state.mouseDown) return;
 			moveCount++;
 			if (moveCount % granularity === 1) {
-				const rect = nameCanvas.getBoundingClientRect();
+				const rect = state.canvas.getBoundingClientRect();
 				const { pageX, pageY } =
 					e.type === 'touchmove' ? e.targetTouches[0] : e;
 				const [offsetX, offsetY] = [pageX - rect.left, pageY - rect.top];
-				const [x, y] = scaleCanvasDimensions(offsetX, offsetY);
+				const [x, y] = scaleCanvasDimensions(state.canvas, offsetX, offsetY);
 
 				const currentPath = state.paths[state.paths.length - 1];
 				if (!currentPath) return;
@@ -1234,7 +1409,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		};
 
 		document.addEventListener('mousemove', drawPath);
-		document.addEventListener('touchmove', drawPath);
+		document.addEventListener('touchmove', drawPath, { passive: true });
 
 		const endPath = (e) => {
 			if (isMobile && e.type !== 'touchend') return;
@@ -1242,6 +1417,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			csh.setState((prev) => {
 				return {
 					...prev,
+					canvas: null,
 					mouseDown: false,
 				};
 			});
@@ -1250,27 +1426,38 @@ document.addEventListener('DOMContentLoaded', () => {
 		document.addEventListener('mouseup', endPath);
 		document.addEventListener('touchend', endPath);
 
-		if (undoStroke)
-			undoStroke.addEventListener('click', () => {
-				const state = csh.getState();
-				if (!state) return;
+		const undoStroke = (e) => {
+			const path = e.target
+				.closest('.draw-player-name')
+				?.querySelector('.name-path');
+			if (!path) return;
+			const state = csh.getState();
+			if (!state) return;
 
-				const paths = getElementArray(namePath, 'path');
-				if (paths.length > 0) paths[paths.length - 1].remove();
-				state.paths.pop();
-				csh.setState(state);
-			});
+			const paths = getElementArray(path, 'path');
+			if (paths.length > 0) paths[paths.length - 1].remove();
+			state.paths.pop();
+			csh.setState(state);
+		};
+		const clearStroke = (e) => {
+			const state = csh.getState();
+			if (!state) return;
+			const path = e.target
+				.closest('.draw-player-name')
+				?.querySelector('.name-path');
+			if (!path) return;
+			const paths = getElementArray(path, 'path');
+			paths.forEach((p) => p.remove());
+			state.paths = [];
+			csh.setState(state);
+		};
 
-		if (clearStroke)
-			clearStroke.addEventListener('click', () => {
-				const state = csh.getState();
-				if (!state) return;
-
-				const paths = getElementArray(namePath, 'path');
-				paths.forEach((p) => p.remove());
-				state.paths = [];
-				csh.setState(state);
-			});
+		getElementArray(document, 'button.undo-stroke').forEach((b) =>
+			b.addEventListener('click', undoStroke)
+		);
+		getElementArray(document, 'button.clear-stroke').forEach((b) =>
+			b.addEventListener('click', clearStroke)
+		);
 	}
 
 	if (isKey) {
@@ -1297,4 +1484,99 @@ document.addEventListener('DOMContentLoaded', () => {
 			b.addEventListener('click', sendInputFromKey)
 		);
 	}
+
+	// sh.addWatcher(null, (state) => {
+	// 	console.log(state);
+	// 	console.trace();
+	// });
+
+	//
+	const joinGameButton = document.querySelector('#join-game');
+	const spectateGameButton = document.querySelector('#spectate-game');
+	const playerName = document.querySelector('#player-name');
+	const joinCode = document.querySelector('#room-code');
+	const playerContainer = document.querySelector('.player-container');
+
+	joinGameButton.addEventListener('click', () => {
+		const st = csh.getState();
+		const nameData = st.paths.map((p) => p.getAttribute('d'));
+		const name = playerName.value;
+
+		if (!name) return showMessage('error', 'You must enter your name');
+		if (!joinCode.value)
+			return showMessage('error', 'You must enter a join code');
+
+		socket.emit(
+			'join-game',
+			{
+				name,
+				nameData,
+				uid,
+				joinCode: joinCode.value,
+			},
+			withTimeout(
+				(data) => {
+					if (data.status !== 'OK') showMessage('error', data.message);
+					else if (data.message) showMessage('info', data.message);
+					sh.setState(data.gameState);
+				},
+				() => {
+					showMessage('error', 'Joining game timed out.');
+				}
+			)
+		);
+	});
+
+	sh.addWatcher(playerContainer, (e) => {
+		const nameContainer = e.target.querySelector('.name-container');
+		const nameCanvas = e.target.querySelector('svg');
+		const path = nameCanvas.querySelector('.player-name-path');
+		const playerLectern = e.target.querySelector('.lectern');
+
+		const state = e.detail;
+		const player = state.players.find((p) => p.uid === uid);
+		if (player) {
+			showPanel(e.target);
+			const editPlayer = e.target.querySelector('.edit-player');
+			hidePanel(editPlayer);
+
+			const buzzer = document.querySelector('#buzzer');
+			if (buzzer.getAttribute('data-bs-toggle') === 'popover') {
+				const tt = new bootstrap.Popover(buzzer);
+				tt.show();
+				setTimeout(() => {
+					tt.dispose();
+					buzzer.removeAttribute('data-bs-title');
+					buzzer.removeAttribute('data-bs-toggle');
+					buzzer.removeAttribute('data-bs-content');
+				}, 3000);
+			}
+
+			if (player.nameData.length > 0) {
+				hidePanel(nameContainer);
+				showPanel(nameCanvas);
+				player.nameData.forEach((nd) => {
+					const np = document.createElementNS(
+						'http://www.w3.org/2000/svg',
+						'path'
+					);
+					np.setAttribute('d', nd);
+					path.appendChild(np);
+				});
+			} else {
+				showPanel(nameContainer);
+				hidePanel(nameCanvas);
+				nameContainer.innerHTML = player.name;
+			}
+
+			const playerIndex = state.players.findIndex((p) => p.uid === uid);
+			if (playerIndex !== -1 && playerIndex === state.buzzedIn) {
+				playerLectern.classList.add('lit');
+				startTimerLights(
+					playerLectern,
+					e.detail.currentTime - e.detail.buzzTime
+				);
+			} else playerLectern.classList.remove('lit');
+		} else return hidePanel(e.target);
+	});
 });
