@@ -68,12 +68,12 @@
 		}
 		@media (max-aspect-ratio: 0.89) {
 			.clue-value {
-				font-size: 4.9vw;
+				font-size: 4.5vw;
 			}
 		}
 		@media (aspect-ratio > 0.89) {
 			.clue-value {
-				font-size: 4.9vh;
+				font-size: 4.5vh;
 			}
 		}
 	}
@@ -470,6 +470,7 @@
 	height: 100%;
 	.fj-response-display,
 	.fj-wager-display {
+		display: flex;
 		font-family: 'Shadows Into Light Two', cursive;
 		font-weight: 400;
 		font-style: normal;
@@ -490,6 +491,7 @@
 		width: 100%;
 		padding: 5%;
 		text-align: center;
+		margin: auto;
 	}
 
 	.display-inner.animate {

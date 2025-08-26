@@ -5,6 +5,16 @@ const Game = require('../public/js/utils/Game');
 // const userTimeout = 5 * 60 * 1000;
 const userTimeout = 2000;
 
+const catchSocketErr = (fn) => {
+	return (data, cb) => {
+		try {
+			fn(data, cb);
+		} catch (err) {
+			return cb({ status: 'fail', message: err.message });
+		}
+	};
+};
+
 let io;
 
 /**
@@ -170,10 +180,12 @@ const socket = async (http, server) => {
 				});
 
 			const player = game.gameState.players[data.player];
+			if (!data.name && !player.getName())
+				return cb({ status: 'fail', message: 'You must specify a name' });
 			if (data.name) player.setName(data.name);
 			if (data.nameData) player.setNameData(data.nameData);
 			if (data.key) player.setKey(data.key);
-
+			console.log(player);
 			game.updateGameState();
 			cb({ status: 'OK', gameState: game.getGameState() });
 		});
@@ -200,51 +212,46 @@ const socket = async (http, server) => {
 		});
 
 		//game input
-		socket.on('game-input', (data, cb) => {
-			if (!Array.isArray(data) || data.length === 0)
-				return cb({ status: 'fail', message: 'Invalid input' });
-			const inp = data[0];
-			let game;
-			if (['host', 'correct', 'incorrect'].includes(inp)) {
-				game = activeGames.find((g) => g.gameState.host.socketId === socket.id);
-				if (game) {
-					game.handleInput(data);
-					return cb({ status: 'OK' });
-				} else
-					return cb({
-						status: 'fail',
-						message: 'Only the host may issue this command',
-					});
-			}
-			game = getGameForSocketId(socket.id);
-			if (!game)
-				return cb({ status: 'fail', message: 'You are not in a game' });
-			const player = game.gameState.players.findIndex(
-				(p) => p.socketId === socket.id
-			);
-			game.handleInput('player', player);
-			cb({ status: 'OK' });
-		});
+		socket.on(
+			'game-input',
+			catchSocketErr((data, cb) => {
+				console.log(data);
+				if (!Array.isArray(data) || data.length === 0)
+					return cb({ status: 'fail', message: 'Invalid input' });
+				const inp = data[0];
+				let game;
+				//host input
+				if (['host', 'correct', 'incorrect'].includes(inp)) {
+					game = activeGames.find(
+						(g) => g.gameState.host.socketId === socket.id
+					);
+					if (game) {
+						game.handleInput(data);
+						return cb({ status: 'OK' });
+					} else throw new Error('Only the host may issue this command');
+				}
+				game = getGameForSocketId(socket.id);
+				if (!game) throw new Error('You are not in a game');
+
+				game.handleInput(...data);
+				cb({ status: 'OK' });
+			})
+		);
 
 		//Things players can emit
 		socket.on('join-game', (data, cb) => {
 			const game = activeGames.find((g) => g.joinCode === data.joinCode);
 			if (!game) return cb({ status: 'fail', message: 'Game not found' });
 
-			try {
-				game.acceptNewPlayer({
-					...data,
-					socketId: socket.id,
-				});
-				socket.join(game.id);
-				cb({ status: 'OK', gameState: game.gameState });
-				socket
-					.to(game.id)
-					.emit('update-game-state', game.getGameData(['players']));
-			} catch (err) {
-				console.log(err);
-				sendError(err.message);
-			}
+			game.acceptNewPlayer({
+				...data,
+				socketId: socket.id,
+			});
+			socket.join(game.id);
+			cb({ status: 'OK', gameState: game.gameState });
+			socket
+				.to(game.id)
+				.emit('update-game-state', game.getGameData(['players']));
 		});
 
 		socket.on('buzz', (cb) => {

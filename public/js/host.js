@@ -205,6 +205,7 @@ const getPlayerIndex = () => {
 };
 
 const sendGameInput = (...args) => {
+	console.log(args);
 	//if this is the key window, pass the input forward to the main window
 	if (isKey) {
 		if (!window.opener) return;
@@ -368,7 +369,7 @@ const handleKeyPress = async (e) => {
 		else if (e.key.toLowerCase() === 'x') sendGameInput('incorrect');
 	} else {
 		const ind = state.players.findIndex(
-			(p) => e.key === p.key && p.name !== ''
+			(p) => e.key === p.key && p.name !== '' && !p.isRemote
 		);
 		if (ind < 0) return;
 		sendGameInput('player', ind);
@@ -396,6 +397,15 @@ const sendKey = (e) => {
 	const evt = new CustomEvent('receive-key', { detail: { key: e.key } });
 	window.opener.document.dispatchEvent(evt);
 };
+
+let emitEvent;
+if (isKey) {
+	emitEvent = (data) => {
+		const evt = new CustomEvent('emit-event', { detail: data });
+		window.opener.document.dispatchEvent('emit-event');
+	};
+}
+
 //main game - handle key press on keydown, receive key from control window
 if (!isKey) {
 	document.addEventListener('keydown', handleKeyPress);
@@ -405,10 +415,10 @@ if (!isKey) {
 	//main window - handling input sent from key window
 	document.addEventListener('receive-input', (e) => {
 		const { args } = e.detail;
-		console.log(3);
+		console.log(args);
 		try {
 			if (game) game.handleInput(...args);
-			else if (socket) socket.emit('game-input', ...(args || []), socketCB());
+			else if (socket) socket.emit('game-input', args, socketCB());
 		} catch (err) {
 			const evt = new CustomEvent('receive-message', {
 				detail: { type: 'error', message: err.message },
@@ -417,17 +427,27 @@ if (!isKey) {
 		}
 	});
 	//main window - handling game input sent from key window
-	if (!isKey) {
-		document.addEventListener('key-input', (e) => {
-			const state = sh.getState();
-			//special case - pregame host input pops up the "start game" prompt.
-			//almost everything else actually sends an input
-			if (state.state === 'pregame' && e.detail.input === 'host') {
-				return handleKeyPress({ key: 'ArrowDown' });
-			}
-			sendGameInput(e.detail.input);
-		});
-	}
+	document.addEventListener('key-input', (e) => {
+		const state = sh.getState();
+		//special case - pregame host input pops up the "start game" prompt.
+		//almost everything else actually sends an input
+		if (state.state === 'pregame' && e.detail.input === 'host') {
+			return handleKeyPress({ key: 'ArrowDown' });
+		}
+		sendGameInput(e.detail.input);
+	});
+	//main window - handling request for socket to send something from key window
+	document.addEventListener('emit-event', (e) => {
+		const { eventName, data, onSuccess, onTimeout } = e.detail;
+		socket.emit(
+			eventName,
+			data,
+			withTimeout(
+				onSuccess ? onSuccess : (data) => {},
+				onTimeout ? onTimeout : () => {}
+			)
+		);
+	});
 }
 //control window - on key press, send it to the main window to manage the state
 else {
@@ -720,7 +740,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				const lec = document.querySelector(`.lectern[data-index="${index}"]`);
 				if (!lec) return pi.removeAttribute('value');
 				const key = buzzerKey.getAttribute('data-key');
-
+				const name = playerName.value;
+				if (!name) return showMessage('error', 'You must enter a player name.');
 				if (!state.isRemote) {
 					if (
 						index < game.gameState.players.length &&
@@ -746,20 +767,22 @@ document.addEventListener('DOMContentLoaded', () => {
 					pi.removeAttribute('value');
 					playerSettingsModal.hide();
 				} else {
+					const data = {
+						player: index,
+						gameId: state.id,
+						uid,
+						name: playerName.value,
+						key,
+						nameData: Array.isArray(nameData.paths)
+							? nameData.paths.map((p) => p.getAttribute('d'))
+							: [],
+					};
 					socket.emit(
 						'edit-player',
-						{
-							player: index,
-							gameId: state.id,
-							uid,
-							name: playerName.value,
-							key,
-							nameData: Array.isArray(nameData.paths)
-								? nameData.paths.map((p) => p.getAttribute('d'))
-								: [],
-						},
+						data,
 						withTimeout(
 							(data) => {
+								console.log(data);
 								if (data.status === 'OK') playerSettingsModal.hide();
 								else showMessage('error', data.message);
 							},
@@ -979,6 +1002,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (fjResponseModal) fjResponseModal.show();
 		} else if (state.state === 'FJOver') {
 			if (thinkMusic) thinkMusic.pause();
+			if (fjResponseModal) fjResponseModal.hide();
 			showView(fjResponseDiv);
 		} else {
 			showView(gameBoard);
@@ -1041,7 +1065,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (state.round >= state.board.length - 1 || state.round < 0) return;
 			const clue = getClue(cat, row);
 			if (!clue) return;
-			if (clue.selected) e.target.innerHTML = '';
+			if (clue.selected || state.round >= state.board.length - 1)
+				e.target.innerHTML = '';
 			else e.target.innerHTML = `$${clue.value}`;
 		});
 	});
@@ -1129,7 +1154,14 @@ document.addEventListener('DOMContentLoaded', () => {
 	scoreDisplays.forEach((sd, i) => {
 		sh.addWatcher(sd, (e) => {
 			if (!e.detail) return;
+			const player = e.detail.players[i];
+			if (!player || !player.name) {
+				e.target.innerHTML = '';
+				return;
+			}
+
 			const score = e.detail.players[i]?.score || 0;
+
 			if (score >= 0) e.target.classList.remove('neg');
 			else e.target.classList.add('neg');
 
@@ -1325,8 +1357,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					.filter((fjr, i) => {
 						return !state.players[i].isRemote;
 					});
-				console.log(5);
-				socket.emit('set-final-response', toSend, socketCB());
+				sendGameInput('setFJResponses', toSend);
 			}
 		});
 	}
@@ -1493,90 +1524,114 @@ document.addEventListener('DOMContentLoaded', () => {
 	//
 	const joinGameButton = document.querySelector('#join-game');
 	const spectateGameButton = document.querySelector('#spectate-game');
-	const playerName = document.querySelector('#player-name');
+	const newPlayerName = document.querySelector('#player-name');
 	const joinCode = document.querySelector('#room-code');
 	const playerContainer = document.querySelector('.player-container');
+	let buzzerButton, playerScore;
+	if (playerContainer) {
+		buzzerButton = playerContainer.querySelector('#buzzer');
+		playerScore = playerContainer.querySelector('.score');
+	}
 
-	joinGameButton.addEventListener('click', () => {
-		const st = csh.getState();
-		const nameData = st.paths.map((p) => p.getAttribute('d'));
-		const name = playerName.value;
+	if (joinGameButton)
+		joinGameButton.addEventListener('click', () => {
+			const st = csh.getState();
+			const nameData = st.paths.map((p) => p.getAttribute('d'));
+			const name = newPlayerName.value;
 
-		if (!name) return showMessage('error', 'You must enter your name');
-		if (!joinCode.value)
-			return showMessage('error', 'You must enter a join code');
+			if (!name) return showMessage('error', 'You must enter your name');
+			if (!joinCode.value)
+				return showMessage('error', 'You must enter a join code');
 
-		socket.emit(
-			'join-game',
-			{
-				name,
-				nameData,
-				uid,
-				joinCode: joinCode.value,
-			},
-			withTimeout(
-				(data) => {
-					if (data.status !== 'OK') showMessage('error', data.message);
-					else if (data.message) showMessage('info', data.message);
-					sh.setState(data.gameState);
+			socket.emit(
+				'join-game',
+				{
+					name,
+					nameData,
+					uid,
+					joinCode: joinCode.value,
 				},
-				() => {
-					showMessage('error', 'Joining game timed out.');
+				withTimeout(
+					(data) => {
+						if (data.status !== 'OK') showMessage('error', data.message);
+						else if (data.message) showMessage('info', data.message);
+						sh.setState(data.gameState);
+					},
+					() => {
+						showMessage('error', 'Joining game timed out.');
+					}
+				)
+			);
+		});
+	if (buzzerButton)
+		buzzerButton.addEventListener('click', (e) => {
+			const state = sh.getState();
+			console.log(state);
+			const ind = state.players.findIndex(
+				(p) => uid === p.uid && p.name !== ''
+			);
+			console.log(ind);
+			if (ind < 0) return;
+			sendGameInput('player', ind);
+		});
+
+	if (playerContainer)
+		sh.addWatcher(playerContainer, (e) => {
+			const nameContainer = e.target.querySelector('.name-container');
+			const nameCanvas = e.target.querySelector('svg');
+			const path = nameCanvas.querySelector('.player-name-path');
+			const playerLectern = e.target.querySelector('.lectern');
+
+			const state = e.detail;
+			const player = state.players.find((p) => p.uid === uid);
+			if (player) {
+				showPanel(e.target);
+				const editPlayer = e.target.querySelector('.edit-player');
+				hidePanel(editPlayer);
+
+				const buzzer = document.querySelector('#buzzer');
+				if (buzzer.getAttribute('data-bs-toggle') === 'popover') {
+					const tt = new bootstrap.Popover(buzzer);
+					tt.show();
+					setTimeout(() => {
+						tt.dispose();
+						buzzer.removeAttribute('data-bs-title');
+						buzzer.removeAttribute('data-bs-toggle');
+						buzzer.removeAttribute('data-bs-content');
+					}, 3000);
 				}
-			)
-		);
-	});
 
-	sh.addWatcher(playerContainer, (e) => {
-		const nameContainer = e.target.querySelector('.name-container');
-		const nameCanvas = e.target.querySelector('svg');
-		const path = nameCanvas.querySelector('.player-name-path');
-		const playerLectern = e.target.querySelector('.lectern');
+				if (player.nameData.length > 0) {
+					hidePanel(nameContainer);
+					showPanel(nameCanvas);
+					player.nameData.forEach((nd) => {
+						const np = document.createElementNS(
+							'http://www.w3.org/2000/svg',
+							'path'
+						);
+						np.setAttribute('d', nd);
+						path.appendChild(np);
+					});
+				} else {
+					showPanel(nameContainer);
+					hidePanel(nameCanvas);
+					nameContainer.innerHTML = player.name;
+				}
 
-		const state = e.detail;
-		const player = state.players.find((p) => p.uid === uid);
-		if (player) {
-			showPanel(e.target);
-			const editPlayer = e.target.querySelector('.edit-player');
-			hidePanel(editPlayer);
-
-			const buzzer = document.querySelector('#buzzer');
-			if (buzzer.getAttribute('data-bs-toggle') === 'popover') {
-				const tt = new bootstrap.Popover(buzzer);
-				tt.show();
-				setTimeout(() => {
-					tt.dispose();
-					buzzer.removeAttribute('data-bs-title');
-					buzzer.removeAttribute('data-bs-toggle');
-					buzzer.removeAttribute('data-bs-content');
-				}, 3000);
-			}
-
-			if (player.nameData.length > 0) {
-				hidePanel(nameContainer);
-				showPanel(nameCanvas);
-				player.nameData.forEach((nd) => {
-					const np = document.createElementNS(
-						'http://www.w3.org/2000/svg',
-						'path'
+				const playerIndex = state.players.findIndex((p) => p.uid === uid);
+				if (playerIndex !== -1 && playerIndex === state.buzzedIn) {
+					playerLectern.classList.add('lit');
+					startTimerLights(
+						playerLectern,
+						e.detail.currentTime - e.detail.buzzTime
 					);
-					np.setAttribute('d', nd);
-					path.appendChild(np);
-				});
-			} else {
-				showPanel(nameContainer);
-				hidePanel(nameCanvas);
-				nameContainer.innerHTML = player.name;
-			}
+				} else playerLectern.classList.remove('lit');
 
-			const playerIndex = state.players.findIndex((p) => p.uid === uid);
-			if (playerIndex !== -1 && playerIndex === state.buzzedIn) {
-				playerLectern.classList.add('lit');
-				startTimerLights(
-					playerLectern,
-					e.detail.currentTime - e.detail.buzzTime
-				);
-			} else playerLectern.classList.remove('lit');
-		} else return hidePanel(e.target);
-	});
+				const score = player.score;
+				if (score < 0) playerScore.classList.add('neg');
+				else playerScore.classList.remove('neg');
+
+				playerScore.innerHTML = `$${Math.abs(score).toLocaleString('en')}`;
+			} else return hidePanel(e.target);
+		});
 });

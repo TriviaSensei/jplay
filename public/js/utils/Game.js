@@ -29,7 +29,7 @@ const lockTimeout = 250;
 const clueTime = 3500;
 const ddTime = 7000;
 const FJTime = 31000;
-const cluesPerRound = 2;
+const cluesPerRound = 1;
 
 class Player {
 	constructor(name, nameData, uid, socketId, key, isRemote) {
@@ -288,6 +288,8 @@ class Game {
 	}
 
 	handleFJResponse(correct) {
+		console.log(`-------------------`);
+		console.log(`Current step: ${this.gameState.fjStep}`);
 		if (this.gameState.fjStep % 4 !== 1) return;
 		//player whose response we are judging
 		const p = this.gameState.fjOrder[(this.gameState.fjStep - 1) / 4];
@@ -299,6 +301,8 @@ class Game {
 	handleBuzz(p) {
 		try {
 			//if the player is locked, don't do anything
+			console.log(p);
+			console.log(this.gameState.players[p]);
 			if (this.gameState.players[p].isLocked()) return;
 			console.log(`buzz ${p}`);
 
@@ -362,6 +366,7 @@ class Game {
 			//if the input is not valid from that state, then there is no function
 			//for it. If it is a valid input, then the function will run and set the new game state.
 			start: () => {
+				console.log(this.gameState.players);
 				if (
 					this.gameState.players.length > 0 &&
 					this.gameState.players.some((p) => p.getName() !== '')
@@ -375,7 +380,7 @@ class Game {
 				} else throw new Error('You must have at least one player.');
 			},
 			player: (p) => {
-				this.handleBuzz(p);
+				if (this.gameState.buzzedIn === -1) this.handleBuzz(p);
 				// this.setGameState({
 				// 	buzzedIn: p,
 				// });
@@ -405,7 +410,11 @@ class Game {
 					this.gameState.board[this.gameState.round].length - 1
 				) {
 					const control = this.gameState.players.reduce((p, c, i) => {
-						if (c.getScore() < this.gameState.players[p].getScore()) return i;
+						if (
+							c.getName() !== '' &&
+							c.getScore() < this.gameState.players[p].getScore()
+						)
+							return i;
 						return p;
 					}, 0);
 					const roundNames = ['', 'Double ', 'Triple '];
@@ -643,8 +652,12 @@ class Game {
 				});
 			},
 			setWager: (wagers) => {
+				//find any invalid wager
 				const inv = wagers.find((w) => {
+					//if the player index is valid
 					if (w.player >= 0 && w.player < this.gameState.players.length) {
+						//if the score is not positive, the wager is ignored
+						//if the wager is in the correct range, we're good
 						if (
 							this.gameState.players[w.player].getScore() <= 0 ||
 							(w.wager >= 0 &&
@@ -654,6 +667,7 @@ class Game {
 							return false;
 						}
 					}
+					//otherwise, this wager is invalid
 					return true;
 				});
 				if (inv) {
@@ -710,10 +724,16 @@ class Game {
 				modal: 'fj-response-modal',
 				modalDescription: 'Enter FJ Responses',
 			},
-			// host: () => {
-			// 	this.stopClueTimer();
-			// 	this.setGameState({ state: 'FJOver', fjStep: -1 });
-			// },
+			host: () => {
+				this.stopClueTimer();
+				this.setGameState({ state: 'FJOver', fjStep: -1 });
+			},
+			setFJResponses: (responses) => {
+				responses.forEach((res) => {
+					this.gameState.players[res.player].finalResponse = res.response;
+				});
+				this.updateGameState();
+			},
 			setFJResponse: (player, response) => {
 				if (player >= 0 && player < this.gameState.players.length) {
 					this.gameState.players[player].finalResponse = response;
@@ -728,7 +748,12 @@ class Game {
 			},
 			host: () => {
 				const maxStep = this.gameState.fjOrder.length * 4 - 1;
+				console.log(`-------------------`);
+				console.log(`Max step: ${maxStep}`);
+				console.log(`Current step: ${this.gameState.fjStep}`);
+
 				if (this.gameState.fjStep % 4 === 1) return;
+
 				if (this.gameState.fjStep < maxStep) {
 					const fjStep = this.gameState.fjStep + 1;
 					const fjPlayer =
@@ -744,6 +769,13 @@ class Game {
 							: fjSubstep === 2
 							? `${fjPlayer.name}'s Final Jeopardy wager revealed. Press advance to continue`
 							: `${fjPlayer.name}'s result set. Press advance to continue.`;
+					if (fjSubstep === 3) {
+						console.log(`Adjusting score (${this.gameState.fjStep})`);
+						const ind =
+							this.gameState.fjOrder[Math.floor(this.gameState.fjStep / 4)];
+						const p = this.gameState.players[ind];
+						p.setScore(p.getScore() + (p.finalCorrect ? 1 : -1) * p.finalWager);
+					}
 					this.setGameState({ fjStep, status: newStatus });
 				} else {
 					const maxScore = this.gameState.players.reduce((p, c) => {
@@ -758,14 +790,6 @@ class Game {
 						winners.length === 1 ? 'wins' : 'win'
 					} with $${maxScore.toLocaleString('en')}`;
 					this.setGameState({ state: 'FJResults', status: newStatus });
-				}
-
-				if (this.gameState.fjStep % 4 === 3) {
-					const ind =
-						this.gameState.fjOrder[Math.floor(this.gameState.fjStep / 4)];
-					const p = this.gameState.players[ind];
-					p.setScore(p.getScore() + (p.finalCorrect ? 1 : -1) * p.finalWager);
-					this.updateGameState();
 				}
 			},
 			correct: () => {
@@ -1090,8 +1114,6 @@ class Game {
 	}
 
 	setGameState(state) {
-		console.log('setting game state');
-		console.log(state);
 		let newData = {};
 		this.gameState.modal = '';
 		this.gameState.modalDescription = '';
@@ -1105,7 +1127,6 @@ class Game {
 			...state,
 			...newData,
 		};
-		console.log(this.gameState);
 		this.updateGameState();
 		if (this.gameState.message) this.gameState.message = '';
 		if (this.gameState.playSound) this.gameState.playSound = false;
