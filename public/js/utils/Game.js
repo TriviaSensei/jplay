@@ -595,6 +595,7 @@ class Game {
 				buzzerArmed: false,
 				buzzedIn: -1,
 				selectedClue: [-1, -1],
+				timeout: false,
 				status: `Between rounds. Press advance to continue`,
 			},
 			host: () => {
@@ -848,7 +849,9 @@ class Game {
 				if (data.reset) {
 					delete data.reset;
 					if (this.stateHandler) this.stateHandler.setState(data);
-				} else if (this.stateHandler) {
+				} else if (data.cancelGame && this.stateHandler)
+					this.stateHandler.setState(null);
+				else if (this.stateHandler) {
 					const state = this.stateHandler.getState();
 					const newState = {
 						...state,

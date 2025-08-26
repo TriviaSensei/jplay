@@ -167,11 +167,21 @@ const socket = async (http, server) => {
 		});
 
 		socket.on('cancel-game', (data, cb) => {
-			cb({ status: 'OK' });
+			const game = getGameForSocketId(socket.id);
+			if (!game)
+				return cb({ status: 'fail', message: 'You are not part of a game' });
+			else if (game.gameState.host.socketId !== socket.id)
+				return cb({
+					status: 'fail',
+					message: 'Only the host may cancel a game',
+				});
+			activeGames = activeGames.filter((g) => g.id !== game.id);
 		});
 
 		socket.on('edit-player', (data, cb) => {
 			const game = getGameByPlayer(data.uid);
+			if (!game)
+				return cb({ status: 'fail', message: 'You are not part of a game' });
 			//if it's not the host doing the editing, return an error
 			if (game.gameState.host.uid !== data.uid)
 				return cb({
@@ -185,7 +195,6 @@ const socket = async (http, server) => {
 			if (data.name) player.setName(data.name);
 			if (data.nameData) player.setNameData(data.nameData);
 			if (data.key) player.setKey(data.key);
-			console.log(player);
 			game.updateGameState();
 			cb({ status: 'OK', gameState: game.getGameState() });
 		});
@@ -215,7 +224,6 @@ const socket = async (http, server) => {
 		socket.on(
 			'game-input',
 			catchSocketErr((data, cb) => {
-				console.log(data);
 				if (!Array.isArray(data) || data.length === 0)
 					return cb({ status: 'fail', message: 'Invalid input' });
 				const inp = data[0];

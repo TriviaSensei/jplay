@@ -169,9 +169,9 @@ if (isKey) {
 	incorrectButton = document.querySelector('#incorrect-btn');
 }
 
-const thinkMusic = document.querySelector('#think-sound');
+let thinkMusic = document.querySelector('#think-sound');
 
-const socketCB = () =>
+const socketCB = (fn) =>
 	withTimeout(
 		(data) => {
 			if (data.status !== 'OK') return showMessage('error', data.message);
@@ -187,6 +187,9 @@ const socketCB = () =>
 						...newState,
 					};
 				});
+
+			if (fn) console.log('running function');
+			if (fn) fn();
 		},
 		() => {
 			console.trace();
@@ -329,7 +332,6 @@ const handleKeyPress = async (e) => {
 		else {
 			if (playerIndex < state.players.length) {
 				if (state.isRemote) {
-					console.log(2);
 					socket.emit(
 						'edit-player',
 						{
@@ -337,7 +339,7 @@ const handleKeyPress = async (e) => {
 							player: playerIndex,
 							key: e.key,
 						},
-						socketCB()
+						socketCB(playerSettingsModal?.hide)
 					);
 				} else {
 					game.gameState.players[playerIndex].setKey(e.key);
@@ -527,7 +529,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	const sounds = getElementArray(document, 'audio');
-	sounds.forEach((s) => {
+
+	sounds.forEach((s, i) => {
 		s.load();
 		s.addEventListener('ended', () => {
 			s.pause();
@@ -550,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		files.forEach((f) => f.addEventListener('click', selectFile));
 	}
 
-	if (createButton)
+	if (createButton) {
 		createButton.addEventListener('click', async () => {
 			const gameType = document.querySelector(
 				'[name="play-type"]:checked'
@@ -589,6 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				handleRequest(url, 'GET', null, handler);
 			} else return showMessage('error', 'Invalid file location specified');
 		});
+	}
 
 	sh.addWatcher(initContainer, (e) => {
 		if (!e?.detail) return;
@@ -780,16 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					socket.emit(
 						'edit-player',
 						data,
-						withTimeout(
-							(data) => {
-								console.log(data);
-								if (data.status === 'OK') playerSettingsModal.hide();
-								else showMessage('error', data.message);
-							},
-							() => {
-								showMessage('error', 'Request timed out');
-							}
-						)
+						socketCB(() => playerSettingsModal.hide())
 					);
 				}
 			});
