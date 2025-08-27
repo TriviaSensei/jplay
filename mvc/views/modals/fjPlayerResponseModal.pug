@@ -1,0 +1,20 @@
+.modal#fj-player-response-modal(tabindex="-1" aria-labelledby="fj-player-response-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false")
+    .modal-dialog.modal-dialog-centered
+        .modal-content#fj-player-response-modal-content
+            input#player-index(type="hidden")
+            .modal-header
+                h5.modal-title#fj-player-response-label Final Jeopardy Response
+            .modal-body
+                .input-row-v 
+                    .input-row-h
+                        .fj-player-response-container.w-100.me-2
+                            .input-label Enter Response (will automatically save when time expires)
+                            .input-container.d-flex.flex-row
+                                .d-flex.me-1
+                                    #fj-player-prefix.fj-prefix.m-auto.me-1 What is
+                                    input#fj-player-response.fj-player-response(type="text" placeholder="Response")
+                                .d-flex.ms-1
+                                    .m-auto ?
+                        button#clear-fj-player-response.ms-1.btn.btn-sm.btn-secondary Clear
+            .modal-footer
+                button#save-fj-player-response.btn.btn-sm.btn-primary(type="button") Save

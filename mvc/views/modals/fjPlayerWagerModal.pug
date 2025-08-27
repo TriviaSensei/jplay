@@ -1,0 +1,17 @@
+.modal#fj-player-wager-modal(tabindex="-1" aria-labelledby="fj-player-wager-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false")
+    .modal-dialog.modal-dialog-centered
+        .modal-content#fj-player-wager-modal-content
+            input#player-index(type="hidden")
+            .modal-header
+                h5.modal-title#fj-player-wager-label Final Jeopardy Wager
+            .modal-body
+                .input-row-v     
+                    .input-row-h
+                        .fj-player-wager-container.w-50.me-2
+                            .input-label Enter wager (Max #[span.fj-player-max-wager]) 
+                            .input-container
+                                input#fj-player-wager.fj-player-wager(type="number" placenolder="Wager" min="0")
+                        button.btn.btn-sm.btn-warning.me-2.wager-0 0
+                        button.btn.btn-sm.btn-primary.wager-max Max
+            .modal-footer
+                button#confirm-fj-player-wager.btn.btn-sm.btn-primary(type="button") Save

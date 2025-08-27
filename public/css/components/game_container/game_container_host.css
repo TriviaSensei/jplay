@@ -465,6 +465,11 @@
 	}
 }
 
+div.fj-prefix {
+	text-wrap: nowrap;
+	margin-right: 1em;
+}
+
 .fj-response-div {
 	width: 100%;
 	height: 100%;

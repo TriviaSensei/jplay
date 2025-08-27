@@ -195,14 +195,19 @@ const socket = async (http, server) => {
 			if (data.name) player.setName(data.name);
 			if (data.nameData) player.setNameData(data.nameData);
 			if (data.key) player.setKey(data.key);
+			player.isRemote = false;
+
 			game.updateGameState();
 			cb({ status: 'OK', gameState: game.getGameState() });
 		});
 
 		socket.on('edit-game-data', (data, cb) => {
-			const game = getGameByPlayer(data.uid);
+			console.log(data);
+			const game = getGameForSocketId(socket.id);
 			//if it's not the host doing the editing, return an error
-			if (game.gameState.host.uid !== data.uid)
+			console.log(game.id);
+			console.log(game.gameState.host);
+			if (game.gameState.host.socketId !== socket.id)
 				return cb({
 					status: 'fail',
 					message: 'Only the host may edit game data.',
@@ -224,12 +229,13 @@ const socket = async (http, server) => {
 		socket.on(
 			'game-input',
 			catchSocketErr((data, cb) => {
+				console.log(data);
 				if (!Array.isArray(data) || data.length === 0)
 					return cb({ status: 'fail', message: 'Invalid input' });
 				const inp = data[0];
 				let game;
 				//host input
-				if (['host', 'correct', 'incorrect'].includes(inp)) {
+				if (['host', 'correct', 'incorrect', 'start'].includes(inp)) {
 					game = activeGames.find(
 						(g) => g.gameState.host.socketId === socket.id
 					);
@@ -271,6 +277,35 @@ const socket = async (http, server) => {
 				(p) => p.socketId === socket.id
 			);
 			g.handleInput('player', ind);
+			cb({ status: 'OK' });
+		});
+
+		socket.on('save-fj-wager', (data, cb) => {
+			const game = getGameForSocketId(socket.id);
+			if (!game)
+				return cb({ status: 'fail', message: 'You are not in a game' });
+			const ind = game.gameState.players.findIndex(
+				(p) => p.socketId === socket.id
+			);
+			if (ind < 0) return cb({ status: 'fail', message: 'Player not found' });
+			if (data.wager < 0 || data.wager > game.gameState.players[ind].score)
+				return cb({ status: 'fail', message: 'Invalid wager' });
+			game.gameState.players[ind].finalWager = data.wager;
+			game.updateGameState();
+			cb({ status: 'OK' });
+		});
+
+		socket.on('save-fj-response', (data, cb) => {
+			const game = getGameForSocketId(socket.id);
+			if (!game)
+				return cb({ status: 'fail', message: 'You are not in a game' });
+			const ind = game.gameState.players.findIndex(
+				(p) => p.socketId === socket.id
+			);
+			if (ind < 0) return cb({ status: 'fail', message: 'Player not found' });
+
+			game.gameState.players[ind].finalResponse = data.response;
+			game.updateGameState();
 			cb({ status: 'OK' });
 		});
 

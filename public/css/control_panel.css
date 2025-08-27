@@ -4,7 +4,7 @@
 	flex-direction: column;
 	button {
 		margin: 0.5em;
-		max-width: 50%;
+		max-width: 250px;
 	}
 }
 

@@ -5,7 +5,7 @@ import { withTimeout } from './utils/socketTimeout.js';
 const createButton = document.querySelector('#create-game');
 const fileUpload = document.querySelector('#game-file');
 let socket;
-const hostKeys = ['arrowdown', 'space', 'spacebar'];
+const hostKeys = ['arrowdown', 'space', 'spacebar', ' '];
 const isKey = location.href.indexOf('control') >= 0;
 let uid;
 
@@ -126,17 +126,18 @@ const fjWagerDisplay = fjResponseDiv.querySelector(
 );
 
 const views = [liveClue, categoryScroll, gameBoard, fjCategory, fjResponseDiv];
+let fjPrefixDiv = getElementArray(document, 'div.fj-prefix');
 
 let fjw,
 	fjr,
 	fjWagerModal,
 	fjResponseModal,
 	confirmFJWagers,
+	fjWagerRadios,
 	fjWagerLabels,
 	fjMaxWagers,
 	wagerZero,
 	wagerMax,
-	fjPrefixDiv,
 	fjPrefixes,
 	fjResponseLabels,
 	fjResponses,
@@ -154,11 +155,14 @@ if (isKey) {
 	fjResponseModal = new bootstrap.Modal(fjr);
 	confirmFJWagers = document.querySelector('#confirm-fj-wager');
 	fjWagerLabels = getElementArray(fjw, '.fj-wager-label');
+	fjWagerRadios = getElementArray(fjw, 'input[name="fj-wager-radio"]');
 	fjMaxWagers = getElementArray(fjw, '.fj-max-wager');
 	wagerZero = fjw.querySelector('.wager-0');
 	wagerMax = fjw.querySelector('.wager-max');
-	fjPrefixDiv = fjr.querySelector('#fj-prefix');
-	fjPrefixes = getElementArray(fjr, '.fj-prefix-container input[type="radio"]');
+	fjPrefixes = getElementArray(
+		document,
+		'.fj-prefix-container input[type="radio"]'
+	);
 	fjResponseLabels = getElementArray(fjr, 'label.fj-response-label');
 	fjResponses = getElementArray(fjr, '.fj-response');
 	confirmFJResponses = fjr.querySelector('#confirm-fj-response');
@@ -168,8 +172,6 @@ if (isKey) {
 	correctButton = document.querySelector('#correct-btn');
 	incorrectButton = document.querySelector('#incorrect-btn');
 }
-
-let thinkMusic = document.querySelector('#think-sound');
 
 const socketCB = (fn) =>
 	withTimeout(
@@ -196,6 +198,80 @@ const socketCB = (fn) =>
 			showMessage('error', 'Input timed out');
 		}
 	);
+
+/*TODO: implement opening this and having user submit their FJ wager and response */
+const fjpwm = document.querySelector('#fj-player-wager-modal');
+let fjPlayerWagerModal, fjPlayerWager, saveFJWager, fjWagerZero, fjWagerMax;
+if (fjpwm) {
+	fjPlayerWagerModal = new bootstrap.Modal(fjpwm);
+	fjPlayerWager = fjpwm.querySelector('#fj-player-wager');
+	saveFJWager = fjpwm.querySelector('#confirm-fj-player-wager');
+	fjWagerZero = fjpwm.querySelector('.wager-0');
+	fjWagerMax = fjpwm.querySelector('.wager-max');
+	const fjWagerSetter = (isMax) => {
+		return () => {
+			if (!fjPlayerWager) return;
+			if (isMax)
+				fjPlayerWager.value = Number(fjPlayerWager.getAttribute('max'));
+			else fjPlayerWager.value = 0;
+		};
+	};
+	fjWagerZero.addEventListener('click', fjWagerSetter(false));
+	fjWagerMax.addEventListener('click', fjWagerSetter(true));
+	saveFJWager.addEventListener('click', () => {
+		const wager = Number(fjPlayerWager.value);
+		if (isNaN(wager)) return showMessage('error', 'Invalid wager');
+		socket.emit(
+			'save-fj-wager',
+			{ wager },
+			withTimeout(
+				(data) => {
+					if (data.status !== 'OK') showMessage('error', data.message);
+					else {
+						showMessage('info', 'Wager saved');
+						fjPlayerWagerModal.hide();
+					}
+				},
+				() => {
+					showMessage('error', 'Request timed out');
+				}
+			)
+		);
+	});
+}
+const fjprm = document.querySelector('#fj-player-response-modal');
+let fjPlayerResponseModal,
+	clearFJResponse,
+	fjPlayerResponse,
+	saveFJResponseButton;
+if (fjprm) {
+	fjPlayerResponseModal = new bootstrap.Modal(fjprm);
+	fjPlayerResponse = fjprm.querySelector('#fj-player-response');
+	clearFJResponse = fjprm.querySelector('#clear-fj-player-response');
+	saveFJResponseButton = fjprm.querySelector('#save-fj-player-response');
+
+	clearFJResponse.addEventListener('click', () => {
+		fjPlayerResponse.value = '';
+	});
+	const saveFJResponse = () => {
+		socket.emit(
+			'save-fj-response',
+			{ response: fjPlayerResponse.value },
+			withTimeout(
+				(data) => {
+					if (data.status !== 'OK') showMessage('error', data.message);
+					else showMessage('info', 'Response saved');
+				},
+				() => {
+					showMessage('error', 'Request timed out');
+				}
+			)
+		);
+	};
+	saveFJResponseButton.addEventListener('click', saveFJResponse);
+}
+
+let thinkMusic = document.querySelector('#think-sound');
 
 const hidePanel = (tgt) => {
 	if (!tgt) return;
@@ -250,12 +326,27 @@ const openKey = () => {
 	const openModal = document.querySelector('.modal.show');
 	if (openModal) return;
 	if (keyWindow) keyWindow.close();
-	keyWindow = window.open(
-		`/control`,
-		'_blank',
-		`popup,address=false,menubar=false,statusbar=no,status=false,toolbar=false,location=false,scrollbars=false`
-	);
-	keyWindow.addEventListener('load', sendGameState, { once: true });
+	const windowOptions = `popup,address=false,menubar=false,statusbar=no,status=false,toolbar=false,location=false,scrollbars=false,left=100,top=100,width=1200`;
+	keyWindow = window.open(`/control`, 'keyWindow', windowOptions);
+	if (!keyWindow)
+		showMessage(
+			'error',
+			'Could not open key - please disable your popup blocker',
+			2000
+		);
+	else keyWindow.addEventListener('load', sendGameState, { once: true });
+};
+
+const isHost = () => {
+	const state = sh.getState();
+	if (!state) return false;
+	return state.host.uid === uid;
+};
+
+const isPlayer = () => {
+	const state = sh.getState();
+	if (!state) return false;
+	return state.players.some((p) => p.uid && p.uid === uid);
 };
 
 //handle key press
@@ -263,9 +354,7 @@ const handleKeyPress = async (e) => {
 	const setKey = setKeyButton.getAttribute('data-toggled') === 'true';
 	const state = sh.getState();
 	if (!state) return;
-	const isHost = state.host.uid === uid;
-	const isPlayer = state.players.some((p) => p.uid && p.uid === uid);
-	if (!isHost && !isPlayer) return;
+	if (!isHost() && !isPlayer()) return;
 
 	//is it a modal key?
 	const openModal = document.querySelector('.modal.show');
@@ -339,7 +428,7 @@ const handleKeyPress = async (e) => {
 							player: playerIndex,
 							key: e.key,
 						},
-						socketCB(playerSettingsModal?.hide)
+						socketCB(() => playerSettingsModal.hide())
 					);
 				} else {
 					game.gameState.players[playerIndex].setKey(e.key);
@@ -358,8 +447,9 @@ const handleKeyPress = async (e) => {
 		state?.host?.keys?.includes(e.key.toLowerCase()) &&
 		state?.buzzedIn === -1
 	) {
-		if (state.players.some((p) => p.name || p.nameData.length > 0))
+		if (isHost() && state.players.some((p) => p.name || p.nameData.length > 0))
 			startGameModal.show();
+		else if (!isHost()) return;
 		else
 			return showMessage('error', 'You must have at least one active player');
 	}
@@ -404,7 +494,7 @@ let emitEvent;
 if (isKey) {
 	emitEvent = (data) => {
 		const evt = new CustomEvent('emit-event', { detail: data });
-		window.opener.document.dispatchEvent('emit-event');
+		window.opener.document.dispatchEvent(evt);
 	};
 }
 
@@ -501,7 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		});
 
-		socket.on('update-game-state', (data) => {
+		socket.on('update-game-state', (data, cb) => {
 			console.log(data);
 			if (data.reset) {
 				delete data.reset;
@@ -513,6 +603,10 @@ document.addEventListener('DOMContentLoaded', () => {
 					...data,
 				};
 				sh.setState(newState);
+			}
+			if (data.state === 'FJOver' && cb) {
+				cb({ uid, response: fjPlayerResponse?.value });
+				if (fjPlayerResponseModal) fjPlayerResponseModal.hide();
 			}
 		});
 		window.addEventListener('beforeunload', () => {
@@ -818,13 +912,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			playerSettingsModal.hide();
 		});
 
-	if (!isKey)
+	if (!isKey) {
 		confirmStartGame.addEventListener('click', () => {
 			sendGameInput('start');
 			startGameModal.hide();
 		});
-
-	if (!isKey)
 		sh.addWatcher(buzzerKey, (e) => {
 			const ind = getPlayerIndex();
 			if (isNaN(ind) && !e.detail) return;
@@ -841,6 +933,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (key.charCodeAt(0) === 32) key = 'Space';
 			e.target.innerHTML = key;
 		});
+	}
 
 	const getCategory = (cat) => {
 		const state = sh.getState();
@@ -865,12 +958,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			else v.classList.add('d-none');
 		});
 	};
+
 	//main screen display as function of state
 	sh.addWatcher(null, (state) => {
 		if (!state) return;
 
 		if (state.state === 'waitingDD') {
-			if (!keyWindow) openKey();
 			//waiting for a DD wager
 			showView(gameBoard);
 			//play the sound
@@ -957,7 +1050,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			const catText = catInner.querySelector('.category-div');
 			if (catText) catText.innerHTML = state.board.slice(-1).pop().category;
 			if (state.playSound && fjSound) fjSound.play();
-			if (!isKey && !keyWindow) openKey();
 			if (isKey) {
 				const populateLabels = (lbl) => {
 					const ind = Number(lbl.getAttribute('data-index'));
@@ -966,6 +1058,19 @@ document.addEventListener('DOMContentLoaded', () => {
 					} else lbl.innerHTML = state.players[ind].name;
 				};
 				fjWagerLabels.forEach(populateLabels);
+				fjWagerRadios.forEach((inp, i) => {
+					inp.addEventListener('change', (e) => {
+						if (e.target.checked) {
+							if (state.players[i].isRemote) {
+								fjWagerMax.disabled = true;
+								fjWagerZero.disabled = true;
+							} else {
+								fjWagerMax.disabled = false;
+								fjWagerZero.disabled = false;
+							}
+						}
+					});
+				});
 				fjResponseLabels.forEach(populateLabels);
 				fjMaxWagers.forEach((mw) => {
 					const ind = Number(mw.getAttribute('data-index'));
@@ -977,14 +1082,37 @@ document.addEventListener('DOMContentLoaded', () => {
 						return;
 					const maxWager = state.players[ind].score;
 					mw.innerHTML = maxWager;
-					mw.closest('.fj-wager-container')
-						.querySelector('input.fj-wager')
-						.setAttribute('max', maxWager);
+					const inp = mw
+						.closest('.fj-wager-container')
+						.querySelector('input.fj-wager');
+					inp.setAttribute('max', maxWager);
+					if (state.players[ind].isRemote) inp.disabled = true;
+					else inp.disabled = false;
 				});
+
+				const fjWagers = getElementArray(document, '.fj-wager');
+				fjWagers.forEach((fjw) => {
+					const ind = Number(fjw.getAttribute('data-index'));
+					if (!state.players[ind]) fjw.value = '';
+					else if (state.players[ind].finalWager < 0) fjw.value = '';
+					else fjw.value = Number(state.players[ind].finalWager);
+				});
+
 				fjWagerModal.show();
+			} else if (isPlayer()) {
+				if (fjpwm) {
+					const ind = state.players.findIndex((p) => p.uid === uid);
+					const maxWager = state.players[ind].score;
+					const mw = fjpwm.querySelector('.fj-player-max-wager');
+					if (mw) mw.innerHTML = maxWager;
+					const inp = fjpwm.querySelector('.fj-player-wager');
+					inp.setAttribute('max', maxWager);
+					fjPlayerWagerModal.show();
+				}
 			}
 		} else if (state.state === 'showFJ') {
 			if (fjWagerModal) fjWagerModal.hide();
+			if (fjPlayerWagerModal) fjPlayerWagerModal.hide();
 			showView(liveClue);
 			const fj = state.board.slice(-1).pop();
 			liveClueText.innerHTML = fj.text;
@@ -994,10 +1122,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		} else if (state.state === 'FJLive') {
 			showView(liveClue);
 			if (state.playSound && thinkMusic) thinkMusic.play();
-			if (fjResponseModal) fjResponseModal.show();
+			if (isKey && fjResponseModal) fjResponseModal.show();
+			if (isPlayer()) fjPlayerResponseModal.show();
 		} else if (state.state === 'FJOver') {
 			if (thinkMusic) thinkMusic.pause();
-			if (fjResponseModal) fjResponseModal.hide();
+			// if (fjResponseModal) fjResponseModal.hide();
+			if (fjPlayerResponseModal) fjPlayerResponseModal.hide();
 			showView(fjResponseDiv);
 		} else {
 			showView(gameBoard);
@@ -1057,12 +1187,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		sh.addWatcher(cb, (e) => {
 			const state = e.detail;
 			if (!state) return;
-			if (state.round >= state.board.length - 1 || state.round < 0) return;
 			const clue = getClue(cat, row);
-			if (!clue) return;
-			if (clue.selected || state.round >= state.board.length - 1)
+
+			if (!clue || state.round >= state.board.length - 1 || state.round < 0) {
 				e.target.innerHTML = '';
-			else e.target.innerHTML = `$${clue.value}`;
+				return;
+			} else e.target.innerHTML = `$${clue.value}`;
 		});
 	});
 
@@ -1190,7 +1320,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		sh.addWatcher(
 			null,
 			(state) => {
-				// if (state && !keyWindow) openKey();
+				if (state && isHost() && !keyWindow) openKey();
 			},
 			{ once: true }
 		);
@@ -1263,21 +1393,25 @@ document.addEventListener('DOMContentLoaded', () => {
 	//edited to handle both socket and local
 	const handlePrefixChange = (e) => {
 		if (!e.target.checked) return;
+		console.log(e.target);
 		let val = e.target.value;
+		console.log(val);
 		if (val === '[None]') val = '';
 		const state = sh.getState();
-		console.log(4);
+
 		if (state.isRemote) {
-			socket.emit(
-				'edit-game-data',
-				{
-					uid,
-					gameData: {
-						fjPrefix: val,
-					},
+			emitEvent({
+				eventName: 'edit-game-data',
+				data: {
+					gameData: { fjPrefix: val },
 				},
-				socketCB()
-			);
+				onSuccess: (data) => {
+					sh.setState(data.gameState);
+				},
+				onTimeout: () => {
+					showMessage('error', 'Request timed out');
+				},
+			});
 		} else
 			sh.setState((prev) => {
 				return {
@@ -1286,21 +1420,26 @@ document.addEventListener('DOMContentLoaded', () => {
 				};
 			});
 	};
-	if (fjPrefixDiv) {
-		sh.addWatcher(fjPrefixDiv, (e) => {
-			e.target.innerHTML = e.detail.fjPrefix;
+	if (fjPrefixDiv && fjPrefixDiv.length > 0) {
+		fjPrefixDiv.forEach((fjp) => {
+			sh.addWatcher(fjp, (e) => {
+				console.log(fjp);
+				e.target.innerHTML = e.detail.fjPrefix;
+			});
 		});
-		const pf = fjr.querySelector(
+		let pf = fjr?.querySelector(
 			'.fj-prefix-container input[type="radio"]:checked'
 		);
 		if (pf) {
 			const val = pf.value;
-			if (val === '[None]') fjPrefixDiv.innerHTML = '';
-			else fjPrefixDiv.innerHTML = val;
+			fjPrefixDiv.forEach((fjp) => {
+				fjp.innerHTML = val === '[None]' ? '' : val;
+			});
 		}
 	}
 	if (fjPrefixes) {
 		fjPrefixes.forEach((p) => {
+			console.log(p);
 			p.addEventListener('change', handlePrefixChange);
 		});
 		const ps1 = getElementArray(fjw, 'input[name="fj-wager-radio"]');
@@ -1328,8 +1467,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (fjResponses)
 			fjResponses.forEach((fjr, i) => {
 				sh.addWatcher(fjr, (e) => {
-					if (e.detail.players[i].isRemote) e.target.disabled = true;
-					else e.target.disabled = false;
+					if (e.detail.players[i].isRemote) {
+						e.target.disabled = true;
+						e.target.value = e.detail.players[i].finalResponse;
+					} else e.target.disabled = false;
 				});
 			});
 		confirmFJResponses.addEventListener('click', () => {
@@ -1561,11 +1702,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	if (buzzerButton)
 		buzzerButton.addEventListener('click', (e) => {
 			const state = sh.getState();
-			console.log(state);
 			const ind = state.players.findIndex(
 				(p) => uid === p.uid && p.name !== ''
 			);
-			console.log(ind);
 			if (ind < 0) return;
 			sendGameInput('player', ind);
 		});
@@ -1593,7 +1732,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						buzzer.removeAttribute('data-bs-title');
 						buzzer.removeAttribute('data-bs-toggle');
 						buzzer.removeAttribute('data-bs-content');
-					}, 3000);
+					}, 1500);
 				}
 
 				if (player.nameData.length > 0) {

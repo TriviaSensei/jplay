@@ -32,3 +32,9 @@
 		}
 	}
 }
+.input-row-h button {
+	width: 20%;
+	height: 70%;
+	margin-top: auto;
+	margin-bottom: auto;
+}

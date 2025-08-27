@@ -288,8 +288,6 @@ class Game {
 	}
 
 	handleFJResponse(correct) {
-		console.log(`-------------------`);
-		console.log(`Current step: ${this.gameState.fjStep}`);
 		if (this.gameState.fjStep % 4 !== 1) return;
 		//player whose response we are judging
 		const p = this.gameState.fjOrder[(this.gameState.fjStep - 1) / 4];
@@ -301,10 +299,7 @@ class Game {
 	handleBuzz(p) {
 		try {
 			//if the player is locked, don't do anything
-			console.log(p);
-			console.log(this.gameState.players[p]);
 			if (this.gameState.players[p].isLocked()) return;
-			console.log(`buzz ${p}`);
 
 			//stop the clue timeout, set the game state
 			this.stopClueTimer();
@@ -366,17 +361,23 @@ class Game {
 			//if the input is not valid from that state, then there is no function
 			//for it. If it is a valid input, then the function will run and set the new game state.
 			start: () => {
-				console.log(this.gameState.players);
 				if (
 					this.gameState.players.length > 0 &&
 					this.gameState.players.some((p) => p.getName() !== '')
 				) {
-					this.setGameState({
-						state: 'boardIntro',
-						round: 0,
-						categoryShown: -2,
-						status: 'Board intro - press advance to display next category',
+					// this.setGameState({
+					// 	state: 'boardIntro',
+					// 	round: 0,
+					// 	categoryShown: -2,
+					// 	status: 'Board intro - press advance to display next category',
+					// });
+					this.gameState.active = true;
+					this.gameState.state = 'betweenRounds';
+					this.gameState.round = 2;
+					this.gameState.players.forEach((p, i) => {
+						if (p.name) p.score = (i + 1) * 200;
 					});
+					this.updateGameState();
 				} else throw new Error('You must have at least one player.');
 			},
 			player: (p) => {
@@ -388,6 +389,7 @@ class Game {
 			host: () => {
 				this.setGameState({
 					buzzedIn: -1,
+					status: this.pregameStatus,
 				});
 			},
 		},
@@ -749,9 +751,6 @@ class Game {
 			},
 			host: () => {
 				const maxStep = this.gameState.fjOrder.length * 4 - 1;
-				console.log(`-------------------`);
-				console.log(`Max step: ${maxStep}`);
-				console.log(`Current step: ${this.gameState.fjStep}`);
 
 				if (this.gameState.fjStep % 4 === 1) return;
 
@@ -771,7 +770,6 @@ class Game {
 							? `${fjPlayer.name}'s Final Jeopardy wager revealed. Press advance to continue`
 							: `${fjPlayer.name}'s result set. Press advance to continue.`;
 					if (fjSubstep === 3) {
-						console.log(`Adjusting score (${this.gameState.fjStep})`);
 						const ind =
 							this.gameState.fjOrder[Math.floor(this.gameState.fjStep / 4)];
 						const p = this.gameState.players[ind];
@@ -785,9 +783,9 @@ class Game {
 					}, 0);
 					const winners = this.gameState.players
 						.filter((p) => p.score === maxScore)
-						.map((p) => p.name)
-						.join(', ');
-					const newStatus = `Results finalized. ${winners} ${
+						.map((p) => p.name);
+
+					const newStatus = `Results finalized. ${winners.join(', ')} ${
 						winners.length === 1 ? 'wins' : 'win'
 					} with $${maxScore.toLocaleString('en')}`;
 					this.setGameState({ state: 'FJResults', status: newStatus });
@@ -878,16 +876,17 @@ class Game {
 		}
 
 		const dd2r = dd2c.map((el) => generateRandom(ddDistribution[1]));
+		this.pregameStatus = `Pregame - ${
+			this.isRemote
+				? 'share join code or have players join locally'
+				: 'enter player names on main screen'
+		}, test the buzzers, then press "advance" when ready.${
+			this.isRemote ? `<br><br>Join code: ${this.joinCode.toUpperCase()}` : ''
+		}`;
 		this.gameState = {
 			active: false, //whether the game is active
 			state: 'pregame',
-			status: `Pregame - ${
-				this.isRemote
-					? 'share join code or have players join locally'
-					: 'enter player names on main screen'
-			}, test the buzzers, then press "advance" when ready.${
-				this.isRemote ? `<br>Join code: ${this.joinCode.toUpperCase()}` : ''
-			}`,
+			status: this.pregameStatus,
 			joinCode: this.joinCode,
 			isRemote: this.isRemote,
 			buzzerArmed: false, //whether a buzz will be accepted
@@ -947,14 +946,14 @@ class Game {
 		for (var i = 0; i < 3; i++) {
 			this.addBlankPlayer();
 		}
-		//start in FJ for testing
+		// start in FJ for testing
 		// this.gameState.active = true;
 		// this.gameState.state = 'betweenRounds';
 		// this.gameState.round = 2;
 		// this.gameState.players.forEach((p, i) => {
 		// 	p.score = (i + 1) * 200;
 		// });
-		//***************** */
+		/******************/
 
 		this.updateGameState();
 	}
@@ -1017,7 +1016,19 @@ class Game {
 						.to(this.gameState.host.socketId)
 						.emit('update-game-state', this.gameState);
 				else this.io.to(p.socketId).emit('update-game-state', this.gameState);
-			} else this.io.to(this.getId()).emit('update-game-state', this.gameState);
+			} else if (this.gameState.state !== 'FJOver')
+				this.io.to(this.getId()).emit('update-game-state', this.gameState);
+			else
+				this.io
+					.to(this.getId())
+					.emit('update-game-state', this.gameState, (data) => {
+						this.gameState.players.some((p) => {
+							if (p.uid === data.uid) {
+								p.finalResponse = data.response;
+								return true;
+							}
+						});
+					});
 		}
 		this.gameState.playSound = false;
 	}
