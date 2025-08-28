@@ -330,7 +330,7 @@ class Game {
 	 * - FJCategory: showing FJ category, waiting for wagers
 	 * - showfJ: showing FJ clue, timer not live
 	 * - FJLive: showing FJ clue, timer live
-	 * - FJResults: progressing through FJ responses, wagers, and final scores
+	 * - FJOver: progressing through FJ responses, wagers, and final scores
 	 * - endGame: end of game
 	 */
 
@@ -785,10 +785,14 @@ class Game {
 						.filter((p) => p.score === maxScore)
 						.map((p) => p.name);
 
-					const newStatus = `Results finalized. ${winners.join(', ')} ${
+					const newStatus = `${winners.join(', ')} ${
 						winners.length === 1 ? 'wins' : 'win'
 					} with $${maxScore.toLocaleString('en')}`;
-					this.setGameState({ state: 'FJResults', status: newStatus });
+					this.setGameState({
+						state: 'endGame',
+						status: newStatus,
+						message: 'The game has ended',
+					});
 				}
 			},
 			correct: () => {
@@ -798,52 +802,21 @@ class Game {
 				this.handleFJResponse(false);
 			},
 		},
-		FJResults: {
-			data: {},
-			host: () => {
-				//we've revealed everything. Acknowledge the winners and end the game
-				if (this.gameState.fjStep === this.gameState.players.length * 2 - 1) {
-					const hs = this.gameState.players.reduce((p, c) => {
-						return Math.max(c.getScore(), p);
-					}, 0);
-					const winners = this.gameState.players
-						.filter((p) => p.getScore() === hs)
-						.map((p) => p.getName());
-					let message;
-					if (winners.length === 1) {
-						message = `${winners[0]} wins with $${hs.toLocaleString('en')}!`;
-					} else if (winners.length === 2) {
-						message = `${winners[0]} and ${
-							winners[1]
-						} tie with $${hs.toLocaleString('en')}!`;
-					} else {
-						winners[winners.length - 1] = `and ${winners[length - 1]}`;
-						message = `${winners.join(', ')} tie with $${hs.toLocaleString(
-							'en'
-						)}!}`;
-					}
-					this.setGameState({ state: 'endGame', message });
-				}
-				if (this.gameState.fjStep % 2 === 0)
-					this.setGameState({ fjStep: this.gameState.fjStep + 1 });
-			},
-		},
 		endGame: {
 			host: () => {
-				this.setGameState(null);
+				this.gameState = null;
+				this.updateGameState();
 			},
 		},
 	};
 
 	constructor(board, host, io, socket, stateHandler) {
 		this.id = randomString(20, chars);
-		// this.joinCode = randomString(4, letters);
-		this.joinCode = 'a';
+		this.joinCode = randomString(4, letters);
 		this.io = io;
 		this.socket = socket;
 		if (this.socket) {
 			this.socket.on('update-game-state', (data) => {
-				console.log(data);
 				if (data.reset) {
 					delete data.reset;
 					if (this.stateHandler) this.stateHandler.setState(data);
@@ -1016,19 +989,7 @@ class Game {
 						.to(this.gameState.host.socketId)
 						.emit('update-game-state', this.gameState);
 				else this.io.to(p.socketId).emit('update-game-state', this.gameState);
-			} else if (this.gameState.state !== 'FJOver')
-				this.io.to(this.getId()).emit('update-game-state', this.gameState);
-			else
-				this.io
-					.to(this.getId())
-					.emit('update-game-state', this.gameState, (data) => {
-						this.gameState.players.some((p) => {
-							if (p.uid === data.uid) {
-								p.finalResponse = data.response;
-								return true;
-							}
-						});
-					});
+			} else this.io.to(this.getId()).emit('update-game-state', this.gameState);
 		}
 		this.gameState.playSound = false;
 	}

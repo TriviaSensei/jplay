@@ -61,6 +61,11 @@ const playerName = document.querySelector('#set-player-name');
 const setKeyButton = document.querySelector('#set-button');
 const buzzerKey = document.querySelector('#current-key');
 const startGameModal = isKey ? null : new bootstrap.Modal('#start-game-modal');
+const egm = document.querySelector('#end-game-modal');
+
+const endGameMessage = egm?.querySelector('#end-game-result');
+const ackEndGame = egm?.querySelector('#end-game-ok');
+const endGameModal = egm ? new bootstrap.Modal(egm) : null;
 const confirmStartGame = document.querySelector('#confirm-start');
 
 const gameBoard = gameContainer.querySelector('.game-board');
@@ -244,6 +249,22 @@ let fjPlayerResponseModal,
 	clearFJResponse,
 	fjPlayerResponse,
 	saveFJResponseButton;
+const saveFJResponse = (silent) => {
+	if (!fjPlayerResponse || !isPlayer()) return;
+	socket.emit(
+		'save-fj-response',
+		{ response: fjPlayerResponse.value },
+		withTimeout(
+			(data) => {
+				if (data.status !== 'OK') showMessage('error', data.message);
+				else if (!silent) showMessage('info', 'Response saved');
+			},
+			() => {
+				showMessage('error', 'Request timed out');
+			}
+		)
+	);
+};
 if (fjprm) {
 	fjPlayerResponseModal = new bootstrap.Modal(fjprm);
 	fjPlayerResponse = fjprm.querySelector('#fj-player-response');
@@ -253,22 +274,8 @@ if (fjprm) {
 	clearFJResponse.addEventListener('click', () => {
 		fjPlayerResponse.value = '';
 	});
-	const saveFJResponse = () => {
-		socket.emit(
-			'save-fj-response',
-			{ response: fjPlayerResponse.value },
-			withTimeout(
-				(data) => {
-					if (data.status !== 'OK') showMessage('error', data.message);
-					else showMessage('info', 'Response saved');
-				},
-				() => {
-					showMessage('error', 'Request timed out');
-				}
-			)
-		);
-	};
-	saveFJResponseButton.addEventListener('click', saveFJResponse);
+
+	saveFJResponseButton.addEventListener('click', () => saveFJResponse(false));
 }
 
 let thinkMusic = document.querySelector('#think-sound');
@@ -284,7 +291,6 @@ const getPlayerIndex = () => {
 };
 
 const sendGameInput = (...args) => {
-	console.log(args);
 	//if this is the key window, pass the input forward to the main window
 	if (isKey) {
 		if (!window.opener) return;
@@ -378,11 +384,7 @@ const handleKeyPress = async (e) => {
 		return openKey();
 
 	//player input (remote game only)
-	if (
-		state.isRemote &&
-		state.players.some((p) => p.uid && p.uid === uid) &&
-		(e.key === ' ' || e.key === 'ArrowLeft')
-	) {
+	if (state.isRemote && isPlayer() && e.key === ' ') {
 		return socket.emit(
 			'buzz',
 			withTimeout(
@@ -459,7 +461,9 @@ const handleKeyPress = async (e) => {
 		if (state.host.keys.includes(e.key.toLowerCase())) sendGameInput('host');
 		else if (e.key.toLowerCase() === 'c') sendGameInput('correct');
 		else if (e.key.toLowerCase() === 'x') sendGameInput('incorrect');
-	} else {
+	}
+	//non-remote player key pressed
+	else {
 		const ind = state.players.findIndex(
 			(p) => e.key === p.key && p.name !== '' && !p.isRemote
 		);
@@ -591,8 +595,13 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		});
 
-		socket.on('update-game-state', (data, cb) => {
-			console.log(data);
+		socket.on('update-game-state', (data) => {
+			const state = sh.getState();
+
+			if (state.state !== data.state && data.state === 'FJOver') {
+				saveFJResponse(true);
+			}
+
 			if (data.reset) {
 				delete data.reset;
 				sh.setState(data);
@@ -603,10 +612,6 @@ document.addEventListener('DOMContentLoaded', () => {
 					...data,
 				};
 				sh.setState(newState);
-			}
-			if (data.state === 'FJOver' && cb) {
-				cb({ uid, response: fjPlayerResponse?.value });
-				if (fjPlayerResponseModal) fjPlayerResponseModal.hide();
 			}
 		});
 		window.addEventListener('beforeunload', () => {
@@ -1129,6 +1134,16 @@ document.addEventListener('DOMContentLoaded', () => {
 			// if (fjResponseModal) fjResponseModal.hide();
 			if (fjPlayerResponseModal) fjPlayerResponseModal.hide();
 			showView(fjResponseDiv);
+		} else if (state.state === 'endGame') {
+			showView(gameBoard);
+			if (egm) {
+				endGameMessage.innerHTML = state.status;
+				ackEndGame.addEventListener('click', () => {
+					endGameModal.hide();
+					setTimeout(() => location.reload(), 1000);
+				});
+				endGameModal.show();
+			}
 		} else {
 			showView(gameBoard);
 		}
@@ -1423,7 +1438,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	if (fjPrefixDiv && fjPrefixDiv.length > 0) {
 		fjPrefixDiv.forEach((fjp) => {
 			sh.addWatcher(fjp, (e) => {
-				console.log(fjp);
 				e.target.innerHTML = e.detail.fjPrefix;
 			});
 		});
@@ -1439,7 +1453,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 	if (fjPrefixes) {
 		fjPrefixes.forEach((p) => {
-			console.log(p);
 			p.addEventListener('change', handlePrefixChange);
 		});
 		const ps1 = getElementArray(fjw, 'input[name="fj-wager-radio"]');

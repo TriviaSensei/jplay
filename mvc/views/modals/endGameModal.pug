@@ -1,0 +1,9 @@
+.modal#end-game-modal(tabindex="-1" aria-labelledby="end-game-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false")
+    .modal-dialog.modal-dialog-centered
+        .modal-content#end-game-modal-content
+            input#player-index(type="hidden")
+            .modal-header
+                h5.modal-title#end-game-label Game Over
+            #end-game-result.modal-body
+            .modal-footer
+                button#end-game-ok.btn.btn-sm.btn-primary(type="button" data-key="Enter,Return") OK

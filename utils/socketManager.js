@@ -202,11 +202,8 @@ const socket = async (http, server) => {
 		});
 
 		socket.on('edit-game-data', (data, cb) => {
-			console.log(data);
 			const game = getGameForSocketId(socket.id);
 			//if it's not the host doing the editing, return an error
-			console.log(game.id);
-			console.log(game.gameState.host);
 			if (game.gameState.host.socketId !== socket.id)
 				return cb({
 					status: 'fail',
@@ -229,26 +226,23 @@ const socket = async (http, server) => {
 		socket.on(
 			'game-input',
 			catchSocketErr((data, cb) => {
-				console.log(data);
 				if (!Array.isArray(data) || data.length === 0)
 					return cb({ status: 'fail', message: 'Invalid input' });
 				const inp = data[0];
-				let game;
+				let game = getGameForSocketId(socket.id);
+				if (!game) throw new Error('You are not in a game');
+
 				//host input
 				if (['host', 'correct', 'incorrect', 'start'].includes(inp)) {
-					game = activeGames.find(
-						(g) => g.gameState.host.socketId === socket.id
-					);
-					if (game) {
-						game.handleInput(data);
-						return cb({ status: 'OK' });
-					} else throw new Error('Only the host may issue this command');
+					if (game.gameState.host.socketId !== socket.id)
+						throw new Error('Only the host may issue this command');
 				}
-				game = getGameForSocketId(socket.id);
-				if (!game) throw new Error('You are not in a game');
 
 				game.handleInput(...data);
 				cb({ status: 'OK' });
+				if (game.gameState.state === 'endGame') {
+					activeGames = activeGames.filter((g) => g.id !== game.getId());
+				}
 			})
 		);
 
