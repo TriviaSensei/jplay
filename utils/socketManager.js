@@ -160,6 +160,11 @@ const socket = async (http, server) => {
 				null,
 				null
 			);
+			while (
+				activeGames.some((gm) => gm.gameState.joinCode === g.gameState.joinCode)
+			) {
+				g.refreshJoinCode();
+			}
 			console.log(`Game ${g.gameState.id} created`);
 			activeGames.push(g);
 			socket.join(g.id);

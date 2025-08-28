@@ -810,6 +810,11 @@ class Game {
 		},
 	};
 
+	refreshJoinCode = () => {
+		this.joinCode = randomString(4, letters);
+		this.gameState.joinCode = this.joinCode;
+	};
+
 	constructor(board, host, io, socket, stateHandler) {
 		this.id = randomString(20, chars);
 		this.joinCode = randomString(4, letters);
