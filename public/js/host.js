@@ -53,9 +53,8 @@ const svgDisplays = getElementArray(document, '.lectern-name-canvas');
 const cancelEditPlayer = document.querySelector('#cancel-edit-player');
 const removePlayer = document.querySelector('#remove-player');
 const confirmEditPlayer = document.querySelector('#confirm-edit-player');
-const playerSettingsModal = document.querySelector('#player-settings-modal')
-	? new bootstrap.Modal('#player-settings-modal')
-	: null;
+const psm = document.querySelector('#player-settings-modal');
+const playerSettingsModal = psm ? new bootstrap.Modal(psm) : null;
 const pi = document.querySelector('#player-index');
 const playerName = document.querySelector('#set-player-name');
 const setKeyButton = document.querySelector('#set-button');
@@ -554,6 +553,9 @@ else {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+	const uidTest = localStorage.getItem('jp-client-id');
+	if (uidTest) uid = uidTest;
+
 	if (isKey && !window.opener) location.href = '/';
 
 	if (!isKey) {
@@ -613,6 +615,11 @@ document.addEventListener('DOMContentLoaded', () => {
 				};
 				sh.setState(newState);
 			}
+		});
+
+		socket.on('game-timeout', (data) => {
+			showMessage('error', 'Game timed out', 2000);
+			setTimeout(() => location.reload(), 2000);
 		});
 		window.addEventListener('beforeunload', () => {
 			if (keyWindow) keyWindow.close();
@@ -700,6 +707,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	sh.addWatcher(gameContainer, (e) => {
+		console.log(uid, isKey, e.detail);
 		if (!uid) uid = localStorage.getItem('jp-client-id');
 		if (isKey) showPanel(e.target);
 		else if (!e.detail || e.detail.host.uid !== uid) hidePanel(e.target);
@@ -747,6 +755,18 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 
 		playerSettingsModal.show();
+		const svgCont = psm ? psm.querySelector('.svg-container') : null;
+		if (svgCont) {
+			console.log(svgCont);
+			const tt = new bootstrap.Popover(svgCont);
+			tt.show();
+			setTimeout(() => {
+				tt.dispose();
+				svgCont.removeAttribute('data-bs-toggle');
+				svgCont.removeAttribute('data-bs-content');
+				svgCont.removeAttribute('data-bs-title');
+			}, 2000);
+		}
 	};
 	const loadPlayerDataKey = (e) => {
 		if (!isKey) return;
@@ -972,7 +992,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			//waiting for a DD wager
 			showView(gameBoard);
 			//play the sound
-			if (!isKey && ddSound && state.playSound) {
+			if (!isKey && isHost() && ddSound && state.playSound) {
 				ddSound.play();
 			} else if (isKey) {
 				//set up and show the dd wager modal
@@ -986,6 +1006,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				if (state.playSound && ddWagerModal) {
 					setTimeout(() => {
+						ddWager.value = '';
 						ddWagerModal.show();
 					}, 3000);
 				} else if (isKey && ddWagerModal) ddWagerModal.show();
@@ -1145,6 +1166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				endGameModal.show();
 			}
 		} else {
+			console.log(state);
 			showView(gameBoard);
 		}
 	});
@@ -1204,7 +1226,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (!state) return;
 			const clue = getClue(cat, row);
 
-			if (!clue || state.round >= state.board.length - 1 || state.round < 0) {
+			if (
+				!clue ||
+				state.round >= state.board.length - 1 ||
+				state.round < 0 ||
+				clue.selected
+			) {
 				e.target.innerHTML = '';
 				return;
 			} else e.target.innerHTML = `$${clue.value}`;
@@ -1263,7 +1290,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				(e.detail.state === 'buzz' || e.detail.state === 'pregame')
 			) {
 				e.target.classList.add('lit');
-				startTimerLights(l, e.detail.currentTime - e.detail.buzzTime);
+				if (e.detail.state === 'buzz')
+					startTimerLights(l, e.detail.currentTime - e.detail.buzzTime);
 			} else if (
 				e.detail.state === 'FJOver' &&
 				e.detail.fjOrder[Math.floor(e.detail.fjStep / 4)] === ind
@@ -1768,10 +1796,11 @@ document.addEventListener('DOMContentLoaded', () => {
 				const playerIndex = state.players.findIndex((p) => p.uid === uid);
 				if (playerIndex !== -1 && playerIndex === state.buzzedIn) {
 					playerLectern.classList.add('lit');
-					startTimerLights(
-						playerLectern,
-						e.detail.currentTime - e.detail.buzzTime
-					);
+					if (e.detail.state === 'buzz')
+						startTimerLights(
+							playerLectern,
+							e.detail.currentTime - e.detail.buzzTime
+						);
 				} else playerLectern.classList.remove('lit');
 
 				const score = player.score;
@@ -1781,4 +1810,21 @@ document.addEventListener('DOMContentLoaded', () => {
 				playerScore.innerHTML = `$${Math.abs(score).toLocaleString('en')}`;
 			} else return hidePanel(e.target);
 		});
+
+	document.addEventListener('shown.bs.tab', (e) => {
+		if (e.target.getAttribute('id') === 'play-tab') {
+			const svgCont = document.querySelector(
+				'#play-tab-pane .svg-container[data-bs-toggle="popover"]'
+			);
+			if (svgCont) {
+				const tt = new bootstrap.Popover(svgCont);
+				tt.show();
+				setTimeout(() => {
+					tt.dispose();
+					svgCont.removeAttribute('data-bs-toggle');
+					svgCont.removeAttribute('data-bs-content');
+				}, 2000);
+			}
+		}
+	});
 });

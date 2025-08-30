@@ -1,6 +1,7 @@
 const { v4: uuidV4 } = require('uuid');
 const pingInterval = 1000;
 const pingTimeout = 500;
+const gameTimeout = 300000;
 const Game = require('../public/js/utils/Game');
 // const userTimeout = 5 * 60 * 1000;
 const userTimeout = 2000;
@@ -41,6 +42,7 @@ let io;
  * }
  */
 let activeGames = [];
+let timeouts = [];
 
 const sanitizeData = (game) => {
 	const toReturn = {
@@ -75,12 +77,6 @@ const setSocketId = (uid, socketId) => {
 			return false;
 		});
 	return g;
-};
-
-const removeGame = (id) => {
-	activeGames = activeGames.filter((g) => {
-		return g.id !== id;
-	});
 };
 
 const getGameById = (id) => {
@@ -150,6 +146,25 @@ const socket = async (http, server) => {
 			);
 		};
 
+		const removeGame = (gameId) => {
+			io.to(gameId).emit('game-timeout', null);
+			activeGames = activeGames.filter((g) => g.id !== gameId);
+			timeouts = timeouts.filter((to) => to.id !== gameId);
+		};
+
+		const resetGameTimeout = (gameId) => {
+			const to = timeouts.find((t) => t.id === gameId);
+			if (!to)
+				timeouts.push({
+					id: gameId,
+					timeout: setTimeout(() => removeGame(gameId), gameTimeout),
+				});
+			else {
+				clearTimeout(to.timeout);
+				to.timeout = setTimeout(() => removeGame(gameId), gameTimeout);
+			}
+		};
+
 		//Things the host can emit
 		socket.on('create-game', (data, cb) => {
 			console.log('Creating remote game...');
@@ -160,6 +175,7 @@ const socket = async (http, server) => {
 				null,
 				null
 			);
+			resetGameTimeout(g.id);
 			while (
 				activeGames.some((gm) => gm.gameState.joinCode === g.gameState.joinCode)
 			) {
@@ -187,6 +203,7 @@ const socket = async (http, server) => {
 			const game = getGameByPlayer(data.uid);
 			if (!game)
 				return cb({ status: 'fail', message: 'You are not part of a game' });
+			resetGameTimeout(game.id);
 			//if it's not the host doing the editing, return an error
 			if (game.gameState.host.uid !== data.uid)
 				return cb({
@@ -208,6 +225,9 @@ const socket = async (http, server) => {
 
 		socket.on('edit-game-data', (data, cb) => {
 			const game = getGameForSocketId(socket.id);
+			if (!game)
+				return cb({ status: 'fail', message: 'You are not part of a game' });
+			resetGameTimeout(game.id);
 			//if it's not the host doing the editing, return an error
 			if (game.gameState.host.socketId !== socket.id)
 				return cb({
@@ -236,7 +256,7 @@ const socket = async (http, server) => {
 				const inp = data[0];
 				let game = getGameForSocketId(socket.id);
 				if (!game) throw new Error('You are not in a game');
-
+				resetGameTimeout(game.id);
 				//host input
 				if (['host', 'correct', 'incorrect', 'start'].includes(inp)) {
 					if (game.gameState.host.socketId !== socket.id)
@@ -253,9 +273,13 @@ const socket = async (http, server) => {
 
 		//Things players can emit
 		socket.on('join-game', (data, cb) => {
-			const game = activeGames.find((g) => g.joinCode === data.joinCode);
+			const game = activeGames.find(
+				(g) => g.joinCode.toLowerCase() === data.joinCode.toLowerCase()
+			);
+
 			if (!game) return cb({ status: 'fail', message: 'Game not found' });
 
+			resetGameTimeout(game.id);
 			game.acceptNewPlayer({
 				...data,
 				socketId: socket.id,
@@ -276,6 +300,7 @@ const socket = async (http, server) => {
 				(p) => p.socketId === socket.id
 			);
 			g.handleInput('player', ind);
+			resetGameTimeout(g.id);
 			cb({ status: 'OK' });
 		});
 
@@ -283,6 +308,7 @@ const socket = async (http, server) => {
 			const game = getGameForSocketId(socket.id);
 			if (!game)
 				return cb({ status: 'fail', message: 'You are not in a game' });
+			resetGameTimeout(game.id);
 			const ind = game.gameState.players.findIndex(
 				(p) => p.socketId === socket.id
 			);
@@ -298,6 +324,8 @@ const socket = async (http, server) => {
 			const game = getGameForSocketId(socket.id);
 			if (!game)
 				return cb({ status: 'fail', message: 'You are not in a game' });
+			resetGameTimeout(game.id);
+
 			const ind = game.gameState.players.findIndex(
 				(p) => p.socketId === socket.id
 			);

@@ -29,7 +29,7 @@ const lockTimeout = 250;
 const clueTime = 3500;
 const ddTime = 7000;
 const FJTime = 31000;
-const cluesPerRound = 1;
+const cluesPerRound = 30;
 
 class Player {
 	constructor(name, nameData, uid, socketId, key, isRemote) {
@@ -229,8 +229,7 @@ class Game {
 						this.startClueTimer(clueTime, {
 							buzzerArmed: false,
 							buzzedIn: -1,
-							state: 'showClue',
-							status: 'Clue timed out',
+							state: 'clueTimedOut',
 						});
 					}
 					//everyone is locked out - are there clues left?
@@ -293,7 +292,10 @@ class Game {
 		const p = this.gameState.fjOrder[(this.gameState.fjStep - 1) / 4];
 		const player = this.gameState.players[p];
 		player.finalCorrect = correct;
-		this.setGameState({ fjStep: this.gameState.fjStep + 1 });
+		this.setGameState({
+			fjStep: this.gameState.fjStep + 1,
+			status: `${player.name}'s Final Jeopardy wager revealed. Press advance to continue.`,
+		});
 	}
 
 	handleBuzz(p) {
@@ -365,18 +367,18 @@ class Game {
 					this.gameState.players.length > 0 &&
 					this.gameState.players.some((p) => p.getName() !== '')
 				) {
-					// this.setGameState({
-					// 	state: 'boardIntro',
-					// 	round: 0,
-					// 	categoryShown: -2,
-					// 	status: 'Board intro - press advance to display next category',
-					// });
-					this.gameState.active = true;
-					this.gameState.state = 'betweenRounds';
-					this.gameState.round = 2;
-					this.gameState.players.forEach((p, i) => {
-						if (p.name) p.score = (i + 1) * 200;
+					this.setGameState({
+						state: 'boardIntro',
+						round: 0,
+						categoryShown: -2,
+						status: 'Board intro - press advance to display next category',
 					});
+					// this.gameState.active = true;
+					// this.gameState.state = 'betweenRounds';
+					// this.gameState.round = 2;
+					// this.gameState.players.forEach((p, i) => {
+					// 	if (p.name) p.score = (i + 1) * 200;
+					// });
 					this.updateGameState();
 				} else throw new Error('You must have at least one player.');
 			},
@@ -442,6 +444,7 @@ class Game {
 				wager: -1,
 				selectedClue: [-1, -1],
 				currentTime: null,
+				timeout: false,
 			},
 			clue: (cat, row) => {
 				const rd = this.gameState.round;
@@ -480,7 +483,7 @@ class Game {
 					this.startClueTimer(clueTime, {
 						buzzerArmed: false,
 						buzzedIn: -1,
-						state: 'showClue',
+						state: 'clueTimedOut',
 						status: 'Clue timed out. Press advance to continue.',
 					});
 				}
@@ -533,6 +536,28 @@ class Game {
 				this.handleBuzz(p);
 			},
 		},
+		//clue timed out
+		clueTimedOut: {
+			data: {
+				status: 'Clue timed out. Press "advance" to continue.',
+			},
+			host: () => {
+				const state = this.gameState;
+				if (this.checkRoundOver())
+					this.setGameState({
+						state: 'betweenRounds',
+						round: state.round + 1,
+						timeout: false,
+					});
+				else
+					this.setGameState({
+						state: 'select',
+						status: `${this.gameState.players[
+							this.gameState.control
+						].getName()} to select a clue`,
+					});
+			},
+		},
 		//buzz: a player is buzzed in
 		buzz: {
 			//can only come from clueLive - buzzer is disarmed
@@ -573,13 +598,29 @@ class Game {
 				this.setGameState({
 					state: 'DDLive',
 				});
-				this.startClueTimer(ddTime, null);
+				this.startClueTimer(ddTime, {
+					state: 'DDTimedOut',
+					timeout: true,
+					playSound: true,
+				});
 			},
 		},
 		//DDLive: DD is live, buzzers not active
 		DDLive: {
 			data: {
 				status: `Waiting for Daily Double response`,
+			},
+			correct: () => {
+				this.handleDDResponse(true);
+			},
+			incorrect: () => {
+				this.handleDDResponse(false);
+			},
+		},
+		DDTimedOut: {
+			data: {
+				status:
+					'Daily Double timed out. Indicate whether correct response was given to continue.',
 			},
 			correct: () => {
 				this.handleDDResponse(true);
@@ -1160,7 +1201,7 @@ class Game {
 		this.clueTimeout = null;
 		this.setGameState({
 			...nextState,
-			timeout: nextState.state !== 'FJOver',
+			timeout: true,
 			playSound: nextState.state !== 'FJOver',
 		});
 		this.gameState.playSound = false;
