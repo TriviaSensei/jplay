@@ -1,0 +1,31 @@
+name: cicd
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm Install
+      - name: Generate deployment package
+        run: zip -r jplay.zip .
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: jplay
+          environment_name: Jplay-env
+          version_label: ${{ github.sha }}
+          region: us-east-1
+          deployment_package: jplay.zip
