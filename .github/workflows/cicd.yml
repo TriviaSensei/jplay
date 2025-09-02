@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 20
       - name: Install dependencies
-        run: npm Install
+        run: npm install
       - name: Generate deployment package
         run: zip -r jplay.zip .
       - name: Deploy to EB
