@@ -2,7 +2,7 @@
     .input-row-v 
         .input-label Your name 
         .input-container 
-            input#player-name.mb-2(type="text" placeholder="Your name" value="chuck")
+            input#player-name.mb-2(type="text" placeholder="Your name")
             #join-name.draw-player-name
                 .ratio.ratio-4x3.mb-2
                     .svg-container(data-bs-content="Draw your name here!" data-bs-toggle="popover")
@@ -15,7 +15,7 @@
     .input-row-v 
         .input-label Room code
         .input-container 
-            input#room-code.caps(type="text" placeholder="Room code" maxlength="4" value="a")
+            input#room-code.caps(type="text" placeholder="Room code" maxlength="4")
     .w-100.d-flex.mt-4
         .m-auto.w-50.d-flex.flex-row
             button#join-game.btn.btn-primary.w-100.me-1 Join
