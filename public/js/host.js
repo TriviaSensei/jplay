@@ -1877,9 +1877,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			'#play-tab-pane .svg-container[data-bs-toggle="popover"]'
 		);
 		const disposeTT = () => {
-			if (tt) tt.dispose();
-			svgCont.removeAttribute('data-bs-toggle');
-			svgCont.removeAttribute('data-bs-content');
+			try {
+				if (tt) tt.dispose();
+				svgCont.removeAttribute('data-bs-toggle');
+				svgCont.removeAttribute('data-bs-content');
+			} catch (err) {}
 		};
 		if (e.target.getAttribute('id') === 'play-tab') {
 			if (svgCont) {
