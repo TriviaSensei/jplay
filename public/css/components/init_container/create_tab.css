@@ -67,20 +67,7 @@
 		border: none;
 		outline: none;
 		resize: none;
-	}
-
-	@media (max-aspect-ratio: 0.89) {
-		#edit-clue-text {
-			font-size: 7vw;
-		}
-	}
-	/*
-		viewport is wide enough to fit everything - font size determined by the height of the window
-	*/
-	@media (aspect-ratio > 0.89) {
-		#edit-clue-text {
-			font-size: 3vh;
-		}
+		font-size: 1.5em;
 	}
 }
 
