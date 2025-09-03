@@ -1,19 +1,21 @@
 link(rel="stylesheet" href="/css/components/init_container.css")
 ul.nav.nav-tabs.nav-fill.mt-3#myTab(role="tablist")
     li.nav-item(role="presentation")
-        button.nav-link#play-tab(data-bs-toggle="tab" data-bs-target="#play-tab-pane" type="button" role="tab" aria-controls="play-tab-pane" aria-selected="false") Play
+        button.nav-link.active#play-tab(data-bs-toggle="tab" data-bs-target="#play-tab-pane" type="button" role="tab" aria-controls="play-tab-pane" aria-selected="false") Play
   
     li.nav-item(role="presentation")
-        button.nav-link.active#host-tab(data-bs-toggle="tab" data-bs-target="#host-tab-pane" type="button" role="tab" aria-controls="host-tab-pane" aria-selected="true") Host
+        button.nav-link#host-tab(data-bs-toggle="tab" data-bs-target="#host-tab-pane" type="button" role="tab" aria-controls="host-tab-pane" aria-selected="true") Host
   
     li.nav-item(role="presentation")
         button.nav-link#create-tab(data-bs-toggle="tab" data-bs-target="#create-tab-pane" type="button" role="tab" aria-controls="create-tab-pane" aria-selected="false") Create
 
   
 .tab-content#myTabContent
-    .tab-pane.fade#play-tab-pane(role="tabpanel" aria-labelledby="play-tab" tabindex="0")
+    #header-message.position-fixed.header-message.d-flex.flex-row.justify-content-end.d-none
+        .message-content
+    .tab-pane.fade.show.active#play-tab-pane(role="tabpanel" aria-labelledby="play-tab" tabindex="0")
         include init_container/play_tab
-    .tab-pane.fade.show.active#host-tab-pane(role="tabpanel" aria-labelledby="host-tab" tabindex="0")
+    .tab-pane.fade#host-tab-pane(role="tabpanel" aria-labelledby="host-tab" tabindex="0")
         include init_container/host_tab
     .tab-pane.fade#create-tab-pane(role="tabpanel" aria-labelledby="create-tab" tabindex="0")
         include init_container/create_tab

@@ -1,0 +1,10 @@
+.modal#create-data-modal(tabindex="-1" aria-labelledby="create-data-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false")
+    .modal-dialog.modal-dialog-centered
+        .modal-content#create-data-modal-content
+            .modal-header
+                h5.modal-title#create-data-label Upload Data - Result
+            .modal-body 
+                p The data was uploaded with warnings.
+                ul#data-warnings
+            .modal-footer
+                button.btn.btn-sm.btn-primary(type="button" data-bs-dismiss="modal") OK

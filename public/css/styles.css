@@ -112,6 +112,11 @@ body.dark {
 	border-bottom: 5px solid var(--blue);
 }
 
+.tab-content {
+	flex: 1;
+	overflow-y: auto;
+}
+
 .host-panel {
 	display: flex;
 	flex-direction: column;

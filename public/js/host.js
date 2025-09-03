@@ -552,6 +552,58 @@ else {
 	});
 }
 
+const validateGameData = (data) => {
+	const fail = (msg) => {
+		return { status: 'fail', message: msg };
+	};
+	if (!data) return fail('No data was found');
+	else if (!Array.isArray(data) || data.length !== 3)
+		return fail('Data must have a rounds array of 3 rounds');
+	else if (!data[2].category || !data[2].text || !data[2].response) {
+		return fail(
+			'Final Jeopardy round is missing category, text, or response data'
+		);
+	} else {
+		for (var round = 0; round <= 1; round++) {
+			const rd = data[round];
+			if (rd.length !== 6)
+				return fail(`Round ${round + 1} does not contain 6 valid categories`);
+			for (var category = 0; category < rd.length; category++) {
+				if (!rd[category].category || rd[category].category.trim() === '')
+					return fail(
+						`Round ${round + 1}, category ${
+							category + 1
+						} does not have valid category text`
+					);
+				const clues = rd[category].clues;
+				if (clues.length !== 5)
+					return fail(
+						`Round ${round + 1}, category ${
+							category + 1
+						} does not contain 5 valid clues`
+					);
+
+				for (var clue = 0; clue < 5; clue++) {
+					const cl = clues[clue];
+					if (!cl.text || cl.text.trim() === '')
+						return fail(
+							`Round ${round + 1}, category ${category + 1}, clue ${
+								clue + 1
+							} does not contain text`
+						);
+					if (!cl.response || cl.response.trim() === '')
+						return fail(
+							`Round ${round + 1}, category ${category + 1}, clue ${
+								clue + 1
+							} does not contain a response`
+						);
+				}
+			}
+		}
+	}
+	return { status: 'OK' };
+};
+
 document.addEventListener('DOMContentLoaded', () => {
 	const uidTest = localStorage.getItem('jp-client-id');
 	if (uidTest) uid = uidTest;
@@ -680,6 +732,9 @@ document.addEventListener('DOMContentLoaded', () => {
 				const reader = new FileReader();
 				reader.addEventListener('load', () => {
 					data = JSON.parse(reader.result);
+					const val = validateGameData(data.rounds);
+					if (val.status !== 'OK')
+						return showMessage('error', val.message, 2000);
 					startGame(gameType, data.rounds);
 				});
 				reader.readAsText(file, 'utf-8');
@@ -691,6 +746,9 @@ document.addEventListener('DOMContentLoaded', () => {
 				const handler = (res) => {
 					if (res.status === 'success') data = res.data.rounds;
 					else return showMessage('error', res.message);
+
+					const val = validateGameData(data);
+					if (val.status !== 'OK') return showMessage('error', val.message);
 					startGame(gameType, data);
 				};
 				const url = `/games/${filename}`;
@@ -1048,7 +1106,9 @@ document.addEventListener('DOMContentLoaded', () => {
 				else if (ind === state.categoryShown) {
 					setTimeout(() => cb.classList.remove('category-hidden'), 500);
 					const cd = cb.querySelector('.category-div');
+					const cc = cb.querySelector('.comment-div');
 					cd.innerHTML = getCategory(i)?.category || '';
+					if (isKey && cc) cc.innerHTML = getCategory(i)?.comments || '';
 				}
 			});
 			categoryScrollInner.style.left = `${-100 * state.categoryShown}%`;
@@ -1811,20 +1871,32 @@ document.addEventListener('DOMContentLoaded', () => {
 			} else return hidePanel(e.target);
 		});
 
-	document.addEventListener('shown.bs.tab', (e) => {
+	let to, tt;
+	const handlePopover = (e) => {
+		const svgCont = document.querySelector(
+			'#play-tab-pane .svg-container[data-bs-toggle="popover"]'
+		);
+		const disposeTT = () => {
+			if (tt) tt.dispose();
+			svgCont.removeAttribute('data-bs-toggle');
+			svgCont.removeAttribute('data-bs-content');
+		};
 		if (e.target.getAttribute('id') === 'play-tab') {
-			const svgCont = document.querySelector(
-				'#play-tab-pane .svg-container[data-bs-toggle="popover"]'
-			);
 			if (svgCont) {
-				const tt = new bootstrap.Popover(svgCont);
-				tt.show();
-				setTimeout(() => {
-					tt.dispose();
-					svgCont.removeAttribute('data-bs-toggle');
-					svgCont.removeAttribute('data-bs-content');
-				}, 2000);
+				tt = new bootstrap.Popover(svgCont);
+				if (tt) {
+					tt.show();
+					to = setTimeout(disposeTT, 2000);
+				}
 			}
+		} else if (tt && to) {
+			clearTimeout(to);
+			disposeTT();
+			tt = null;
+			to = null;
 		}
-	});
+	};
+	document.addEventListener('shown.bs.tab', handlePopover);
+	const pt = document.querySelector('#play-tab.active');
+	if (pt) handlePopover({ target: pt });
 });
