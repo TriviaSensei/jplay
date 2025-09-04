@@ -36,6 +36,11 @@ body {
 	bottom: 0;
 }
 
+body.bg-light {
+	background-image: url(../img/bg.jpg);
+	background-size: cover;
+	background-repeat: no-repeat;
+}
 body.dark {
 	background-color: var(--black);
 }
@@ -105,7 +110,7 @@ body.dark {
 .game-container {
 	width: min(89vh, 100%);
 	padding: 1%;
-	background-color: black;
+	/* background-color: black; */
 }
 
 .nav-tabs .nav-link.active {

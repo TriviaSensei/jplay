@@ -2,35 +2,42 @@
 	width: 100%;
 }
 
-.player-container .lecterns {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	.lectern {
-		width: 50%;
-		/*
+.player-container {
+	.lecterns {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		.lectern {
+			width: min(50%, 60vh);
+			/*
 				viewport is tall and narrow, and font size will be determined by the width of the window
 			*/
-		@media (max-aspect-ratio: 0.89) {
-			.name-display {
-				font-size: 3vw;
+			@media (max-aspect-ratio: 0.89) {
+				.name-display {
+					font-size: 3vw;
+				}
+				.score-display {
+					font-size: 4.2vw;
+				}
 			}
-			.score-display {
-				font-size: 4.2vw;
-			}
-		}
-		/*
+			/*
 				viewport is wide enough to fit everything - font size determined by the height of the window
 			*/
-		@media (aspect-ratio > 0.89) {
-			.name-display {
-				font-size: 3vh;
-			}
-			.score-display {
-				font-size: 4.2vh;
+			@media (aspect-ratio > 0.89) {
+				.name-display {
+					font-size: 3vh;
+				}
+				.score-display {
+					font-size: 4.2vh;
+				}
 			}
 		}
 	}
+}
+
+.player-container .buzzer-container {
+	min-height: 30%;
+	width: min(100%, 500px);
 }
 .input-row-h button {
 	width: 20%;

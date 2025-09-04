@@ -345,6 +345,7 @@ const openKey = () => {
 const isHost = () => {
 	const state = sh.getState();
 	if (!state) return false;
+	console.log(state.host.uid, uid);
 	return state.host.uid === uid;
 };
 
@@ -1408,8 +1409,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (state?.message?.trim()) showMessage('info', state.message);
 		if (state?.isRemote && socket)
 			socket.emit('update-game-state', state, 1500);
-		if (state) document.body.classList.add('dark');
-		else document.body.classList.remove('dark');
+		if (state) {
+			if (isPlayer() || isKey) document.body.classList.add('dark');
+			else if (isHost()) document.body.classList.add('bg-light');
+		} else {
+			document.body.classList.remove('dark');
+			document.body.classList.remove('bg-light');
+		}
 	});
 
 	sh.addWatcher(timeoutSound, (e) => {
