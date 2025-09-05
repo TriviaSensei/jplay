@@ -105,12 +105,17 @@ if (ddWagerModal) {
 	confirmDDWager = ddw.querySelector('#confirm-dd-wager');
 }
 
-let editPlayerModal, editPlayerHeader, editPlayerName, editPlayerScore;
+let editPlayerModal,
+	editPlayerHeader,
+	editPlayerName,
+	editPlayerScore,
+	assignControl;
 if (isKey) {
 	editPlayerModal = new bootstrap.Modal('#edit-player-modal');
 	editPlayerHeader = document.querySelector('#edit-player-header');
 	editPlayerName = document.querySelector('#edit-player-name');
 	editPlayerScore = document.querySelector('#edit-player-score');
+	assignControl = document.querySelector('#give-control');
 }
 
 const nameCanvas = document.querySelector('#draw-player-name .name-canvas');
@@ -194,7 +199,6 @@ const socketCB = (fn) =>
 					};
 				});
 
-			if (fn) console.log('running function');
 			if (fn) fn();
 		},
 		() => {
@@ -324,7 +328,25 @@ const receiveGameState = (e) => {
 	sh.setState(e.detail);
 };
 if (isKey) document.addEventListener('receive-state', receiveGameState);
-
+else {
+	document.addEventListener('assign-control', (e) => {
+		const index = e.detail;
+		const state = sh.getState();
+		if (!state.players[index]?.name) return;
+		const status =
+			state.state === 'waitingDD'
+				? `Waiting for Daily Double wager from ${state.players[index].name}`
+				: `${state.players[index].name} to select a clue`;
+		if (state.isRemote) {
+			socket.emit('edit-game-data', { control: index, status }, socketCB());
+		} else {
+			game.setGameState({
+				control: index,
+				status,
+			});
+		}
+	});
+}
 //open key
 const openKey = () => {
 	if (isKey) return;
@@ -414,7 +436,7 @@ const handleKeyPress = async (e) => {
 		//local players cannot have a key reserved for the host
 		else if (
 			!state.players[playerIndex]?.isRemote &&
-			[...state.host.keys, 'c', 'x'].includes(e.key.toLowerCase())
+			[...state.host.keys, 'c', 'x', 'k'].includes(e.key.toLowerCase())
 		) {
 			showMessage('warning', `Key is reserved for host - no changes made`);
 		}
@@ -423,15 +445,10 @@ const handleKeyPress = async (e) => {
 		else {
 			if (playerIndex < state.players.length) {
 				if (state.isRemote) {
-					socket.emit(
-						'edit-player',
-						{
-							uid,
-							player: playerIndex,
-							key: e.key,
-						},
-						socketCB(() => playerSettingsModal.hide())
-					);
+					state.players[playerIndex].key = e.key;
+					buzzerKey.setAttribute('data-key', e.key);
+					sh.setState(state);
+					console.log(state);
 				} else {
 					game.gameState.players[playerIndex].setKey(e.key);
 					buzzerKey.setAttribute('data-key', e.key);
@@ -766,7 +783,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	sh.addWatcher(gameContainer, (e) => {
-		console.log(uid, isKey, e.detail);
 		if (!uid) uid = localStorage.getItem('jp-client-id');
 		if (isKey) showPanel(e.target);
 		else if (!e.detail || e.detail.host.uid !== uid) hidePanel(e.target);
@@ -966,7 +982,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					);
 				}
 			});
-		else
+		else {
 			confirmEditPlayer.addEventListener('click', () => {
 				const index = getPlayerIndex();
 				const data = {
@@ -978,6 +994,13 @@ document.addEventListener('DOMContentLoaded', () => {
 				sendGameInput('editPlayer', index, data);
 				editPlayerModal.hide();
 			});
+			assignControl.addEventListener('click', () => {
+				const index = getPlayerIndex();
+				const evt = new CustomEvent('assign-control', { detail: index });
+				if (!window.opener) return;
+				return window.opener.document.dispatchEvent(evt);
+			});
+		}
 	}
 
 	if (cancelEditPlayer)
@@ -1227,7 +1250,6 @@ document.addEventListener('DOMContentLoaded', () => {
 				endGameModal.show();
 			}
 		} else {
-			console.log(state);
 			showView(gameBoard);
 		}
 	});

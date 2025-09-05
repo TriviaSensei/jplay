@@ -49,6 +49,18 @@ body.dark {
 	overscroll-behavior: none;
 }
 
+.help-icon {
+	position: absolute;
+	right: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	height: 50%;
+	img:hover {
+		cursor: pointer;
+		opacity: 50%;
+	}
+}
+
 .category-display {
 	font-family: 'Swiss 911 Compressed', sans-serif;
 }

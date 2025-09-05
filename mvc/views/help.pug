@@ -1,0 +1,122 @@
+mixin image(caption)
+    img.help-img
+    .caption= caption
+
+mixin command(cmd)
+    span.command= cmd
+
+doctype html
+html
+    head
+        meta(name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0")
+        link(rel="preconnect" href="https://fonts.googleapis.com")
+        link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+        link(href="https://fonts.googleapis.com/css2?family=Shadows+Into+Light+Two&display=swap" rel="stylesheet")
+        link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous")
+        link(rel='stylesheet' href='/css/styles.css')
+        link(rel='stylesheet' href='/css/help.css')
+        block styles
+        link(rel='shortcut icon' href='/img/favicon.png')
+        meta(charset='UTF-8')
+        meta(name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+        title= title
+    body.no-select.overflow-hidden
+        .container-all
+            nav.position-sticky.d-flex.mt-3(style="top:0;")
+                .w-100.h-100.position-relative.d-flex
+                    .position-absolute.home-icon
+                        a(href="/")
+                            img(src="/img/home.svg")                
+                    h2.mx-auto J-Play Documentation
+            .f-1.overflow-auto.p-2
+                section
+                    h4 Introduction 
+                    p J-Play is a place where you can play Jeopardy! with your friends, just like the real thing. Create your own game file (or use one of the example ones provided), and host your game, with players joining either locally or remotely with a join code.
+                section 
+                    h4 Creating a game file 
+                    p This help file will start with how to create a game file, as it is absolutely necessary for playing a game.
+                    p It is possible to manually create a game file (download the template #[a(href=`data:text/plain;charset=utf-8,${encodeURIComponent(JSON.stringify(template))}` download="template.json") here]), or using the "Create" tab, which is available from the #[a(href="/") homepage], as shown below: 
+                    +image("The create tab")
+                    h5 Manual game creation
+                    p Creating a game manually takes a basic knowledge of JSON. To create a game manually, open the template. 
+                    p The "rounds" array has 3 elements, representing the three rounds of a game (Jeopardy, Double Jeopardy, and Final Jeopardy). 
+                    p For the Jeopardy and Double Jeopardy rounds, you must fill in each category, and for each of the 5 clues in each category, the text and correct response for each clue. If the category has any comments (e.g. a clarification of the category for the host to read to the contestants, like "each correct response starts with a C"), you may fill that in as well. Clue values will be automatically populated, and daily double locations will be randomly determined when the game file is loaded.
+                    +image("Manually creating a game")
+                    p Final Jeopardy is a single object with a category, text, and response attribute. All three must be filled in.
+                    p Additionally, clue texts and responses can support basic HTML formatting (&lt;i&gt; for italic text, &lt;br&gt; for a new line). If you need a quotation mark, you can escape it with a backslash (\"):
+                    +image("Using basic HTML and escaping quotation marks")
+                    p #[b It is recommended that category names are limited to 25 characters, and clue texts are limited to 125 characters.]
+                    h5 Using the Creator 
+                    p Using the game creator is an easy way to generate and download the .json file for later use. You do not have to create the entire game in one sitting - rather, you may download the incomplete file and then reload it later to complete by using the "Download" and "Load" buttons.
+                    p To use the creator, select the round (J, DJ, or FJ for first round, Double Jeopardy, and Final Jeopardy, respectively), Category, and Value, and type in the clue and response. Upon selecting a category, you may also edit the category name and comments.
+                    p If any issues are present, a warning emoji (⚠️) will appear and the area will be outlined in red: 
+                    ul 
+                        li In the round selector: At least one category in the round has a blank name, or at least one clue in the round has a blank text or response field.
+                        li In the category selector: the name of the category is blank, or at least one clue in the category has a blank text or response field.
+                        li In the clue selector: This clue has a blank text or response field.
+                    +image("The creator interface")
+                section 
+                    h4 Starting a game 
+                    p A game requires a host and at least one player. It is recommended that the host have a dual-screen setup, as the game key with correct responses will open in a new window, and the easiest way to control the game will be to use that window. While the site is mobile friendly and it is technically possible to do so, controlling the game from a tablet or smartphone is not recommended. Players are, however, encouraged to play from their phones.
+                    p To play a game, the host must first start by using the "Host" tab. There are two sets of options for starting a game: 
+                    ul
+                        li 
+                            p Game type
+                                ul
+                                    li Local - all players are physically present and will be buzzing in with the keyboard.
+                                    li Remote - at least one player will be playing remotely from a different device. Other players who are physically present may join from their own device or buzz in using the keyboard.
+                        li 
+                            p Load game file 
+                                ul
+                                    li From computer - a .json file from your local machine, possibly having been generated using the creator. If there is invalid or missing data in this file, the game will not start.
+                                    li From server - a small set of games compiled from real Jeopardy! clues has been provided for use.
+                    p Once a file is loaded, the game board will show, and a the browser will attempt to open a key window. If the key window does not open, disable your popup blocker. If you accidentally close the key window, press "K" from the main window to reopen it. For a remote game, the join code will be displayed in this window. Additionally, this window will display the correct response to each clue, the scores, and any relevant game controls for the host. The main window should be screen-shared with players in a remote game. The key window should be concealed from view in a local game, and not shared in a remote game.
+                section 
+                    h4 Joining a game 
+                    h5 Local players
+                    p Whether the game itself is local or remote, local players (players who will play on the same machine as the host) can be added to the game through the interface itself, using the "edit player" buttons.
+                    +image("The game board before players are added")
+                    p A player must be given a text name. They may also draw their name (like on the real show) in the blue canvas, but that is optional. If they do not draw their name, their lectern will display their name as text.
+                    p Also note the "buzzer key" section. Local players must set the key they wish to use in order to buzz in. By default, the left, middle, and right players (as viewed on the screen) will use the left, up, and right arrows to buzz, but these can be changed. No two local players can use the same key, obviously, and the spacebar, "C", "X", "K", and down arrow keys are reserved for host use and may not be used by players.
+                    +image("The player settings window") 
+                    p Click on a player's name in the lectern to edit or remove the player once they are saved.
+                    +image("The player's lectern after saving")
+                    h5 Remote players 
+                    p The host will get a join code from the key window when they start the game.
+                    +image("The key window with the join code")
+                    p Remote players will log into the game using their own devices using their name and the join code. As with local players, they must provide a text name, and may optionally draw their name with the canvas.
+                    +image("Joining a game remotely") 
+                    p Upon joining the game, the player will see their lectern and a buzzer button. They may click the button or press spacebar to buzz during the game. Before the game starts, the buzzers are live so that players may test them.
+                    +image("Player buzzer") 
+                section 
+                    h4 Playing the game and game flow
+                    p The host has ultimate control over the game, and the key window will assist by describing the current game state, and what input the game is expecting from the host, if any. This section will describe what actions/commands are available at any given time in the game and point out some other important features of the interface.
+                    +image("Control panel in the key window")
+                    h5 Host controls 
+                    p The host has 4 basic controls: 
+                    ul 
+                        li #[span.fw-semibold Host key] - The "host key" is any of the spacebar, down arrow, or the advance button in the key window, and acts as an all-purpose button that advances the game state.
+                        li #[span.fw-semibold Correct key] - "C" or the "correct" button in the key window. Marks a contestant's answer correct when necessary.
+                        li #[span.fw-semibold Incorrect key] - "X" or the "incorrect button" in the key window. Marks a contestant's answer incorrect when necessary.
+                        li #[span.fw-semibold Open key] - "K", opens the key window. If a key window is already open, the old key window is closed.
+                    p These controls will be referred to further down in this section as the flow of the game is described.
+                    h5 Pregame 
+                    p When the game starts, it is in a "pregame" state. Players may join or be added to the game.
+                    p Press the #[+command("host key")] when ready to start the game. Press "start" in the ensuing prompt to begin the game.
+                    h5 Board intro 
+                    p The board is populated. In the key window, the location of any daily doubles will be marked by inverting its colors. The categories are initially concealed.
+                    +image("A daily double is marked with a yellow background and blue text")
+                    p Use the #[+command("host key")] to scroll through the categories. You must press the #[+command("host key")] after each category, as it may have comments that the host needs to read to the players.
+                    +image("Revealing the categories. The left side is the player view in a local game, and the right side is the view in the key window when a comment exists for a category")
+                    h5 Clue select
+                    p At any time when a clue is to be selected, the host may click an unselected clue in the main window or the key window to select it. The player in control of the board is highlighted with a white line underneath their lectern.
+                    +image("Alex is in control of the board")
+                    
+
+
+
+
+
+
+
+    script(src="/js/help.js" type="module" defer)

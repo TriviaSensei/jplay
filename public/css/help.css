@@ -1,0 +1,47 @@
+.container-all {
+	overflow-y: hidden;
+	margin: auto;
+	height: 100%;
+	width: min(100%, 600px);
+	display: flex;
+	flex-direction: column;
+}
+
+.home-icon {
+	position: absolute;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	height: 50%;
+	img {
+		height: 100%;
+		width: 100%;
+	}
+	img:hover {
+		cursor: pointer;
+		opacity: 50%;
+	}
+}
+
+section {
+	margin-bottom: 1em;
+	display: flex;
+	flex-direction: column;
+}
+
+.help-img {
+	width: min(100%, 400px);
+	margin: auto;
+}
+
+.help-img + .caption {
+	font-size: 0.8em;
+	font-weight: bold;
+	margin: 0.5em auto 1em;
+}
+
+.command {
+	font-weight: bold;
+	background-color: #bbb;
+	padding: 0 0.2em;
+}

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { readdir, readFile } = require('node:fs/promises');
+const template = require('../template');
 
 exports.httpsRedirect = (req, res, next) => {
 	if (
@@ -34,6 +35,13 @@ exports.getHome = async (req, res, next) => {
 			files: [],
 		});
 	}
+};
+
+exports.getHelp = async (req, res, next) => {
+	res.status(200).render('help', {
+		title: 'J-Play Help!',
+		template,
+	});
 };
 
 exports.getGame = async (req, res, next) => {
