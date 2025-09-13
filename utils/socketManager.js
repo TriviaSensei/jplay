@@ -49,7 +49,6 @@ const sanitizeData = (game) => {
 };
 
 const getGameForUser = (id) => {
-	console.log(id);
 	return activeGames.find(
 		(g) =>
 			(g.gameState.host?.uid && g.gameState.host.uid === id) ||
@@ -59,14 +58,12 @@ const getGameForUser = (id) => {
 
 const setSocketId = (uid, socketId) => {
 	const g = getGameForUser(uid);
-	console.log(`Found in game ID: ${g ? g.id : '(none)'}`);
-	console.log(`Setting socket ID to ${socketId}`);
+
 	if (!g) return null;
 	if (g.gameState.host.uid === uid) g.gameState.host.socketId = socketId;
 	else
 		g.gameState.players.some((p) => {
 			if (p.uid === uid) {
-				console.log(p);
 				p.setSocketId(socketId);
 				return true;
 			}
@@ -88,13 +85,6 @@ const getGameByPlayer = (uid) => {
 };
 
 const getGameForSocketId = (id) => {
-	console.log(`getting game for socket ID ${id}`);
-	console.log(
-		activeGames.map((g) => [
-			g.gameState.host.socketId,
-			...g.gameState.players.map((p) => p.socketId),
-		])
-	);
 	return activeGames.find(
 		(g) =>
 			g.gameState.host.socketId === id ||
@@ -127,8 +117,7 @@ const socket = async (http, server) => {
 		});
 		//user sends this to get their gamestate back
 		socket.on('verify-id', (data, cb) => {
-			console.log(`Verifying id:`);
-			console.log(data);
+			console.log(`Verifying id: ${data.id}`);
 			const activeGame = getGameForUser(data.id);
 			//if we didn't find a game, then the player isn't part of one
 			if (!activeGame)
@@ -298,7 +287,6 @@ const socket = async (http, server) => {
 		});
 
 		socket.on('buzz', (cb) => {
-			console.log(`Buzz (ID: ${socket.id})`);
 			const g = getGameForSocketId(socket.id);
 			if (!g) return cb({ status: 'fail', message: 'You are not in a game' });
 
