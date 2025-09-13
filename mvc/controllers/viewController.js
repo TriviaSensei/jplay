@@ -10,7 +10,7 @@ exports.httpsRedirect = (req, res, next) => {
 	) {
 		if (req.header('x-forwarded-proto') !== 'https') {
 			return res.redirect(`https://${req.header('host')}${req.url}`);
-			// next();
+			// next() ;
 		}
 	}
 	next();
