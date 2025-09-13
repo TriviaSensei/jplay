@@ -221,7 +221,7 @@ class Game {
 					//lock this player out for the question
 					this.gameState.players[this.gameState.buzzedIn].locked = true;
 					//if any one is elibible, go back to clueLive
-					if (this.gameState.players.some((p) => !p.isLocked())) {
+					if (this.gameState.players.some((p) => p.name && !p.isLocked())) {
 						this.setGameState({
 							state: 'clueLive',
 							status: `Waiting for buzz`,
@@ -446,6 +446,11 @@ class Game {
 				currentTime: null,
 				timeout: false,
 			},
+			action: () => {
+				this.gameState.players.forEach((p) => {
+					p.locked = false;
+				});
+			},
 			clue: (cat, row) => {
 				const rd = this.gameState.round;
 				const clue = this.gameState.board[rd][cat].clues[row];
@@ -549,13 +554,15 @@ class Game {
 						round: state.round + 1,
 						timeout: false,
 					});
-				else
+				else {
 					this.setGameState({
 						state: 'select',
 						status: `${this.gameState.players[
 							this.gameState.control
 						].getName()} to select a clue`,
 					});
+					this.unlockAll();
+				}
 			},
 		},
 		//buzz: a player is buzzed in
@@ -1136,18 +1143,24 @@ class Game {
 
 	setGameState(state) {
 		let newData = {};
+		let action;
 		this.gameState.modal = '';
 		this.gameState.modalDescription = '';
 		//if we are entering a new general game state, populate the basic data
 		if (state.state && state.gameState !== this.gameState.state) {
 			const newState = state.state;
-			if (this.stateMap[newState]?.data) newData = this.stateMap[newState].data;
+			if (this.stateMap[newState]?.data) {
+				newData = this.stateMap[newState].data;
+				if (this.stateMap[newState].action)
+					action = this.stateMap[newState].action;
+			}
 		}
 		this.gameState = {
 			...this.gameState,
 			...state,
 			...newData,
 		};
+		if (action) action();
 		this.updateGameState();
 		if (this.gameState.message) this.gameState.message = '';
 		if (this.gameState.playSound) this.gameState.playSound = false;
@@ -1180,6 +1193,13 @@ class Game {
 					this.gameState.players[player].locked = false;
 				}, lockTimeout);
 		}
+	}
+
+	unlockAll() {
+		this.gameState.players.forEach((p) => {
+			p.locked = false;
+		});
+		this.updateGameState();
 	}
 
 	unlockPlayer(player) {
