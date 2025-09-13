@@ -45,33 +45,29 @@ let activeGames = [];
 let timeouts = [];
 
 const sanitizeData = (game) => {
-	const toReturn = {
-		...game,
-	};
-	delete toReturn.id;
-	delete toReturn.host.socketId;
-	toReturn.gameState.players.forEach((p) => {
-		delete p.socketId;
-	});
-	return toReturn;
+	return game.gameState;
 };
 
 const getGameForUser = (id) => {
+	console.log(id);
 	return activeGames.find(
 		(g) =>
-			(g.host?.uid && g.host.uid === id) ||
+			(g.gameState.host?.uid && g.gameState.host.uid === id) ||
 			g.gameState.players.some((p) => p.uid === id)
 	);
 };
 
 const setSocketId = (uid, socketId) => {
 	const g = getGameForUser(uid);
+	console.log(`Found in game ID: ${g ? g.id : '(none)'}`);
+	console.log(`Setting socket ID to ${socketId}`);
 	if (!g) return null;
-	if (g.host.uid === uid) g.host.socketId = socketId;
+	if (g.gameState.host.uid === uid) g.gameState.host.socketId = socketId;
 	else
 		g.gameState.players.some((p) => {
 			if (p.uid === uid) {
-				p.socketId = socketId;
+				console.log(p);
+				p.setSocketId(socketId);
 				return true;
 			}
 			return false;
@@ -92,6 +88,13 @@ const getGameByPlayer = (uid) => {
 };
 
 const getGameForSocketId = (id) => {
+	console.log(`getting game for socket ID ${id}`);
+	console.log(
+		activeGames.map((g) => [
+			g.gameState.host.socketId,
+			...g.gameState.players.map((p) => p.socketId),
+		])
+	);
 	return activeGames.find(
 		(g) =>
 			g.gameState.host.socketId === id ||
@@ -124,12 +127,15 @@ const socket = async (http, server) => {
 		});
 		//user sends this to get their gamestate back
 		socket.on('verify-id', (data, cb) => {
+			console.log(`Verifying id:`);
+			console.log(data);
 			const activeGame = getGameForUser(data.id);
 			//if we didn't find a game, then the player isn't part of one
 			if (!activeGame)
 				return cb({ status: 'OK', id: uuidV4(), gameState: null });
 			//otherwise, send the gamestate back to the player
 			else {
+				console.log(`Setting new socket ID (${socket.id}) for user ${data.id}`);
 				setSocketId(data.id, socket.id);
 				socket.join(activeGame.id);
 				cb({

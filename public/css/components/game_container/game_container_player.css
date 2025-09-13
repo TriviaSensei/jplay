@@ -38,6 +38,14 @@
 .player-container .buzzer-container {
 	min-height: 30%;
 	width: min(100%, 500px);
+	.btn-buzzer {
+		background-color: var(--lt-blue);
+		color: white;
+	}
+	.btn-buzzer.armed {
+		background-color: white;
+		color: var(--blue);
+	}
 }
 .input-row-h button {
 	width: 20%;

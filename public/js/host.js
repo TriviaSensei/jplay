@@ -367,7 +367,6 @@ const openKey = () => {
 const isHost = () => {
 	const state = sh.getState();
 	if (!state) return false;
-	console.log(state.host.uid, uid);
 	return state.host.uid === uid;
 };
 
@@ -631,17 +630,22 @@ document.addEventListener('DOMContentLoaded', () => {
 	if (!isKey) {
 		socket = io();
 		socket.once('ack-connection', () => {
+			console.log('Connection made');
 			//see if a client id is stored in local storage
 			const myId = localStorage.getItem('jp-client-id');
 			//if not, get one and store it
 			if (!myId) {
+				console.log('No ID found - requesting a new one');
 				socket.emit(
 					'request-id',
 					null,
 					withTimeout(
 						(data) => {
 							if (data.status !== 'OK') showMessage('error', data.message);
-							if (data.id) uid = data.id;
+							if (data.id) {
+								uid = data.id;
+								localStorage.setItem('jp-client-id', uid);
+							}
 						},
 						() => {
 							showMessage('error', 'Could not connect to server');
@@ -651,13 +655,19 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 			//if so, send it to get our state back
 			else {
+				console.log('Verifying ID with server');
 				socket.emit(
 					'verify-id',
 					{ id: myId },
 					withTimeout(
 						(data) => {
+							console.log(data);
 							if (data.status !== 'OK') showMessage('error', data.message);
-							if (data.id) uid = data.id;
+							if (data.id) {
+								uid = data.id;
+								localStorage.setItem('jp-client-id', uid);
+							}
+							if (data.gameState) sh.setState(data.gameState);
 						},
 						() => {
 							showMessage('error', 'Could not connect to server');
@@ -1847,6 +1857,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			const state = e.detail;
 			const player = state.players.find((p) => p.uid === uid);
+			const playerIndex = state.players.findIndex((p) => p.uid === uid);
+
 			if (player) {
 				showPanel(e.target);
 				const editPlayer = e.target.querySelector('.edit-player');
@@ -1863,6 +1875,13 @@ document.addEventListener('DOMContentLoaded', () => {
 						buzzer.removeAttribute('data-bs-content');
 					}, 1500);
 				}
+				if (
+					state.state === 'clueLive' ||
+					(state.state === 'pregame' && state.buzzedIn === -1)
+				) {
+					buzzer.classList.add('armed');
+				} else buzzer.classList.remove('armed');
+				console.log(state);
 
 				if (player.nameData.length > 0) {
 					hidePanel(nameContainer);
@@ -1881,7 +1900,6 @@ document.addEventListener('DOMContentLoaded', () => {
 					nameContainer.innerHTML = player.name;
 				}
 
-				const playerIndex = state.players.findIndex((p) => p.uid === uid);
 				if (playerIndex !== -1 && playerIndex === state.buzzedIn) {
 					playerLectern.classList.add('lit');
 					if (e.detail.state === 'buzz')
@@ -1889,7 +1907,9 @@ document.addEventListener('DOMContentLoaded', () => {
 							playerLectern,
 							e.detail.currentTime - e.detail.buzzTime
 						);
-				} else playerLectern.classList.remove('lit');
+				} else {
+					playerLectern.classList.remove('lit');
+				}
 
 				const score = player.score;
 				if (score < 0) playerScore.classList.add('neg');
