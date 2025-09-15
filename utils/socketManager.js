@@ -278,15 +278,19 @@ const socket = async (http, server) => {
 			if (!game) return cb({ status: 'fail', message: 'Game not found' });
 
 			resetGameTimeout(game.id);
-			game.acceptNewPlayer({
-				...data,
-				socketId: socket.id,
-			});
-			socket.join(game.id);
-			cb({ status: 'OK', gameState: game.gameState });
-			socket
-				.to(game.id)
-				.emit('update-game-state', game.getGameData(['players']));
+			try {
+				game.acceptNewPlayer({
+					...data,
+					socketId: socket.id,
+				});
+				socket.join(game.id);
+				cb({ status: 'OK', gameState: game.gameState });
+				socket
+					.to(game.id)
+					.emit('update-game-state', game.getGameData(['players']));
+			} catch (err) {
+				cb({ status: 'fail', message: err.message });
+			}
 		});
 
 		socket.on('buzz', (cb) => {

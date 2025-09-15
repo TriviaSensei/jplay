@@ -9,6 +9,18 @@ const hostKeys = ['arrowdown', 'space', 'spacebar', ' '];
 const isKey = location.href.indexOf('control') >= 0;
 let uid;
 
+const coverDiv = document.querySelector('#cover-div');
+if (coverDiv) {
+	const skb = coverDiv.querySelector('#show-key-button');
+	skb.addEventListener(
+		'click',
+		() => {
+			coverDiv.remove();
+		},
+		{ once: true }
+	);
+}
+
 const sh = new StateHandler(null);
 const csh = new StateHandler({
 	paths: [],
