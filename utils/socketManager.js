@@ -191,7 +191,10 @@ const socket = async (http, server) => {
 					status: 'fail',
 					message: 'Only the host may cancel a game',
 				});
+
+			socket.to(game.id).emit('game-cancelled', null);
 			activeGames = activeGames.filter((g) => g.id !== game.id);
+			return cb({ status: 'OK' });
 		});
 
 		socket.on('edit-player', (data, cb) => {

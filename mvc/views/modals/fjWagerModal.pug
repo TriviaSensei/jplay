@@ -10,10 +10,10 @@
                         - var i = 0
                         - while (i<3)
                             - if (i===0) 
-                                input(id=`fj-wager-${i}` data-index=`${i}` name="fj-wager-radio" type="radio" value=`${i}` checked)
+                                input(id=`fj-wager-radio-${i}` data-index=`${i}` name="fj-wager-radio" type="radio" value=`${i}` checked)
                             - else 
-                                input(id=`fj-wager-${i}` data-index=`${i}` name="fj-wager-radio" type="radio" value=`${i}`)
-                            label.fj-wager-label(for=`fj-wager-${i}` data-index=`${i}`)
+                                input(id=`fj-wager-radio-${i}` data-index=`${i}` name="fj-wager-radio" type="radio" value=`${i}`)
+                            label.fj-wager-label(for=`fj-wager-radio-${i}` data-index=`${i}`)
                             - i++;
                     .input-row-h
                         - var j = 0

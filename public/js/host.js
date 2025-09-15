@@ -15,7 +15,7 @@ const csh = new StateHandler({
 	mouseDown: false,
 });
 
-const granularity = 2;
+const granularity = 1;
 
 let game;
 const startGame = (type, data) => {
@@ -60,6 +60,8 @@ const playerName = document.querySelector('#set-player-name');
 const setKeyButton = document.querySelector('#set-button');
 const buzzerKey = document.querySelector('#current-key');
 const startGameModal = isKey ? null : new bootstrap.Modal('#start-game-modal');
+const cancelGame = document.querySelector('#confirm-cancel');
+
 const egm = document.querySelector('#end-game-modal');
 
 const endGameMessage = egm?.querySelector('#end-game-result');
@@ -1457,6 +1459,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
+	//open the key automatically when a game is started
 	if (!isKey)
 		sh.addWatcher(
 			null,
@@ -1698,7 +1701,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			const state = csh.getState();
 			if (!state.mouseDown) return;
 			moveCount++;
-			if (moveCount % granularity === 1) {
+			if (granularity === 1 || moveCount % granularity === 1) {
 				const rect = state.canvas.getBoundingClientRect();
 				const { pageX, pageY } =
 					e.type === 'touchmove' ? e.targetTouches[0] : e;
@@ -1772,6 +1775,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			e.target.innerHTML = e.detail.status;
 		});
 		sh.addWatcher(openModalPanel, (e) => {
+			console.log(e.detail);
 			if (e.detail.modal) {
 				e.target.classList.remove('d-none');
 				openModal.innerHTML = e.detail.modalDescription;
@@ -1789,6 +1793,42 @@ document.addEventListener('DOMContentLoaded', () => {
 		[advanceButton, correctButton, incorrectButton].forEach((b) =>
 			b.addEventListener('click', sendInputFromKey)
 		);
+		const handleGameCancel = () => {
+			const evt = new CustomEvent('cancel-game', { detail: null });
+			if (window.opener) window.opener.document.dispatchEvent(evt);
+		};
+		cancelGame.addEventListener('click', () => {
+			const state = sh.getState();
+			if (!state) return;
+
+			if (!state.isRemote) handleGameCancel();
+			else if (isHost) {
+				emitEvent({
+					eventName: 'cancel-game',
+					onSuccess: (data) => {
+						if (data.status === 'OK') {
+							showMessage('info', 'Game cancelled');
+							setTimeout(handleGameCancel, 1000);
+						}
+					},
+					onTimeout: () => {
+						showMessage('error', 'Something went wrong');
+					},
+				});
+			}
+		});
+	} else {
+		document.addEventListener('cancel-game', () => {
+			location.reload();
+		});
+		socket.on('game-cancelled', () => {
+			if (isPlayer()) {
+				showMessage('info', 'Game has been cancelled by host');
+				setTimeout(() => {
+					location.reload();
+				}, 1000);
+			}
+		});
 	}
 
 	// sh.addWatcher(null, (state) => {

@@ -357,6 +357,8 @@ class Game {
 				wager: -1,
 				selectedClue: [-1, -1],
 				currentTime: null,
+				modal: 'cancel-game-modal',
+				modalDescription: 'Cancel game',
 			},
 
 			//representing an input when the game is in that state.
@@ -967,6 +969,8 @@ class Game {
 			fjLock: false,
 			fjPrefix: 'What is',
 			round: -1,
+			modal: 'cancel-game-modal',
+			modalDescription: 'Cancel game',
 		};
 
 		for (var i = 0; i < 3; i++) {

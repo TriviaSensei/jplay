@@ -1,0 +1,10 @@
+.modal#cancel-game-modal(tabindex="-1" aria-labelledby="cancel-game-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false")
+    .modal-dialog.modal-dialog-centered
+        .modal-content#cancel-game-modal-content
+            input#player-index(type="hidden")
+            .modal-header
+                h5.modal-title#cancel-game-label Cancel game?
+            .modal-body Are you sure you want to cancel this game?
+            .modal-footer
+                button.btn.btn-sm.btn-primary(type="button" data-bs-dismiss="modal" data-key='Escape') No
+                button#confirm-cancel.btn.btn-sm.btn-primary(type="button" data-key="Enter,Return") Yes

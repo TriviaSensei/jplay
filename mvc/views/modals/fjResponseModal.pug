@@ -19,10 +19,10 @@
                         - var i = 0
                         - while (i<3)
                             - if (i===0) 
-                                input(id=`fj-response-${i}` data-index=`${i}` name="fj-response-radio" type="radio" value=`${i}` checked)
+                                input(id=`fj-response-radio-${i}` data-index=`${i}` name="fj-response-radio" type="radio" value=`${i}` checked)
                             - else 
-                                input(id=`fj-response-${i}` data-index=`${i}` name="fj-response-radio" type="radio" value=`${i}`)
-                            label.fj-response-label(for=`fj-response-${i}` data-index=`${i}`)
+                                input(id=`fj-response-radio-${i}` data-index=`${i}` name="fj-response-radio" type="radio" value=`${i}`)
+                            label.fj-response-label(for=`fj-response-radio-${i}` data-index=`${i}`)
                             - i++;
                     .input-row-h
                         .fj-response-container.w-100.me-2
