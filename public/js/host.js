@@ -1445,10 +1445,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			socket.emit('update-game-state', state, 1500);
 		if (state) {
 			if (isPlayer() || isKey) document.body.classList.add('dark');
-			else if (isHost()) document.body.classList.add('bg-light');
+			else if (isHost()) document.body.classList.add('bg-jep');
 		} else {
 			document.body.classList.remove('dark');
-			document.body.classList.remove('bg-light');
+			document.body.classList.remove('bg-jep');
 		}
 	});
 

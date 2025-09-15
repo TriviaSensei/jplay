@@ -23,6 +23,10 @@
 	src: url(./swiss.woff2) format('woff2'), url(./swiss.woff) format('woff');
 }
 
+html {
+	height: 100%;
+}
+
 body {
 	background-color: var(--white);
 	font-family: 'Korinna Regular BT', sans-serif;
@@ -30,14 +34,13 @@ body {
 	flex-direction: column;
 	height: 100%;
 	overflow-y: hidden;
-	position: fixed;
 	top: 0;
 	left: 0;
 	right: 0;
 	bottom: 0;
 }
 
-body.bg-light {
+body.bg-jep {
 	background-image: url(../img/bg.jpg);
 	background-size: cover;
 	background-repeat: no-repeat;
