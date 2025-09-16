@@ -29,7 +29,7 @@ const lockTimeout = 250;
 const clueTime = 3500;
 const ddTime = 7000;
 const FJTime = 31000;
-const cluesPerRound = 30;
+const cluesPerRound = 2;
 
 class Player {
 	constructor(name, nameData, uid, socketId, key, isRemote) {
@@ -288,13 +288,15 @@ class Game {
 
 	handleFJResponse(correct) {
 		if (this.gameState.fjStep % 4 !== 1) return;
+		const { category, text, response } = this.gameState.board[2];
+		const fjData = `${category.toUpperCase()}<br>${text}<br>${response}`;
 		//player whose response we are judging
 		const p = this.gameState.fjOrder[(this.gameState.fjStep - 1) / 4];
 		const player = this.gameState.players[p];
 		player.finalCorrect = correct;
 		this.setGameState({
 			fjStep: this.gameState.fjStep + 1,
-			status: `${player.name}'s Final Jeopardy wager revealed. Press advance to continue.`,
+			status: `${fjData}<br><br>${player.name}'s Final Jeopardy wager revealed. Press advance to continue.`,
 		});
 	}
 
@@ -777,10 +779,6 @@ class Game {
 				modal: 'fj-response-modal',
 				modalDescription: 'Enter FJ Responses',
 			},
-			host: () => {
-				this.stopClueTimer();
-				this.setGameState({ state: 'FJOver', fjStep: -1 });
-			},
 			setFJResponses: (responses) => {
 				responses.forEach((res) => {
 					this.gameState.players[res.player].finalResponse = res.response;
@@ -803,6 +801,8 @@ class Game {
 				const maxStep = this.gameState.fjOrder.length * 4 - 1;
 
 				if (this.gameState.fjStep % 4 === 1) return;
+				const { category, text, response } = this.gameState.board[2];
+				const fjData = `${category.toUpperCase()}<br>${text}<br>${response}`;
 
 				if (this.gameState.fjStep < maxStep) {
 					const fjStep = this.gameState.fjStep + 1;
@@ -811,6 +811,7 @@ class Game {
 							this.gameState.fjOrder[Math.floor(fjStep / 4)]
 						];
 					const fjSubstep = fjStep % 4;
+
 					const newStatus =
 						fjSubstep === 0
 							? `Revealing Final Jeopardy for ${fjPlayer.name}. Press advance to continue.`
@@ -825,7 +826,10 @@ class Game {
 						const p = this.gameState.players[ind];
 						p.setScore(p.getScore() + (p.finalCorrect ? 1 : -1) * p.finalWager);
 					}
-					this.setGameState({ fjStep, status: newStatus });
+					this.setGameState({
+						fjStep,
+						status: `${fjData}<br><br>${newStatus}`,
+					});
 				} else {
 					const maxScore = this.gameState.players.reduce((p, c) => {
 						if (c.score > p) return c.score;
