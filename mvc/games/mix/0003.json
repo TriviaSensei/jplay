@@ -115,7 +115,7 @@
 				"comments": "",
 				"clues": [
 					{
-						"text": "You have the nickname Starry McStarface<span class=\"nobreak\">--</span>not this cool canine handle like Sirius has",
+						"text": "You have the nickname Starry McStarface - not this cool canine handle like Sirius has",
 						"response": "the Dog Star"
 					},
 					{
@@ -131,7 +131,7 @@
 						"response": "an asterism"
 					},
 					{
-						"text": "Sirius emits more light than you do, so it has a higher this<span class=\"nobreak\">--</span>an intrinsic property of stars that's measured in joules per second",
+						"text": "Sirius emits more light than you do, so it has a higher this - an intrinsic property of stars that's measured in joules per second",
 						"response": "luminosity"
 					}
 				],
