@@ -1,7 +1,9 @@
 {
-	"showNumber": 9177,
-	"airDate": "2024-10-08",
-	"comments": "Mark Fitzpatrick game 3.",
+	"metadata": {
+		"Show number": 9177,
+		"Air date": "2024-10-08",
+		"Comments": "Mark Fitzpatrick game 3."
+	},
 	"rounds": [
 		[
 			{
@@ -121,7 +123,7 @@
 						"response": "incentive"
 					},
 					{
-						"text": "I'm not neutral or in reverse - I'm motivated by this basic type of need, the title of a Daniel H. Pink bestseller",
+						"text": "I'm not neutral or in reverse<span class=\"nobreak\">--</span>I'm motivated by this basic type of need, the title of a Daniel H. Pink bestseller",
 						"response": "drive"
 					},
 					{

@@ -3,9 +3,20 @@
 	display: none;
 }
 
-div:has(#load-local:checked) .local-load,
 div:has(#load-remote:checked) .remote-load {
 	display: unset;
+}
+
+div:has(#load-local:checked) .local-load {
+	display: flex;
+	flex-direction: row;
+	label {
+		flex: 1;
+	}
+	.load-file-name {
+		flex: 1;
+		margin: 0.5em;
+	}
 }
 
 .remote-load {
@@ -19,5 +30,23 @@ div:has(#load-remote:checked) .remote-load {
 	.file.selected {
 		background-color: var(--green);
 		font-weight: bold;
+	}
+}
+
+.game-metadata {
+	display: flex;
+	flex-direction: column;
+	.metadata-attr {
+		display: flex;
+		flex-direction: row;
+		align-items: flex-start;
+		.metadata-title {
+			font-weight: bold;
+			width: 33%;
+			text-wrap: wrap;
+		}
+		.metadata-data {
+			flex: 1;
+		}
 	}
 }

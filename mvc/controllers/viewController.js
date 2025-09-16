@@ -21,7 +21,18 @@ exports.getHome = async (req, res, next) => {
 		const folder = path.join(__dirname, `../games`);
 		const files = (await readdir(folder, { recursive: true }))
 			.filter((f) => f.indexOf('.json') > 0)
-			.map((f) => f.replace('\\', '/'));
+			.map((f) => f.replace('\\', '/'))
+			.map((f) => {
+				const data = require(`../games/${f}`);
+				if (data.metadata)
+					return {
+						name: f,
+						metadata: data.metadata,
+					};
+				return {
+					name: f,
+				};
+			});
 
 		res.status(200).render('home', {
 			title: 'This is...J-Play!',

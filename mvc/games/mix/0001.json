@@ -1,314 +1,338 @@
 {
-	"mix": 1,
+	"metadata": { "Original airdates": "2025-09-10, 2025-09-11, 2025-09-12" },
 	"rounds": [
 		[
 			{
-				"category": "NOVEL PLOT POINTS",
+				"category": "TAKE A NUMBER IN THE BOOKSTORE",
 				"comments": "",
 				"clues": [
 					{
-						"text": "Huxley AF (that's \"After Ford\"); ain't no fun being an Epsilon; tough day at the lighthouse",
-						"response": "<i>Brave New World</i>"
+						"text": "\"Twenty Years After\" is Alexandre Dumas' follow-up featuring this group of title swashbucklers",
+						"response": "the Three Musketeers"
 					},
 					{
-						"text": "Raskolnikov performs the first half of the title; doesn't handle it well; gets the second half of the title",
-						"response": "<i>Crime and Punishment</i>"
+						"text": "In the book series this many \"Lives of Chloe King\", a teenager learns that she has special enhanced abilities like a cat",
+						"response": "Nine"
 					},
 					{
-						"text": "Opening map quest; Long John Silver doesn't sound good to me; there's the place!",
-						"response": "<i>Treasure Island</i>"
+						"text": "It's not just a murder mystery he must solve in \"The Sign of Four\"<span class=\"nobreak\">--</span>hidden treasure is also involved",
+						"response": "Sherlock Holmes"
 					},
 					{
-						"text": "Clothes don't make the man, a Swiss scientist does; that does not go well at all; a dogsled chase",
-						"response": "<i>Frankenstein</i>"
+						"text": "The afterlife is more than just a place in Mitch Albom's bestseller about this title group of folks \"You Meet in Heaven\"",
+						"response": "The Five People"
 					},
 					{
-						"text": "The narrator's in big trouble atop a skyscraper; gets in some scraps, which he really can't talk about; space monkey business",
-						"response": "<i>Fight Club</i>"
+						"text": "Charles Dickens' \"A Tale of Two Cities\" begins with these 12 words",
+						"response": "It was the best of times, it was the worst of times"
 					}
 				],
-				"originalDate": "2025-06-16"
+				"originalDate": "2025-09-12"
 			},
 			{
-				"category": "3-LETTER BODY PARTS?",
-				"comments": "",
-				"clues": [
-					{ "text": "To equip with weaponry", "response": "arm" },
-					{ "text": "To tease or make fun of", "response": "rib" },
-					{
-						"text": "The distance traveled by a sailing vessel on a single tack",
-						"response": "leg"
-					},
-					{
-						"text": "The seed-bearing part of a cereal plant",
-						"response": "ear"
-					},
-					{ "text": "A tree of the genus Eucalyptus", "response": "gum" }
-				],
-				"originalDate": "2025-06-16"
-			},
-			{
-				"category": "MEDIUM",
+				"category": "REAL \"O.G.\"s",
 				"comments": "",
 				"clues": [
 					{
-						"text": "While spirit boards have existed going back to the Song Dynasty, this name is a trademark of Hasbro",
-						"response": "Ouija"
+						"text": "A 19th century sea captain coined this term for the U.S. flag",
+						"response": "Old Glory"
 					},
 					{
-						"text": "This French loanword associated with spiritualism means \"session\"",
-						"response": "<i>séance</i>"
+						"text": "The website for this restaurant mentions \"never ending servings of our freshly baked breadsticks\"",
+						"response": "Olive Garden"
 					},
 					{
-						"text": "To contact the spirit realm, a medium may need to enter this semi-conscious state that's also the name of an EDM genre",
-						"response": "trance"
+						"text": "In 2025 Miki Yamane of the L.A. Galaxy scored one of these against (well, for) the New York Red Bulls",
+						"response": "an own goal"
 					},
 					{
-						"text": "Brazilian medium Chico Xavier would perform psychography, also called this kind of writing",
-						"response": "automatic"
+						"text": "This type of street musician was often accompanied by a monkey",
+						"response": "an organ grinder"
 					},
 					{
-						"text": "Orson Welles narrated 1981's \"The Man Who Saw Tomorrow\" about this 16th century astrologer &amp; seer",
-						"response": "Nostradamus"
+						"text": "O.G. can stand for this pair of medical specialties; ACOG is the American College of its doctors",
+						"response": "obstetrics & gynecology"
 					}
 				],
-				"originalDate": "2025-06-16"
+				"originalDate": "2025-09-12"
 			},
 			{
-				"category": "ALLITERATION",
+				"category": "ACID TEST",
 				"comments": "",
 				"clues": [
 					{
-						"text": "Something once carried by the family doctor, or in a 2025 movie, the title phrase for secret Intel",
-						"response": "black bag"
+						"text": "Oil of vitriol &amp; battery acid are other names for this corrosive stuff",
+						"response": "sulfuric acid"
 					},
 					{
-						"text": "Mindy Weiss, who has helped the Kardashians with several celebrations, is famous as one of these",
-						"response": "a party planner"
+						"text": "You probably know acetylsalicylic acid better by this name trademarked in 1899",
+						"response": "aspirin"
 					},
 					{
-						"text": "An overtime game-winner in soccer, like by Laurent Blanc in 1998, or hockey, such as Connor McDavid's in 2025",
-						"response": "a golden goal"
+						"text": "Glycine &amp; lysine are 2 of these acids vital to protein creation",
+						"response": "amino acids"
 					},
 					{
-						"text": "\"Supernanny\" Jo Frost says the first step for a parent facing one of these meltdowns is to ask why",
-						"response": "a temper tantrum"
+						"text": "This acid is produced when your body breaks down glucose during exercise, but it's not what makes your muscles sore",
+						"response": "lactic acid"
 					},
 					{
-						"text": "It's an unscientific term for when declining testosterone causes emotional &amp; physical symptoms for guys in middle age",
-						"response": "male menopause"
+						"text": "Leafy green vegetables are a good source of this, also called vitamin B9",
+						"response": "folic acid"
 					}
 				],
-				"originalDate": "2025-06-16"
+				"originalDate": "2025-09-12"
 			},
 			{
-				"category": "WORLD GEOGRAPHY",
+				"category": "MOVIE SEQUELS",
 				"comments": "",
 				"clues": [
 					{
-						"text": "New Zealand sits where 2 tectonic plates collide, the Pacific plate &amp; one named for this big neighboring country",
-						"response": "Australia"
+						"text": "This one goes to... II? \"The End Continues\" is the subtitle of the 2025 sequel to this, the progenitor of the mockumentary form",
+						"response": "<i>This Is Spinal Tap</i>"
 					},
 					{
-						"text": "6-letter name for a region of Asia &amp; for the School of Art of Gaganendranath Tagore, nephew of Rabindranath",
-						"response": "Bengal"
+						"text": "\"Hasta la vista, baby\" was one of Arnold Schwarzenegger's memorable lines from \"Terminator 2:\" this event",
+						"response": "Judgment Day"
 					},
 					{
-						"text": "With about 2,070 miles of coastline, this Horn of Africa nation has the most of any nation on the continent",
-						"response": "Somalia"
+						"text": "Julie Delpy &amp; Ethan Hawke had adventures \"Before Sunrise\"; the first sequel was sensibly called \"Before\" this",
+						"response": "<i>Sunset</i>"
 					},
 					{
-						"text": "The Society Islands are one of 5 groups that make up this Pacific Ocean territory of a European country",
-						"response": "French Polynesia"
+						"text": "The THX sound system was first used in this 1983 film in the \"Star Wars\" franchise",
+						"response": "<i>Return of the Jedi</i>"
 					},
 					{
-						"text": "Szczecin has the Polish-est name, but its history is entwined with this capital 90 mi. off; the 1st train to the city came from there",
-						"response": "Berlin"
+						"text": "Films based on this anime series include \"Mugen Train\" &amp; now one with Tanjiro facing foes at \"the Infinity Castle\"",
+						"response": "<i>Demon Slayer</i>"
 					}
 				],
-				"originalDate": "2025-06-16"
+				"originalDate": "2025-09-12"
 			},
 			{
-				"category": "PARENTHETICAL SONG TITLES",
-				"comments": "You'll have to provide the part outside the parentheses",
+				"category": "ARIA OF EFFECT",
+				"comments": "",
 				"clues": [
 					{
-						"text": "Maybe ask your offspring:<br>\"(For A White Guy)\"",
-						"response": "\"Pretty Fly\""
+						"text": "In a Wagner aria this lover looks down on a deceased Tristan &amp; sadly sings, \"How he smiles...\"",
+						"response": "Isolde"
 					},
 					{
-						"text": "Embrace the C+C Music Factory:<br>\"(Everybody Dance Now)\"",
-						"response": "\"Gonna Make You Sweat\""
+						"text": "Mozart wrote the \"Queen of the Night\" aria from this opera for his sister-in-law, who could really belt it",
+						"response": "<i>The Magic Flute</i>"
 					},
 					{
-						"text": "The (Blue Öyster) cult classic:<br>\"(Don't Fear)\"",
-						"response": "\"The Reaper\""
+						"text": "In this opera Rodolfo sings to Mimì, \"Che gelida manina\", meaning \"your tiny hand is frozen\"",
+						"response": "<i>La bohème</i>"
 					},
 					{
-						"text": "He's not talking about an old engine:<br>\"(Soulja Boy)\"",
-						"response": "\"Crank That\""
+						"text": "At the 1998 Grammys Aretha Franklin sang \"Nessun Dorma\" when she subbed in at the last minute for this one of \"The Three Tenors\"",
+						"response": "Pavarotti"
 					},
 					{
-						"text": "A 1-word history lesson from They Might Be Giants:<br>\"(Not Constantinople)\"",
-						"response": "\"Istanbul\""
+						"text": "Henry Purcell gave us this Carthaginian queen's \"Lament\" after she was spurned by Aeneas",
+						"response": "Dido"
 					}
 				],
-				"originalDate": "2025-06-16"
+				"originalDate": "2025-09-12"
+			},
+			{
+				"category": "PLAY YOUR CARDS RIGHT",
+				"comments": "",
+				"clues": [
+					{
+						"text": "wizardofodds.com says in blackjack, always do this with a pair of aces or a pair of 8s; never do it with a pair of 5s or a pair of 10s",
+						"response": "split"
+					},
+					{
+						"text": "You're holding 3 of a kind, but you know your opponent has a flush; your odds of drawing a pair for this winning poker hand? Not great",
+						"response": "a full house"
+					},
+					{
+						"text": "Red cards like Zurgo Bellstriker will help you play aggressively in this game with a colon &amp; a subtitle",
+						"response": "<i>Magic: The Gathering</i>"
+					},
+					{
+						"text": "In Monopoly, this card says it \"may be kept until needed or sold\", so do that",
+						"response": "Get out of Jail (Free)"
+					},
+					{
+						"text": "One golden rule of this: \"On the opening lead never under-lead an ace against a suit contract\"",
+						"response": "bridge"
+					}
+				],
+				"originalDate": "2025-09-11"
 			}
 		],
 		[
 			{
-				"category": "WHEN I GROW UP I WANT TO BE...",
+				"category": "OSCAR-WINNING TITLE REFERENCES",
 				"comments": "",
 				"clues": [
 					{
-						"text": "A collector of rare these, like Bill Gates; he dropped $30 million on the Codex Leicester!",
-						"response": "(rare) books (manuscripts)"
+						"text": "2009:<br>Military slang for a bad or painful situation",
+						"response": "the hurt locker"
 					},
 					{
-						"text": "A Spartan supersoldier in the United Nations Space Command, like Master Chief in this \"heavenly\" gaming franchise",
-						"response": "<i>Halo</i>"
+						"text": "1996:<br>Count László de Almásy, badly burned",
+						"response": "<i>The English Patient</i>"
 					},
 					{
-						"text": "This kind of scientist, like Ross Geller on \"Friends\", who used the one-word job description \"dinosaurs\"",
-						"response": "paleontologist"
+						"text": "1988:<br>How a young Charlie Babbitt mispronounced his older brother's name",
+						"response": "Rain Man"
 					},
 					{
-						"text": "A rep for this government agency, like Jamie Lee Curtis in \"Everything Everywhere All at Once\"",
-						"response": "the IRS"
+						"text": "1990:<br>A name given to Lieutenant John Dunbar",
+						"response": "Dances with Wolves"
 					},
 					{
-						"text": "This type of psycholog\"ist\", just like B.F. Skinner - except I won't raise my kid in an air-conditioned box",
-						"response": "behavioral (behaviorlist)"
+						"text": "1971:<br>A murder in Marseilles &amp; some heroin central to the action",
+						"response": "<i>The French Connection</i>"
 					}
 				],
-				"originalDate": "2025-06-13"
+				"originalDate": "2025-09-11"
 			},
 			{
-				"category": "DESCRIBING THE OLYMPIC EVENT",
+				"category": "ENGINEERING",
 				"comments": "",
 				"clues": [
 					{
-						"text": "Perform for 9.58 seconds; tie world record set in 2009; point to sky",
-						"response": "the 100-meters"
+						"text": "Designing roads, bridges, sewers &amp; other pieces of infrastructure falls under this branch of engineering",
+						"response": "civil"
 					},
 					{
-						"text": "Lie on your back on the 50-pound namesake item; slide into history at about 90 mph",
-						"response": "a luge"
+						"text": "L.E.D. stands for light-emitting this component, common in electrical engineering",
+						"response": "diode"
 					},
 					{
-						"text": "Be unbelievably proficient with a rope, hoop, ball, clubs &amp; ribbon",
-						"response": "rhythmic gymnastics"
+						"text": "Audio &amp; electrical engineers will measure the ratio of this desired information to noise to evaluate clarity",
+						"response": "signal"
 					},
 					{
-						"text": "Easily confused with a body part; row, row, row your boat with an oar in each hand",
-						"response": "sculling"
+						"text": "It's the term for a rigid structure that extends horizontally, with one end unsupported, like the terraces at Fallingwater",
+						"response": "a cantilever"
 					},
 					{
-						"text": "Your fencing foe must get the point (not the edge), mask to feet; no translation needed at the Paris Games",
-						"response": "épée"
+						"text": "In summer, subway systems get un-cool as they absorb &amp; trap warmth from streets, functioning as what's called a heat this",
+						"response": "a sink"
 					}
 				],
-				"originalDate": "2025-06-13"
+				"originalDate": "2025-09-11"
 			},
 			{
-				"category": "COMPLETE THE QUOTE",
+				"category": "OVERLAPS",
 				"comments": "",
 				"clues": [
 					{
-						"text": "In a 1940 film W.C. Fields says, \"On a trek\", this wine tool was lost &amp; \"we were compelled to live on food &amp; water\"",
-						"response": "a corkscrew"
+						"text": "A DUI offense! Imbibing a martini while driving hazardously close to someone",
+						"response": "cocktailgating"
 					},
 					{
-						"text": "About the immorality of men, Oscar Wilde wrote, \"We are all in the gutter, but some of us are looking at\" these",
-						"response": "the stars"
+						"text": "A plant representing the Trinity that encompasses the country &amp; blues style of Carl Perkins &amp; his \"Blue Suede Shoes\"",
+						"response": "shamrockabilly"
 					},
 					{
-						"text": "James Brown meant dudes like Clyde Stubblefield when he said he was gonna \"give\" this musician \"some\" before a solo",
-						"response": "the drummer"
+						"text": "The art of making films about the organization depicted in \"The Godfather\" &amp; \"Donnie Brasco\"",
+						"response": "cinemafia"
 					},
 					{
-						"text": "According to Friedrich Nietzsche, \"If you gaze for long into\" one of these bottomless basins, it \"gazes also into you\"",
-						"response": "the abyss"
+						"text": "Heap praise on the dominant people of Central Mexico from about 900 to 1200 A.D.",
+						"response": "extoltecs"
 					},
 					{
-						"text": "Hamlet wondered about taking \"arms against\" these metaphoric waters \"and by opposing end them\"",
-						"response": "a sea of troubles"
+						"text": "From Italian, describing paint laid thickly on a surface to create a peaceful painting of shepherds",
+						"response": "impastoral"
 					}
 				],
-				"originalDate": "2025-06-13"
+				"originalDate": "2025-09-11"
 			},
 			{
-				"category": "OPUS",
+				"category": "FINISH HIM!",
 				"comments": "",
 				"clues": [
 					{
-						"text": "Paganini wasted no time when he revolutionized music for this instrument with his 24 caprices, Opus 1",
-						"response": "the violin"
+						"text": "Man of letters Oscar Fingal O'Flahertie Wills...",
+						"response": "(Oscar) Wilde"
 					},
 					{
-						"text": "Sousa composed the \"Washington Post\" march; Johann Strauss II's Opus 279 is the \"Morning Papers\" this dance tune",
-						"response": "a waltz"
+						"text": "Rags-to-riches Yves Henri Donat Mathieu...",
+						"response": "(Yves) Saint Laurent"
 					},
 					{
-						"text": "Chopin's Opus 57 is a berceuse, a word for this type of song, thought to be inspired by a little girl named Louisette Viardot",
-						"response": "a lullaby"
+						"text": "Acting up, Kiefer William Frederick Dempsey George Rufus...",
+						"response": "(Kiefer) Sutherland"
 					},
 					{
-						"text": "Premiered in 1948, Arnold Schoenberg's Opus 46 is \"a survivor from\" this Polish city's ghetto &amp; includes the Shema prayer",
-						"response": "Warsaw"
+						"text": "Pablo Diego José Francisco de Paula Juan Nepomuceno María de los Remedios... de la Santísima Trinidad Ruiz...",
+						"response": "(Pablo) Picasso"
 					},
 					{
-						"text": "This French composer with a hyphenated name loved to travel to North Africa, as heard in his Opus 60, \"Suite algérienne\"",
-						"response": "Camille Saint-Saëns"
+						"text": "Storyteller Antoine Jean-Baptiste Marie Roger de...",
+						"response": "Saint-Exupéry"
 					}
 				],
-				"originalDate": "2025-06-13"
+				"originalDate": "2025-09-10"
 			},
 			{
-				"category": "BILL THE CAT",
+				"category": "PRESIDENTIAL DOIN'S",
 				"comments": "",
 				"clues": [
 					{
-						"text": "The cat's got me on the hook for $250 after it destroyed a Söderhamn ottoman I bought at this chain; maybe I'll get an Återlöga",
-						"response": "IKEA"
+						"text": "Formed the Department of Homeland Security, appointed John Roberts as chief justice",
+						"response": "W. Bush"
 					},
 					{
-						"text": "Not sure how kitty used my account on this service advertised by Gronk &amp; the Mannings, but he lost me $150 on the Breeders' Cup",
-						"response": "FanDuel"
+						"text": "Brokered the Camp David Accords, signed SALT II",
+						"response": "Jimmy Carter"
 					},
 					{
-						"text": "I paid a hundred bucks for some sheets of paper to learn the designs of Akira Yoshizawa in this art - pussums, you owe me",
-						"response": "origami"
+						"text": "Gave the  \"Atoms for Peace\" speech at the U.N., came up with a doctrine after the Suez Crisis",
+						"response": "Eisenhower"
 					},
 					{
-						"text": "It sure didn't take the cat long to hoover up $200 worth of the Ossetra type of this",
-						"response": "caviar"
+						"text": "Got impeached (that was a first), got saved from that by one vote in the Senate (also a first)",
+						"response": "Andrew Johnson"
 					},
 					{
-						"text": "Looks like Dr. Patches Adams got himself a CAT scan! That's also called a CT scan - CT, short for this - &amp; that heart one cost $6k!",
-						"response": "computed tomography"
+						"text": "Blew it with the Alien &amp; Sedition Acts, dealt with the XYZ Affair",
+						"response": "John Adams"
 					}
 				],
-				"originalDate": "2025-06-13"
+				"originalDate": "2025-09-10"
 			},
 			{
-				"category": "YOUR BODY, IN LATIN",
+				"category": "A QUICK WORKOUT",
 				"comments": "",
 				"clues": [
-					{ "text": "Caput", "response": "head" },
-					{ "text": "Pulmo", "response": "lung" },
-					{ "text": "Carpus", "response": "wrist" },
-					{ "text": "Talus", "response": "your ankle" },
-					{ "text": "Pectus", "response": "chest" }
+					{
+						"text": "Looking to get in some cardio without too much impact on your joints? Check out this machine named for the oval path your feet take",
+						"response": "an elliptical"
+					},
+					{
+						"text": "Strongman George Hackenschmidt popularized this chest exercise named for the equipment you lie on while performing it",
+						"response": "a bench press"
+					},
+					{
+						"text": "RDL is short for the \"Romanian\" variation of this exercise, which can be done with a barbell or dumbbells",
+						"response": "deadlift"
+					},
+					{
+						"text": "The open warehouse-style facilities of this fitness program are called \"boxes\"; the first one opened in California in 2001",
+						"response": "CrossFit"
+					},
+					{
+						"text": "If these bodyweight exercises popular in the military got the first name of the man who invented them, we'd all hate doing Royals",
+						"response": "burpees"
+					}
 				],
-				"originalDate": "2025-06-12"
+				"originalDate": "2025-09-10"
 			}
 		],
 		{
-			"category": "BOOK COVERS",
-			"text": "In 1974 Allison Maher Stern posed horizontally on stools &amp; pretended to swim for a cover of this book",
-			"response": "<i>Jaws</i>"
+			"category": "FAMOUS BUILDINGS",
+			"text": "In 1588 a 10th chapel was added to this building to honor a Yurodivy, or \"holy fool\", who was canonized that year",
+			"response": "St. Basil's Cathedral"
 		}
 	]
 }

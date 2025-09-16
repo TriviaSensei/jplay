@@ -18,8 +18,11 @@ link(rel="stylesheet" href="/css/components/init_container/host_tab.css")
                     input#load-remote(type="radio" name="load-type" value="remote" checked)
                     label(for="load-remote") From Server
                 .local-load.my-3
-                    input#game-file(type="file" accept=".json")
+                    label.btn.btn-primary(for="game-file") Choose file (max 20kb)
+                    input#game-file.d-none(type="file" accept=".json")
+                    .load-file-name
                 .remote-load.my-3
                     each file in files
-                        .file(data-file=`${file}` aria-selected="false" aria-filename=`${file}`)= file
+                        .file(data-file=`${file.name}` aria-selected="false" aria-filename=`${file.name}` data-metadata=`${file.metadata ? JSON.stringify(file.metadata) : ''}`)= file.name
+            .game-metadata
     button#create-game.btn.btn-primary.m-auto.mt-3.w-50 Create

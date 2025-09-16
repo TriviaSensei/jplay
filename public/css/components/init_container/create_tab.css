@@ -26,6 +26,44 @@
 		right: 0px;
 	}
 
+	.create-game-metadata,
+	.metadata-header {
+		display: flex;
+		flex-direction: column;
+		.metadata-item {
+			display: flex;
+			flex-direction: row;
+			width: 100%;
+			justify-content: center;
+			.metadata-title {
+				width: 40%;
+				margin: 0.25em;
+			}
+
+			.metadata-value {
+				flex: 1;
+				margin: 0.25em;
+			}
+
+			.invalid {
+				border: 3px solid red;
+			}
+
+			.delete-button {
+				width: 1.5em;
+				height: 1.5em;
+				margin: auto;
+				padding: unset;
+				display: flex;
+			}
+			.delete-button::after {
+				margin: auto;
+				content: '❌';
+				font-size: 0.7em;
+			}
+		}
+	}
+
 	.input-container:has(.invalid) {
 		border-color: red;
 	}

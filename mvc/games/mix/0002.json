@@ -1,338 +1,340 @@
 {
-	"mix": 2,
+	"metadata": {
+		"Original airdates": "2025-07-25, 2025-09-08, 2025-09-09, 2025-09-10"
+	},
 	"rounds": [
 		[
 			{
-				"category": "ALL 5 VOWELS, JUST ONE WORD",
+				"category": "SHE WROTE THAT",
+				"comments": "(Ken: Name the woman who penned each line.)",
+				"clues": [
+					{
+						"text": "\"I think it (makes God angry) if you walk by the color purple in a field somewhere and don't notice it\"",
+						"response": "Alice Walker"
+					},
+					{
+						"text": "\"No need to add that my being happy in Forks is an impossibility\"",
+						"response": "(Stephenie) Meyer"
+					},
+					{
+						"text": "In the introduction to her diary, \"The climax of our struggle... came when our first baby was kidnapped... on March 1st, 1932\"",
+						"response": "Anne Morrow Lindbergh"
+					},
+					{
+						"text": "\"Some day they'll go down together / They'll bury them side by side / To few it'll be grief / To the law a relief\"",
+						"response": "Bonnie Parker"
+					},
+					{
+						"text": "\"He is jubilant as a flag unfurled<span class=\"nobreak\">--</span>/Oh, a girl, she'd not forget him./My own dear love, he is all my world,<span class=\"nobreak\">--</span>/&amp; I wish I'd never met him\"",
+						"response": "Dorothy Parker"
+					}
+				],
+				"originalDate": "2025-09-10"
+			},
+			{
+				"category": "FROM THE NATIONAL WEATHER SERVICE GLOSSARY",
 				"comments": "",
 				"clues": [
 					{
-						"text": "It means capable of using both hands equally well, though a news report dubbed an MLB Lefty/righty pitcher \"amphibious\"",
-						"response": "ambidextrous"
+						"text": "J: \"A structure... extending into a sea, lake, or river to influence the current or tide\"",
+						"response": "a jetty"
 					},
 					{
-						"text": "If your pulse races thinking of the Estelon Aura loudspeaker, you're this type of enthusiast",
-						"response": "audiophile"
+						"text": "D: \"A region of low atmospheric pressure that is usually accompanied by low clouds &amp; precipitation\"",
+						"response": "a depression"
 					},
 					{
-						"text": "The ATF has a webpage on \"rules &\" these, which, actually, are also rules",
-						"response": "regulations"
+						"text": "F: \"A rapid &amp; extreme flow of high water into a normally dry area... beginning within 6 hours of the causative event\"",
+						"response": "a flash flood"
 					},
 					{
-						"text": "This plural word means the science of flight &amp; is the first \"A\" in NASA",
-						"response": "aeronautics"
+						"text": "I:<br>\"A line connecting points of equal pressure\"",
+						"response": "an isobar"
 					},
 					{
-						"text": "To joke in a way others may find inappropriate, like me saying you have too much money, I'm taking back $3,000 each; I'm being...",
-						"response": "facetious"
+						"text": "F: \"(or F scale)<span class=\"nobreak\">--</span>a scale of tornado intensity\"",
+						"response": "Fujita"
 					}
 				],
-				"originalDate": "2025-06-12"
+				"originalDate": "2025-09-10"
 			},
 			{
-				"category": "HOT, TO GO",
+				"category": "ANAGRAMS OF EACH OTHER",
 				"comments": "",
 				"clues": [
 					{
-						"text": "This chain's to-go offerings aren't limited to items like the Meatzza pizza; it's also got Loaded Tots",
-						"response": "Domino's"
+						"text": "To hear something with thoughtful attention &amp; making no sound",
+						"response": "listen & silent"
 					},
 					{
-						"text": "This Mexican grill lists the 53 ingredients it uses, &amp; yes, one of them is the chili pepper it's named for",
-						"response": "Chipotle"
+						"text": "In the buff &amp; a crescent-shaped sand mound",
+						"response": "nude & dune"
 					},
 					{
-						"text": "This chain advises looking for its hot light to know when its original glazed doughnuts are, y'know, hot",
-						"response": "Krispy Kreme"
+						"text": "A glowing streak in the sky &amp; an adjective meaning distant",
+						"response": "meteor & remote"
 					},
 					{
-						"text": "Beijing Beef &amp; Honey Walnut Shrimp are on the menu of this place that puns, \"We wok for you\"",
-						"response": "Panda Express"
+						"text": "The main enemy of a novel's hero &amp; a situation of no economic growth",
+						"response": "antagonist & stagnation"
 					},
 					{
-						"text": "You can get soup or mac &amp; cheese in a bread bowl from this place with a name from Latin for \"bread basket\"",
-						"response": "Panera"
+						"text": "One bead of fluid from the lacrimal gland &amp; an animal that attacks other animals",
+						"response": "teardrop & predator"
 					}
 				],
-				"originalDate": "2025-06-12"
+				"originalDate": "2025-09-10"
 			},
 			{
-				"category": "PROSPERO",
+				"category": "ACCIDENTS WILL HAPPEN",
 				"comments": "",
 				"clues": [
 					{
-						"text": "Prospero says, \"We are such stuff as\" these \"are made on, and our little life is rounded with a sleep\"",
-						"response": "dreams"
+						"text": "Wilson Greatbatch was trying to record heart sounds, but using an incorrect resistor led him to invent the first implantable this",
+						"response": "a pacemaker"
 					},
 					{
-						"text": "Prospero freed this spirit who was magically bound to a tree &amp; used him to create the storm that sinks the ship",
-						"response": "Ariel"
+						"text": "John Walker scraped some combustible materials he'd been mixing off the wooden stirrer &amp; it burst into flames; this was born",
+						"response": "a (friction) match"
 					},
 					{
-						"text": "This daughter of Prospero was but 3 years old when she was set adrift in a boat with her father",
-						"response": "Miranda"
+						"text": "Albert Hofmann was out to discover new stimulants when he accidentally dosed himself with this drug; pretty groovy",
+						"response": "LSD"
 					},
 					{
-						"text": "Prospero threatens pain for this subordinate, son of the sorceress Sycorax: \"Each pinch more stinging than bees that made 'em\"",
-						"response": "Caliban"
+						"text": "He returned from a summer vacation to find a contaminated Petri dish, leading to the discovery of penicillin",
+						"response": "Fleming"
 					},
 					{
-						"text": "Prospero was once the duke of this Italian city, but his brother did him dirty",
-						"response": "Milan"
+						"text": "One of his signature effects used in early films like \"A Trip to the Moon\" was created when the film in his camera jammed up",
+						"response": "Méliès"
 					}
 				],
-				"originalDate": "2025-06-12"
+				"originalDate": "2025-09-09"
 			},
 			{
-				"category": "TV SHOW MASHUPS",
-				"comments": "You'll need to name the two shows whose titles we've combined.",
-				"clues": [
-					{
-						"text": "Prohibition comes to Colorado: \"Boardwalk Park\"",
-						"response": "<i>Boardwalk Empire</i> & <i>South Park</i>"
-					},
-					{
-						"text": "They came together in an \"Emmy-Winning Episode\":<br>\"Modern Guy\"",
-						"response": "<i>Modern Family</i> & <i>Family Guy</i>"
-					},
-					{
-						"text": "From L.A.'s Westside to Oklahoma:<br>\"Curb Your Dogs\"",
-						"response": "<i>Curb Your Enthusiasm</i> & <i>Reservation Dogs</i>"
-					},
-					{
-						"text": "Freedom for a new musical star:<br>\"Prison Idol\"",
-						"response": "<i>Prison Break</i> & <i>American Idol</i>"
-					},
-					{
-						"text": "Kidman &amp; Harrelson, together at last:<br>\"Big Little Detective\"",
-						"response": "<i>Big Little Lies</i> & <i>True Detective</i>"
-					}
-				],
-				"originalDate": "2025-06-12"
-			},
-			{
-				"category": "9-LETTER VOCAB",
+				"category": "RIVERS IN HISTORY",
 				"comments": "",
 				"clues": [
 					{
-						"text": "Usually known by its first 4 letters, it's a protective canvas covering that's been waterproofed",
-						"response": "a tarpaulin"
+						"text": "Coming up this river to attack Paris in the 9th c., Vikings were met by the garrison of Odo, who repulsed them<span class=\"nobreak\">--</span>&amp; turned them back",
+						"response": "the Seine"
 					},
 					{
-						"text": "From the name of a British author, this adjective can describe a totalitarian state",
-						"response": "Orwellian"
+						"text": "This man's forces won the Battle of the Jhelum River in Asia in 326 B.C., but advanced no farther &amp; turned back for home",
+						"response": "Alexander the Great"
 					},
 					{
-						"text": "This adjective with a pair of F's in the middle can refer to something that's not possible to put in words",
-						"response": "ineffable"
+						"text": "In 1916 a group who resented this healer's influence shot him, then threw his body in the Neva River",
+						"response": "Rasputin"
 					},
 					{
-						"text": "It's the chemical compound in chili peppers that brings the heat",
-						"response": "capsaicin"
+						"text": "Including Singidunum, a series of fortresses known as the Limes on this river marked the northern boundary of the Roman empire",
+						"response": "the Danube"
 					},
 					{
-						"text": "It's another word for upper case, like all the letters in the clue you're looking at",
-						"response": "majuscule"
+						"text": "This longest river in Spain was the site of a bloody 1938 battle ending in a Republican defeat &amp; Catalonia's isolation",
+						"response": "Ebro"
 					}
 				],
-				"originalDate": "2025-06-12"
+				"originalDate": "2025-09-09"
 			},
 			{
-				"category": "LOOKIN' BACK, TEXAS",
+				"category": "FICTIONAL CHARACTERS",
 				"comments": "",
 				"clues": [
 					{
-						"text": "In May 1846, the first major clash of the Mexican War took place over disputed territory between the Nueces River &amp; this other waterway",
-						"response": "the Rio Grande"
+						"text": "In a kids' book, we meet this title character along with his siblings Flopsy, Mopsy &amp; Cotton-tail",
+						"response": "Peter Rabbit"
 					},
 					{
-						"text": "In 1928 this future president taught at an elementary school in Cotulla to earn money to continue his education",
-						"response": "L.B. Johnson"
+						"text": "Quixada, Quesada or even Quexana may have been the original surname of the character who chose this name for himself",
+						"response": "Don Quixote"
 					},
 					{
-						"text": "This high-end retailer opened in Dallas in 1907; in 2024, it was bought by the parent company of Saks Fifth Avenue",
-						"response": "Neiman Marcus"
+						"text": "At the end of an 1831 novel, his skeleton is found in a cellar with a curved spine &amp; soon crumbles into dust",
+						"response": "Quasimodo (the Hunchback of Notre Dame)"
 					},
 					{
-						"text": "The first Native Amer. leaders tried for a raid in U.S. courts had attacked this 2-word caravan of vehicles in Young County in 1871",
-						"response": "a wagon train"
+						"text": "A drug addict named William Lee is the narrator of this novel by William S. Burroughs",
+						"response": "<i>Naked Lunch</i>"
 					},
 					{
-						"text": "First name of Mr. Stilwell, who was inspired by spirits called brownies to develop the Texas gulf coast \"Port\" named for him",
-						"response": "Port Arthur"
+						"text": "Jilted as a bride, she calls Satis House home in \"Great Expectations\"",
+						"response": "Miss Havisham"
 					}
 				],
-				"originalDate": "2025-06-11"
+				"originalDate": "2025-09-09"
 			}
 		],
 		[
 			{
-				"category": "DO THE WRITE THING",
+				"category": "GODS' LINKEDIN",
 				"comments": "",
 				"clues": [
 					{
-						"text": "The chemist who \"discovered\" this writing implement opined in a 2009 memoir, \"Yellow is still the only good color\"",
-						"response": "the Highlighter"
+						"text": "If you need a helpful hunt deity, Mixcoatl comes highly recommended by these Tenochtitlan residents",
+						"response": "the Aztecs"
 					},
 					{
-						"text": "Pilot pen co.'s 1973 patent for ink \"erased by light wiping\" led to an increase in the use of these now-common writing surfaces",
-						"response": "dry erase boards (whiteboards)"
+						"text": "Her boss-dad Zeus calls her a headache, but here on the Acropolis, we call her Pallas",
+						"response": "Athena"
 					},
 					{
-						"text": "That little number on your pencil refers to hardness - how much of the \"lead\" is made of this vs. clay",
-						"response": "graphite"
+						"text": "This god got a bad performance review when he failed to smash the skull of Jörmungandr; he'll have another shot at Ragnarök",
+						"response": "Thor"
 					},
 					{
-						"text": "Ancient Greeks used these implements for writing on parchment; you may have used a modern version like the Apple Pencil",
-						"response": "a stylus"
+						"text": "If you're looking for a bountiful harvest, this Roman goddess of grains really reaps it in",
+						"response": "Ceres"
 					},
 					{
-						"text": "In 1910 German pen-trepreneurs trademarked this brand name for writing instruments of \"peak\" quality",
-						"response": "Montblanc"
+						"text": "This consort of Shiva is great at vanquishing foes but she insists her belt of severed hands is business casual; don't tell HR",
+						"response": "Kali"
 					}
 				],
-				"originalDate": "2025-06-11"
+				"originalDate": "2025-09-09"
 			},
 			{
-				"category": "\"OLD\" SONGS",
+				"category": "\"J\" WORDS",
 				"comments": "",
 				"clues": [
 					{
-						"text": "The young 'uns are familiar with the Cocomelon version of this classic that mentions a pig, a cow &amp; the various noises they make",
-						"response": "\"Old MacDonald Had A Farm\""
+						"text": "Before it was a toy, it meant a swindler who switched boxes of coins during a transaction",
+						"response": "jack-in-the-box"
 					},
 					{
-						"text": "In this tune Bob Seger sang, \"Today's music ain't got the same soul\"",
-						"response": "\"Old Time Rock And Roll\""
+						"text": "The 1920s gave us this word for a beat-up old car",
+						"response": "jalopy"
 					},
 					{
-						"text": "A nostalgic Macklemore song says, \"I wish somebody would have told me... someday, these would be\" these",
-						"response": "the good old days"
+						"text": "This word for a type of caretaker comes from the name of a minor Roman deity",
+						"response": "a janitor"
 					},
 					{
-						"text": "The title of this Four Tops song precedes the lyric \"but with a different meaning since you been gone\"",
-						"response": "\"It's The Same Old Song\""
+						"text": "This word for a type of cutting tool comes from the name of a dance that involves a similar up &amp; down motion",
+						"response": "a jigsaw"
 					},
 					{
-						"text": "Rod Stewart told us that this title object \"been broke a thousand times\"",
-						"response": "\"This Old Heart Of Mine\""
+						"text": "It can be any kind of big, festive gathering, no longer just of Boy Scouts",
+						"response": "jamboree"
 					}
 				],
-				"originalDate": "2025-06-11"
+				"originalDate": "2025-09-09"
 			},
 			{
-				"category": "SAME LAST NAME",
+				"category": "EDIBLE IDIOMS",
 				"comments": "",
 				"clues": [
 					{
-						"text": "\"360\" CNN journalist &<br>a parachuting hijacker",
-						"response": "Cooper"
+						"text": "It's something of little importance or value, like, say, legumes in a heap",
+						"response": "a hill of beans"
 					},
 					{
-						"text": "A British scientist<br>&<br>the quarterback for the Carolina Panthers during their 2016 Super Bowl appearance",
-						"response": "Newton"
+						"text": "In a 1785 poem William Cowper referred to this as \"the very spice of life\"; spoken like a man who's never tried sriracha",
+						"response": "variety"
 					},
 					{
-						"text": "\"The World Is Flat\" New York Times columnist<br>&<br>an economist who wrote \"Capitalism &amp; Freedom\"",
-						"response": "Friedman"
+						"text": "At the dinner table, it can be a tempting item, perhaps twice baked<span class=\"nobreak\">--</span>or a subject best avoided",
+						"response": "a hot potato"
 					},
 					{
-						"text": "A World War II U.S. general<br>&<br>a Knick turned U.S. senator from New Jersey",
-						"response": "Bradley"
+						"text": "TV's \"MythBusters\" once tested whether \"taking\" this is \"as easy\" as the idiom suggests<span class=\"nobreak\">--</span>conclusion: nope",
+						"response": "take candy from a baby"
 					},
 					{
-						"text": "Writer of \"Prince Caspian\"<br>&<br>a former congressman &amp; SNCC leader",
-						"response": "Lewis"
+						"text": "This 3-word term once referred to a vessel for boiling the catch at river picnics; today, \"fine\" or not, it means a hot mess",
+						"response": "kettle of fish"
 					}
 				],
-				"originalDate": "2025-06-11"
+				"originalDate": "2025-09-08"
 			},
 			{
-				"category": "MEDIEVAL EUROPE",
+				"category": "BICYCLES ON THE BIG SCREEN",
 				"comments": "",
 				"clues": [
 					{
-						"text": "A term in the news in 2025, this was the title of the highest authority in Venice, an elected job with life tenure",
-						"response": "Doge"
+						"text": "Bicycles take flight thanks to the magical powers of a mysterious alien in this Spielberg flick",
+						"response": "<i>E.T.</i>"
 					},
 					{
-						"text": "The Vikings ranged from Russia in the east to Newfoundland in the west, which they called this",
-						"response": "Vinland"
+						"text": "\"Raindrops Keep Fallin' On My Head\" plays as Paul Newman hams it up on a bike in this film that co-starred Robert Redford",
+						"response": "<i>Butch Cassidy and the Sundance Kid</i>"
 					},
 					{
-						"text": "In 1347, after an 11-month siege, the Burghers of this city surrendered to the British; Rodin cast them in bronze 500 years later",
-						"response": "Calais"
+						"text": "A bit of movie magic allowed this green guy to take a bike ride in 1979 &amp; 1981 films",
+						"response": "Kermit the Frog"
 					},
 					{
-						"text": "We should perhaps call this king of England \"the Conquered\" since he lost the throne at the Battle of Hastings",
-						"response": "Harold (II)"
+						"text": "In a 2025 HBO Max doc, Paul Reubens said people riding bicycles around the WB lot inspired the stolen-bike plot of this movie",
+						"response": "<i>Pee-wee's Big Adventure</i>"
 					},
 					{
-						"text": "The word \"dunce\" comes from the name of this medieval philosopher because he became associated with pointless hairsplitting",
-						"response": "Duns Scotus"
+						"text": "In \"Better Off Dead\" a psychotic paperboy pedals after this actor in pursuit of the $2 he's owed",
+						"response": "(John) Cusack"
 					}
 				],
-				"originalDate": "2025-06-11"
+				"originalDate": "2025-09-08"
 			},
 			{
-				"category": "STARTS WITH \"S\"",
+				"category": "SAME FIRST &amp; LAST LETTER",
 				"comments": "",
 				"clues": [
 					{
-						"text": "Under Robert's Rules, if you propose a motion, someone has to do this for the motion to be considered",
-						"response": "second"
+						"text": "Also called nicotinic acid, it gets better publicity as a vitamin under this name",
+						"response": "niacin"
 					},
 					{
-						"text": "From a Latin word meaning \"of the world\", this adjective means not connected with religion",
-						"response": "secular"
+						"text": "It's paired with preen in an idiom meaning to make oneself beautiful",
+						"response": "primp"
 					},
 					{
-						"text": "A thought expressing an opinion based on incomplete evidence, or a business risk with not great odds",
-						"response": "speculation"
+						"text": "This type of place that makes &amp; serves beer foamed up in the '80s, with California's first being fittingly in Hopland",
+						"response": "a brewpub"
 					},
 					{
-						"text": "A professional who installs all kinds of pipes &amp; makes sure they go snugly together",
-						"response": "a steamfitter"
+						"text": "Lye is also known as this type of soda, meaning it can corrode by chemical action",
+						"response": "caustic"
 					},
 					{
-						"text": "This kind of persuasion works below the threshold of conscious perception",
-						"response": "subliminal"
+						"text": "From the French for \"explore\", the military does it to get information",
+						"response": "reconnoiter"
 					}
 				],
-				"originalDate": "2025-06-10"
+				"originalDate": "2025-09-08"
 			},
 			{
-				"category": "U.S. COINS",
-				"comments": "",
+				"category": "WAR BONDS",
+				"comments": "(Ken: You name the war.)",
 				"clues": [
 					{
-						"text": "Since 2006 this coin has featured an image from a Rembrandt Peale portrait as part of its \"Return to Monticello\" theme",
-						"response": "the nickel"
+						"text": "General Douglas MacArthur,<br>Syngman Rhee",
+						"response": "the Korean War"
 					},
 					{
-						"text": "Washington was on the front &amp; a colonial drummer &amp; victory torch on the reverse of a special quarter that came out in this year",
-						"response": "1976"
+						"text": "Saddam Hussein,<br>\"Stormin' Norman\" Schwarzkopf",
+						"response": "the Gulf War"
 					},
 					{
-						"text": "This Midwest state's commemorative quarter features an astronaut, an early airplane &amp; the words \"Birthplace of Aviation Pioneers\"",
-						"response": "Ohio"
+						"text": "Major-General Sir Colin Campbell,<br>Florence Nightingale",
+						"response": "the Crimean War"
 					},
 					{
-						"text": "The American Women Quarters Program begun in 2022 has featured Wilma Mankiller, first female chief of this indigenous people",
-						"response": "the Cherokee"
+						"text": "George Washington,<br>Marquis de Montcalm",
+						"response": "the French and Indian War"
 					},
 					{
-						"text": "The U.S. Mint issued a 5-ounce silver coin in 2013 honoring this fort alluded to in our national anthem",
-						"response": "Fort McHenry"
+						"text": "Henry V,<br>Joan of Arc",
+						"response": "the Hundred Years' War"
 					}
 				],
-				"originalDate": "2025-06-10"
+				"originalDate": "2025-07-25"
 			}
 		],
 		{
-			"category": "HISTORIC NAMES",
-			"text": "Some 200 years after her birth, she was awarded the rank of General in Maryland's National Guard on Veterans Day 2024",
-			"response": "Harriet Tubman"
+			"category": "TODAY SPELLING COUNTS",
+			"text": "The winning word at the first Scripps National Spelling Bee was this, a plant &amp; genus with sword-shaped leaves now on the trophy",
+			"response": "gladiolus"
 		}
 	]
 }

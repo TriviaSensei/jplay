@@ -40,10 +40,17 @@ const sh = new StateHandler(initState);
 
 const msgDiv = document.querySelector('#header-message');
 
-const createArea = document.querySelector('#create-tab-pane');
+const createArea = document.querySelector('#create-tab-pane .game-data');
 
-const loadFile = createArea.querySelector('#load-file');
-const saveButton = createArea.querySelector('#save-data');
+const loadFile = document.querySelector('#create-tab-pane #load-file');
+const saveButton = document.querySelector('#create-tab-pane #save-data');
+
+const metadataArea = document.querySelector(
+	'#create-tab-pane .create-game-metadata'
+);
+const addMetadata = document.querySelector(
+	'#create-tab-pane #create-game-metadata'
+);
 
 const roundSelect = getElementArray(
 	createArea,
@@ -273,6 +280,73 @@ textInputs.forEach((t) => {
 	t.addEventListener('change', handleDataChange);
 });
 
+const legalChars = 'abcdefghijklmnopqrstuvwxyz1234567890-_ ';
+const validateTitle = (e) => {
+	const chars = e.target.value.toLowerCase().split('');
+	const t = e.target.closest('.metadata-title');
+	if (!t) return;
+	if (
+		chars.length > 0 &&
+		chars.every((char) => legalChars.indexOf(char) >= 0)
+	) {
+		const titles = getElementArray(metadataArea, '.metadata-title input');
+		for (var i = 0; i < titles.length; i++) {
+			if (titles[i] === e.target) break;
+			if (titles[i].value.toLowerCase() === e.target.value.toLowerCase()) {
+				t.classList.add('invalid');
+				return;
+			}
+		}
+		t.classList.remove('invalid');
+	} else t.classList.add('invalid');
+};
+const validateValue = (e) => {
+	const v = e.target.closest('.metadata-value');
+	if (!v) return;
+	const val = e.target.value;
+	if (val.length > 0) v.classList.remove('invalid');
+	else v.classList.add('invalid');
+};
+
+//handle game metadata
+const removeMetadataItem = (e) => {
+	const item = e.target.closest('.metadata-item');
+	if (item) item.remove();
+
+	const titles = getElementArray(metadataArea, '.metadata-title input');
+	titles.forEach((t) => validateTitle({ target: t }));
+};
+const createMetadataItem = (name, value) => {
+	const newItem = createElement('.metadata-item');
+	const t = createElement(`.metadata-title${name ? '' : '.invalid'}`);
+	const in1 = createElement('input');
+	in1.setAttribute('type', 'text');
+	in1.addEventListener('change', validateTitle);
+	in1.addEventListener('blur', validateTitle);
+	t.appendChild(in1);
+	in1.value = name;
+	const v = createElement(`.metadata-value${value ? '' : '.invalid'}`);
+	const in2 = createElement('input');
+	in2.setAttribute('type', 'text');
+	v.appendChild(in2);
+	in2.value = value;
+	in2.addEventListener('change', validateValue);
+	in2.addEventListener('blur', validateValue);
+	newItem.appendChild(t);
+	newItem.appendChild(v);
+	const b = createElement('button.delete-button');
+	b.addEventListener('click', removeMetadataItem);
+	newItem.appendChild(b);
+	return newItem;
+};
+
+addMetadata.addEventListener('click', (e) => {
+	const newItem = createMetadataItem('', '');
+	metadataArea.appendChild(newItem);
+	const inp = newItem.querySelector('.metadata-title input');
+	inp.focus();
+});
+
 const validateData = (data) => {
 	let messages = [];
 	let newData = { ...initState };
@@ -352,14 +426,61 @@ loadFile.addEventListener('change', (e) => {
 			resultModal.show();
 		} else showMessage('info', 'Data successfully loaded');
 		sh.setState({ ...result.data, name: file.name });
+		metadataArea.innerHTML = '';
+		if (data.metadata) {
+			const attrs = Object.getOwnPropertyNames(data.metadata);
+			attrs.forEach((attr) => {
+				const item = createMetadataItem(attr, data.metadata[attr]);
+				metadataArea.appendChild(item);
+			});
+		}
 	});
 	reader.readAsText(file, 'utf-8');
 });
 
+const getMetadataItem = (item) => {
+	const title = item?.querySelector('.metadata-title input')?.value;
+	if (!title)
+		return { status: 'fail', message: 'All metadata items must have a name.' };
+	const value = item.querySelector('.metadata-value input')?.value;
+	if (!value)
+		return {
+			status: 'fail',
+			message: `Metadata item "${title}" is missing a value`,
+		};
+
+	const chars = title.toLowerCase().split('');
+	if (!chars.every((char) => legalChars.indexOf(char) >= 0))
+		return {
+			status: 'fail',
+			message: `Metadata item "${title}" has an illegal character in the name`,
+		};
+
+	return {
+		status: 'OK',
+		title,
+		value,
+	};
+};
+
 saveButton.addEventListener('click', () => {
 	const state = sh.getState();
+	const metadataItems = getElementArray(metadataArea, '.metadata-item');
+	const metadata = {};
+	for (var i = 0; i < metadataItems.length; i++) {
+		const extract = getMetadataItem(metadataItems[i]);
+		if (extract.status !== 'OK')
+			return showMessage('error', extract.message, 2000);
+		metadata[extract.title] = extract.value;
+	}
 	const dataStr =
-		'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state));
+		'data:text/json;charset=utf-8,' +
+		encodeURIComponent(
+			JSON.stringify({
+				metadata,
+				...state,
+			})
+		);
 	const dlAnchorElem = createElement('a');
 	dlAnchorElem.setAttribute('href', dataStr);
 	dlAnchorElem.setAttribute('download', state.name || 'game.json');

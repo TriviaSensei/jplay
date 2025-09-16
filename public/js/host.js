@@ -2,6 +2,8 @@ import { getElementArray } from './utils/getElementArray.js';
 import { showMessage } from './utils/messages.js';
 import { handleRequest } from './utils/requestHandler.js';
 import { withTimeout } from './utils/socketTimeout.js';
+import { createElement } from './utils/createElementFromSelector.js';
+
 const createButton = document.querySelector('#create-game');
 const fileUpload = document.querySelector('#game-file');
 let socket;
@@ -58,6 +60,12 @@ const startGame = (type, data) => {
 };
 
 const initContainer = document.querySelector('.init-container');
+const loadType = getElementArray(
+	document,
+	'input[type="radio"][name="load-type"]'
+);
+let currentFile;
+const gameMetadata = document.querySelector('.game-metadata');
 const gameContainer = document.querySelector('.game-container');
 const editPlayerButtons = getElementArray(document, '.edit-player-button');
 const nameDisplays = getElementArray(document, '.name-container');
@@ -644,12 +652,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	if (!isKey) {
 		socket = io();
 		socket.once('ack-connection', () => {
-			console.log('Connection made');
 			//see if a client id is stored in local storage
 			const myId = localStorage.getItem('jp-client-id');
 			//if not, get one and store it
 			if (!myId) {
-				console.log('No ID found - requesting a new one');
 				socket.emit(
 					'request-id',
 					null,
@@ -669,13 +675,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 			//if so, send it to get our state back
 			else {
-				console.log('Verifying ID with server');
 				socket.emit(
 					'verify-id',
 					{ id: myId },
 					withTimeout(
 						(data) => {
-							console.log(data);
 							if (data.status !== 'OK') showMessage('error', data.message);
 							if (data.id) {
 								uid = data.id;
@@ -738,21 +742,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	});
 
-	const files = getElementArray(document, '.file');
-	if (files) {
-		const selectFile = (e) => {
-			const sf = document.querySelector('.file.selected');
-			if (!e.target || sf === e.target) return;
-			if (sf) {
-				sf.classList.remove('selected');
-				sf.setAttribute('aria-selected', false);
-			}
-			e.target.classList.add('selected');
-			e.target.setAttribute('aria-selected', true);
-		};
-		files.forEach((f) => f.addEventListener('click', selectFile));
-	}
-
 	if (createButton) {
 		createButton.addEventListener('click', async () => {
 			const gameType = document.querySelector(
@@ -767,7 +756,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (!fileType) return showMessage('error', 'File location not specified');
 			let data;
 			if (fileType === 'local') {
-				const file = fileUpload.files[0];
+				const file = fileUpload.files[0] || currentFile;
 				if (!file) return showMessage('error', 'No file specified');
 				else if (file.type !== 'application/json')
 					return showMessage('error', 'Invalid file format');
@@ -798,6 +787,99 @@ document.addEventListener('DOMContentLoaded', () => {
 				handleRequest(url, 'GET', null, handler);
 			} else return showMessage('error', 'Invalid file location specified');
 		});
+	}
+
+	const createMetadataTags = (metadata) => {
+		const attributes = Object.getOwnPropertyNames(metadata);
+		attributes.forEach((attr) => {
+			const value = metadata[attr];
+			const newLine = createElement('.metadata-attr');
+			const title = createElement('.metadata-title');
+			const val = createElement('.metadata-data');
+			val.innerHTML = value;
+			title.innerHTML = `${attr}:`;
+			newLine.appendChild(title);
+			newLine.appendChild(val);
+			gameMetadata.appendChild(newLine);
+		});
+	};
+
+	const processFileMetadata = (file) => {
+		if (gameMetadata) gameMetadata.innerHTML = '';
+		else return;
+
+		const reader = new FileReader();
+		reader.addEventListener('load', () => {
+			const data = JSON.parse(reader.result);
+			const metadata = data?.metadata;
+			if (!metadata) return;
+			createMetadataTags(metadata);
+		});
+		reader.readAsText(file, 'utf-8');
+	};
+
+	if (!isKey) {
+		fileUpload.addEventListener('change', (e) => {
+			const selectedRadio = document.querySelector(
+				'input[type="radio"][name="load-type"][value="local"]:checked'
+			);
+			if (!selectedRadio) return;
+			let file = e.target.files[0];
+			if (!file && !currentFile) return;
+
+			if (!file) file = currentFile;
+			else currentFile = file;
+
+			if (file.type.toLowerCase() !== 'application/json') {
+				e.target.value = '';
+				return showMessage('error', 'Only JSON files are accepted', 2000);
+			} else if (file.size > 20000) {
+				e.target.value = '';
+				return showMessage('error', 'The maximum file size is 20 KB', 2000);
+			}
+			const lfn = document.querySelector('.load-file-name');
+			if (lfn) lfn.innerHTML = file.name;
+			processFileMetadata(file);
+		});
+
+		loadType.forEach((lt) => {
+			lt.addEventListener('change', (e) => {
+				if (!e.target.checked) return;
+				if (gameMetadata) gameMetadata.innerHTML = '';
+
+				if (e.target.value === 'local') {
+					const file = fileUpload.files[0];
+					if (!file) return;
+					const reader = new FileReader();
+					reader.addEventListener('load', () => {
+						const data = JSON.parse(reader.result);
+						const metadata = data?.metadata;
+						if (!metadata) return;
+						createMetadataTags(metadata);
+					});
+					reader.readAsText(file, 'utf-8');
+				}
+			});
+		});
+		const files = getElementArray(document, '.file');
+		if (files) {
+			const selectFile = (e) => {
+				const sf = document.querySelector('.file.selected');
+				if (!e.target || sf === e.target) return;
+				if (sf) {
+					sf.classList.remove('selected');
+					sf.setAttribute('aria-selected', false);
+				}
+				e.target.classList.add('selected');
+				e.target.setAttribute('aria-selected', true);
+				if (gameMetadata) gameMetadata.innerHTML = '';
+				const metadata = JSON.parse(e.target.getAttribute('data-metadata'));
+				if (metadata) {
+					createMetadataTags(metadata);
+				}
+			};
+			files.forEach((f) => f.addEventListener('click', selectFile));
+		}
 	}
 
 	sh.addWatcher(initContainer, (e) => {

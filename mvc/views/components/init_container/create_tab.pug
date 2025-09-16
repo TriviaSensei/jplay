@@ -3,42 +3,54 @@ link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
     input#load-file(type="file" accept=".json")
     button#load-data.btn.btn-secondary.f-1.me-2
         label.w-100.h-100(for="load-file") Load
-    button#save-data.btn.btn-primary.f-1 Download .json 
-.input-row-h
-    .input-label Round
-    .input-container
-        each val,ind in ['J','DJ','FJ']
-            input.invalid(type="radio" value=`${ind}` id=`selected-round-${ind}` name="selected-round" checked=ind===0)
-            label(for=`selected-round-${ind}`)
-                .label-inner= val
-.input-row-v.no-fj
-    .input-label Category 
-    .input-container 
-        select#category-select.w-100
-            each cat in [0,1,2,3,4,5]
-                option.invalid(value=`${cat}`)= `${cat+1}. [Blank] ⚠️`
+    button#save-data.btn.btn-primary.f-1 Download .json
 .input-row-v 
-    .input-label Edit Category Name (max 25 chars)
-    .input-container 
-        input#category-name.w-100(type="text" placeholder="Category name" maxlength="25")
-.input-row-v.no-fj
-    .input-label Edit Category Comments (max 100 chars)
-    .input-container 
-        input#category-comments.w-100(type="text" placeholder="Category comments" maxlength="100")
-.input-row-h.no-fj
-    .input-label Value
+    .input-label Game Metadata
     .input-container
-        each val in [0,1,2,3,4]
-            input.invalid(type="radio" value=`${val}` id=`selected-clue-${val}` name="selected-clue" checked=val===0)
-            label(for=`selected-clue-${val}`)
-                .label-inner= `$${(val+1)*200}`
-.input-row-v
-    .input-label Clue Text (max 125 chars)
-    .input-container
-        .ratio.ratio-4x3 
-            div.p-4.clue-text-container
-                textarea#edit-clue-text.w-100.h-100(placeholder="Clue text" maxlength="125")
-.input-row-v 
-    .input-label Correct Response
-    .input-container 
-        input#correct-response.w-100(type="text" placeholder="Correct response")
+        .d-flex.flex-column.w-100
+            .w-100.d-flex.flex-column
+            .metadata-header
+                .metadata-item.fw-bold
+                    .metadata-title Name
+                    .metadata-value Value
+            .create-game-metadata.w-100.d-flex.flex-column
+            button#create-game-metadata.btn.btn-sm.btn-primary Add
+.game-data.d-flex.flex-column
+    .input-row-h
+        .input-label Round
+        .input-container
+            each val,ind in ['J','DJ','FJ']
+                input.invalid(type="radio" value=`${ind}` id=`selected-round-${ind}` name="selected-round" checked=ind===0)
+                label(for=`selected-round-${ind}`)
+                    .label-inner= val
+    .input-row-v.no-fj
+        .input-label Category 
+        .input-container 
+            select#category-select.w-100
+                each cat in [0,1,2,3,4,5]
+                    option.invalid(value=`${cat}`)= `${cat+1}. [Blank] ⚠️`
+    .input-row-v 
+        .input-label Edit Category Name (max 25 chars)
+        .input-container 
+            input#category-name.w-100(type="text" placeholder="Category name" maxlength="25")
+    .input-row-v.no-fj
+        .input-label Edit Category Comments (max 100 chars)
+        .input-container 
+            input#category-comments.w-100(type="text" placeholder="Category comments" maxlength="100")
+    .input-row-h.no-fj
+        .input-label Value
+        .input-container
+            each val in [0,1,2,3,4]
+                input.invalid(type="radio" value=`${val}` id=`selected-clue-${val}` name="selected-clue" checked=val===0)
+                label(for=`selected-clue-${val}`)
+                    .label-inner= `$${(val+1)*200}`
+    .input-row-v
+        .input-label Clue Text (max 125 chars)
+        .input-container
+            .ratio.ratio-4x3 
+                div.p-4.clue-text-container
+                    textarea#edit-clue-text.w-100.h-100(placeholder="Clue text" maxlength="125")
+    .input-row-v 
+        .input-label Correct Response
+        .input-container 
+            input#correct-response.w-100(type="text" placeholder="Correct response")
