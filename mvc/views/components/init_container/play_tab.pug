@@ -1,8 +1,11 @@
 .d-flex.flex-column
     .input-row-v 
-        .input-label Your name 
+        .input-label Your name (required)
         .input-container 
             input#player-name.mb-2(type="text" placeholder="Your name")
+    .input-row-v
+        .input-label Draw your name (optional)
+        .input-container
             #join-name.draw-player-name
                 .ratio.ratio-4x3.mb-2
                     .svg-container(data-bs-content="Draw your name here!" data-bs-toggle="popover")
