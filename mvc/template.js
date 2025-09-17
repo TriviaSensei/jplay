@@ -1,6 +1,7 @@
 module.exports = {
 	name: '',
 	metadata: {},
+	notes: '',
 	rounds: [
 		[
 			{

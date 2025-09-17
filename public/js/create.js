@@ -52,6 +52,8 @@ const addMetadata = document.querySelector(
 	'#create-tab-pane #create-game-metadata'
 );
 
+const gameNotes = document.querySelector('#game-notes');
+
 const roundSelect = getElementArray(
 	createArea,
 	'input[type="radio"][name="selected-round"]'
@@ -258,6 +260,14 @@ sh.addWatcher(null, populateCategoryNames);
 
 //change data when text inputs change
 const handleDataChange = (e) => {
+	if (e.target === gameNotes) {
+		sh.setState((prev) => {
+			return {
+				...prev,
+				gameNotes: e.target.value,
+			};
+		});
+	}
 	const sc = getSelectedClue();
 	sh.setState((prev) => {
 		if (sc.round === 2)
@@ -436,6 +446,8 @@ loadFile.addEventListener('change', (e) => {
 				metadataArea.appendChild(item);
 			});
 		}
+		gameNotes.value = '';
+		if (data.gameNotes) gameNotes.value = data.gameNotes;
 	});
 	reader.readAsText(file, 'utf-8');
 });
