@@ -2,6 +2,10 @@ mixin image(caption)
     img.help-img
     .caption= caption
 
+mixin imageSrc(caption,src)
+    img.help-img-src(src=`/img/help/${src}`)
+    .caption= caption
+
 mixin command(cmd)
     span.command= cmd
 
@@ -38,7 +42,20 @@ html
                     p It is possible to manually create a game file (download the template #[a(href=`data:text/plain;charset=utf-8,${encodeURIComponent(JSON.stringify(template))}` download="template.json") here]), or using the "Create" tab, which is available from the #[a(href="/") homepage], as shown below: 
                     +image("The create tab")
                     h5 Manual game creation
-                    p Creating a game manually takes a basic knowledge of JSON. To create a game manually, open the template. 
+                    p Creating a game manually takes a basic knowledge of JSON. To create a game manually, open the #[a(href=`data:text/plain;charset=utf-8,${encodeURIComponent(JSON.stringify(template))}` download="template.json") template] and note its contents - a single object with a few attributes, described below.
+                    h6.fw-semibold Name 
+                    p The name is any string describing the file or the game. It is optional.
+                    h6.fw-semibold Metadata 
+                    p The metadata is also optional, but is helpful to describe the contents. You may add any number of pairs of key names and values to this object, and they will be displayed on screen when you open the file in the "host" tab. Each key name must be alphanumeric, and may also include dashes (-), underscores (_), and spaces. Below is an example of what you might put in metadata: 
+                    code {
+                    code "Author": "Chuck Yu",
+                    code "Completed date": "2025-09-17",
+                    code "Theme": "None",
+                    code "Difficulty": "7",
+                    code }
+                    p When the file is first opened, before the host clicks the "create game" button, the metadata will be displayed beneath the file chooser.
+                    +imageSrc("File metadata","metadata.png")
+                    h6.fw-semibold Rounds
                     p The "rounds" array has 3 elements, representing the three rounds of a game (Jeopardy, Double Jeopardy, and Final Jeopardy). 
                     p For the Jeopardy and Double Jeopardy rounds, you must fill in each category, and for each of the 5 clues in each category, the text and correct response for each clue. If the category has any comments (e.g. a clarification of the category for the host to read to the contestants, like "each correct response starts with a C"), you may fill that in as well. Clue values will be automatically populated, and daily double locations will be randomly determined when the game file is loaded.
                     +image("Manually creating a game")
@@ -49,6 +66,7 @@ html
                     h5 Using the Creator 
                     p Using the game creator is an easy way to generate and download the .json file for later use. You do not have to create the entire game in one sitting - rather, you may download the incomplete file and then reload it later to complete by using the "Download" and "Load" buttons.
                     p To use the creator, select the round (J, DJ, or FJ for first round, Double Jeopardy, and Final Jeopardy, respectively), Category, and Value, and type in the clue and response. Upon selecting a category, you may also edit the category name and comments.
+                    p If you wish to include metadata with your game file, you may add that as well, using the "Add" button under the "Game Metadata" section of the creator.
                     p If any issues are present, a warning emoji (⚠️) will appear and the area will be outlined in red: 
                     ul 
                         li In the round selector: At least one category in the round has a blank name, or at least one clue in the round has a blank text or response field.

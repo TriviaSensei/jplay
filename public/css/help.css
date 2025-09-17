@@ -29,12 +29,13 @@ section {
 	flex-direction: column;
 }
 
+.help-img-src,
 .help-img {
 	width: min(100%, 400px);
 	margin: auto;
 }
 
-.help-img + .caption {
+img + .caption {
 	font-size: 0.8em;
 	font-weight: bold;
 	margin: 0.5em auto 1em;
