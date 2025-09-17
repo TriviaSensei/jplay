@@ -228,6 +228,8 @@ const populateSelectedClue = () => {
 								val.classList.remove('invalid');
 								return true;
 							}
+							console.log(val, cl);
+							console.log(clue);
 							val.classList.add('invalid');
 							return false;
 						})
