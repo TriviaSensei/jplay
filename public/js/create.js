@@ -163,7 +163,9 @@ const populateCategoryNames = () => {
 	const sc = getSelectedClue();
 	if (sc.round === 2) return;
 	else {
-		const round = sh.getState().rounds[sc.round];
+		const state = sh.getState();
+		if (!state) return;
+		const round = state.rounds[sc.round];
 		if (!round) return;
 		categories.forEach((c) => {
 			const val = Number(c.getAttribute('value'));
@@ -188,7 +190,6 @@ const populateCategoryNames = () => {
 
 const populateSelectedClue = () => {
 	const sc = getSelectedClue();
-	const state = sh.getState();
 
 	categoryName.value = sc.data.category;
 	categoryComments.value = sc.data.comments;
@@ -196,50 +197,63 @@ const populateSelectedClue = () => {
 	correctResponse.value = sc.data.response;
 
 	populateCategoryNames();
-	//check validity of round
-	//round radio
+	validateAll();
+};
+
+const validateAll = () => {
+	const state = sh.getState();
+	const selectedRound = createArea.querySelector(
+		`input[type="radio"][name="selected-round"]:checked`
+	);
+	if (!selectedRound) return;
+	const selectedRoundNo = Number(selectedRound.getAttribute('value'));
+	//for each round
 	state.rounds.forEach((round, rd) => {
 		const radio = createArea.querySelector(
 			`input[type="radio"][name="selected-round"][value="${rd}"]`
 		);
+		//assume it's valid to start
+		radio.classList.remove('invalid');
 		//FJ needs a category, text, and response
 		if (rd === 2) {
 			const { category, text, response } = state.rounds[2];
-			if (
-				category &&
-				category.trim() !== '' &&
-				text &&
-				text.trim() !== '' &&
-				response &&
-				response.trim() !== ''
-			)
-				radio.classList.remove('invalid');
-			else radio.classList.add('invalid');
+			if (!category?.trim() || !text?.trim() || !response?.trim())
+				radio.classList.add('invalid');
 		} else {
-			//other rounds need every category...
-			if (
-				round.every((cat) => {
-					return (
-						//to have a category text
-						cat.category.trim() !== '' &&
-						cat.clues.length === 5 &&
-						//...and for every clue in it to have a text and response
-						cat.clues.every((clue, cl) => {
-							const val = valueSelect[cl];
-							if (clue.text.trim() !== '' && clue.response.trim() !== '') {
-								val.classList.remove('invalid');
-								return true;
-							}
-							console.log(val, cl);
+			//all other rounds
+			round.forEach((cat, catNo) => {
+				//the category text must not be empty and it must have 5 clues, or the entire round is invalid
+				if (!cat?.category?.trim() || cat.clues.length !== 5)
+					radio.classList.add('invalid');
+
+				//within the category
+				cat.clues.forEach((clue, clueNo) => {
+					//each clue must have text and response or the round is invalid
+					const clueValid =
+						(clue.text ? clue.text.trim() !== '' : false) &&
+						(clue.response ? clue.response.trim() !== '' : false);
+					if (!clueValid) radio.classList.add('invalid');
+
+					if (
+						catNo === categorySelect.selectedIndex &&
+						rd === selectedRoundNo
+					) {
+						const clueRadio = createArea.querySelector(
+							`input[type="radio"][name="selected-clue"][value="${clueNo}"]`
+						);
+						if (clueRadio) {
+							const lbl = createArea.querySelector(
+								`label[for="${clueRadio.id}"]`
+							);
+							console.log(lbl);
 							console.log(clue);
-							val.classList.add('invalid');
-							return false;
-						})
-					);
-				})
-			)
-				radio.classList.remove('invalid');
-			else radio.classList.add('invalid');
+							console.log(clueValid);
+							if (!clueValid) clueRadio.classList.add('invalid');
+							else clueRadio.classList.remove('invalid');
+						}
+					}
+				});
+			});
 		}
 	});
 };
@@ -257,7 +271,7 @@ roundSelect.forEach((rs) =>
 	})
 );
 sh.addWatcher(null, populateCategoryNames);
-
+sh.addWatcher(null, validateAll);
 //change data when text inputs change
 const handleDataChange = (e) => {
 	if (e.target === gameNotes) {
@@ -287,6 +301,7 @@ const handleDataChange = (e) => {
 		return prev;
 	});
 	populateCategoryNames();
+	validateAll();
 };
 textInputs.forEach((t) => {
 	t.addEventListener('change', handleDataChange);
