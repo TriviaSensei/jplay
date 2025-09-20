@@ -245,9 +245,6 @@ const validateAll = () => {
 							const lbl = createArea.querySelector(
 								`label[for="${clueRadio.id}"]`
 							);
-							console.log(lbl);
-							console.log(clue);
-							console.log(clueValid);
 							if (!clueValid) clueRadio.classList.add('invalid');
 							else clueRadio.classList.remove('invalid');
 						}

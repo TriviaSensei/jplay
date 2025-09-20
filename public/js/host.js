@@ -651,7 +651,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	if (!isKey) {
 		socket = io();
-		socket.once('ack-connection', () => {
+		socket.on('disconnect', (reason, details) => {
+			console.log(`Disconnected (${reason})`);
+		});
+		socket.on('ack-connection', () => {
 			//see if a client id is stored in local storage
 			const myId = localStorage.getItem('jp-client-id');
 			//if not, get one and store it

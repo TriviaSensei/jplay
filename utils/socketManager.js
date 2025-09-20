@@ -1,6 +1,6 @@
 const { v4: uuidV4 } = require('uuid');
-const pingInterval = 1000;
-const pingTimeout = 500;
+const pingInterval = 200;
+const pingTimeout = 200;
 const gameTimeout = 600000;
 const Game = require('../public/js/utils/Game');
 // const userTimeout = 5 * 60 * 1000;
@@ -110,6 +110,7 @@ const socket = async (http, server) => {
 		io.to(socket.id).emit('ack-connection', null);
 		//user sends this to get a new UUID
 		socket.on('request-id', (data, cb) => {
+			console.log(`Requesting new ID`);
 			return cb({
 				status: 'OK',
 				id: uuidV4(),
