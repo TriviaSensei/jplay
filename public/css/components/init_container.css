@@ -1,0 +1,7 @@
+.tab-content > .tab-pane {
+	max-height: 100%;
+}
+
+svg {
+	touch-action: none;
+}

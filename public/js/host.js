@@ -1979,7 +1979,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	//
 	const joinGameButton = document.querySelector('#join-game');
-	const spectateGameButton = document.querySelector('#spectate-game');
 	const newPlayerName = document.querySelector('#player-name');
 	const joinCode = document.querySelector('#room-code');
 	const playerContainer = document.querySelector('.player-container');
@@ -2034,7 +2033,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		sh.addWatcher(playerContainer, (e) => {
 			const state = e.detail;
 			const player = state?.players?.find((p) => p.uid === uid);
-			const playerIndex = state.players.findIndex((p) => p.uid === uid);
 
 			if (player) {
 				showPanel(e.target);
@@ -2060,14 +2058,19 @@ document.addEventListener('DOMContentLoaded', () => {
 					buzzer.classList.add('armed');
 				} else buzzer.classList.remove('armed');
 
+				//buzzer displays name on buzz-in, otherwise "buzz"
+				if (state.buzzedIn === -1 || !state.players[state.buzzedIn]?.name)
+					buzzer.innerHTML = 'Buzz';
+				else buzzer.innerHTML = state.players[state.buzzedIn].name;
+
 				const lecterns = getElementArray(
 					playerContainer,
 					'.player-lectern-mini'
 				);
 				lecterns.forEach((l) => {
 					const ind = Number(l.getAttribute('data-index'));
-					const nameDisp = l.querySelector('.name-display');
-					const scoreDisp = l.querySelector('.score-display');
+					const nameDisp = l.querySelector('.name-display .display-inner');
+					const scoreDisp = l.querySelector('.score-display .display-inner');
 					if (
 						isNaN(ind) ||
 						ind < 0 ||
@@ -2085,6 +2088,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 					scoreDisp.innerHTML =
 						name === '' ? '' : `$${Math.abs(score).toLocaleString('en')}`;
+
+					if (state.control === ind) l.classList.add('control');
+					else l.classList.remove('control');
+
+					if (state.buzzedIn === ind) l.classList.add('lit');
+					else l.classList.remove('lit');
 				});
 				// if (playerIndex !== -1 && playerIndex === state.buzzedIn) {
 				// 	playerLectern.classList.add('lit');
