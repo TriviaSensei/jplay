@@ -1,52 +1,162 @@
 .player-container {
 	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 .player-container {
-	.lecterns {
+	.player-table {
+		height: 4em;
+		font-size: 1.5em;
+	}
+	.player-lectern-mini {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		.lectern {
-			width: min(50%, 60vh);
-			/*
-				viewport is tall and narrow, and font size will be determined by the width of the window
-			*/
-			@media (max-aspect-ratio: 0.89) {
-				.name-display {
-					font-size: 3vw;
-				}
-				.score-display {
-					font-size: 4.2vw;
-				}
+		.name-display,
+		.score-display {
+			color: var(--white);
+			text-align: center;
+			display: flex;
+			margin: auto;
+		}
+		.name-display:empty::after,
+		.score-display:empty::after {
+			content: '--';
+			margin: auto;
+		}
+		.score-display {
+			font-family: Arial, Helvetica, sans-serif;
+		}
+	}
+
+	.player-lectern-mini.control {
+		border-bottom: 3px solid white;
+	}
+
+	.player-lectern-mini.lit .name-display {
+		color: var(--blue);
+		background-color: var(--white);
+	}
+
+	.board-display-container {
+		width: min(600px, 100%, 72vh);
+		height: min(450px, 75vw, 54%);
+		position: relative;
+
+		.category-large {
+			width: 90%;
+			height: 90%;
+			position: absolute;
+			z-index: 3;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			display: flex;
+			border: 2px solid var(--white);
+			background-color: var(--blue);
+			font-family: 'Swiss 911 Compressed', sans-serif;
+			.category-text {
+				margin: auto;
+				text-align: center;
+				color: var(--white);
 			}
-			/*
-				viewport is wide enough to fit everything - font size determined by the height of the window
-			*/
-			@media (aspect-ratio > 0.89) {
-				.name-display {
-					font-size: 3vh;
-				}
-				.score-display {
-					font-size: 4.2vh;
-				}
+		}
+	}
+
+	@media (min-aspect-ratio: 0.89) {
+		/* absolutely wide, wide aspect ratio */
+
+		@media (min-width: 600px) {
+			.category-display,
+			.clue-display,
+			.value-display {
+				font-size: 24px !important;
 			}
+			.clue-value {
+				font-size: 32px !important;
+			}
+			.category-scroll .category-div {
+				font-size: 90px !important;
+			}
+			.category-large {
+				font-size: 80px;
+			}
+		}
+
+		/* absolutely narrow, wide aspect ratio */
+		@media (max-width: 600px) {
+			.clue-display,
+			.value-display,
+			.category-display {
+				font-size: 3vw !important;
+			}
+
+			.clue-value {
+				font-size: 24px !important;
+			}
+			.category-scroll .category-div {
+				font-size: 12vh !important;
+			}
+			.category-large {
+				font-size: 10.8vh;
+			}
+		}
+	}
+
+	@media (max-aspect-ratio: 0.89) {
+		/* narrow,  tall aspect ratio*/
+		@media (max-width: 600px) {
+			.clue-display,
+			.value-display,
+			.category-display {
+				font-size: 4vw !important;
+			}
+
+			.clue-value {
+				font-size: 5vw !important;
+			}
+			.category-scroll .category-div {
+				font-size: 12vw !important;
+			}
+			.category-large {
+				font-size: 10.8vw;
+			}
+		}
+		/* narrow, wide aspect ratio */
+		@media (min-width: 600px) {
+			.clue-display,
+			.value-display,
+			.category-display {
+				font-size: 4vw !important;
+			}
+
+			.clue-value {
+				font-size: 5vw !important;
+			}
+			.category-scroll .category-div {
+				font-size: 12vw !important;
+			}
+			.category-large {
+				font-size: 10.8vw;
+			}
+		}
+	}
+
+	.buzzer-container {
+		width: min(100%, 500px);
+		.btn-buzzer {
+			background-color: var(--lt-blue);
+			color: white;
+		}
+		.btn-buzzer.armed {
+			background-color: white;
+			color: var(--blue);
 		}
 	}
 }
 
-.player-container .buzzer-container {
-	min-height: 30%;
-	width: min(100%, 500px);
-	.btn-buzzer {
-		background-color: var(--lt-blue);
-		color: white;
-	}
-	.btn-buzzer.armed {
-		background-color: white;
-		color: var(--blue);
-	}
-}
 .input-row-h button {
 	width: 20%;
 	height: 70%;

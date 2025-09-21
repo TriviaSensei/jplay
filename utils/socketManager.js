@@ -1,7 +1,7 @@
 const { v4: uuidV4 } = require('uuid');
 const pingInterval = 200;
 const pingTimeout = 200;
-const gameTimeout = 600000;
+const gameTimeout = -1;
 const Game = require('../public/js/utils/Game');
 // const userTimeout = 5 * 60 * 1000;
 const userTimeout = 2000;
@@ -149,6 +149,7 @@ const socket = async (http, server) => {
 		};
 
 		const resetGameTimeout = (gameId) => {
+			if (gameTimeout < 1) return;
 			const to = timeouts.find((t) => t.id === gameId);
 			if (!to)
 				timeouts.push({
@@ -223,6 +224,7 @@ const socket = async (http, server) => {
 		});
 
 		socket.on('edit-game-data', (data, cb) => {
+			console.log(data);
 			const game = getGameForSocketId(socket.id);
 			if (!game)
 				return cb({ status: 'fail', message: 'You are not part of a game' });

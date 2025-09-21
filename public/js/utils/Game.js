@@ -871,7 +871,8 @@ class Game {
 
 	constructor(board, host, io, socket, stateHandler) {
 		this.id = randomString(20, chars);
-		this.joinCode = randomString(4, letters);
+		// this.joinCode = randomString(4, letters);
+		this.joinCode = 'A';
 		this.io = io;
 		this.socket = socket;
 		if (this.socket) {

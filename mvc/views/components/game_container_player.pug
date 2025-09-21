@@ -1,8 +1,18 @@
-include lectern
-
-#player-lectern-container.lecterns
-    include ../modals/fjPlayerWagerModal
-    include ../modals/fjPlayerResponseModal
-    +lectern(3)
-    .buzzer-container.f-1.p-5.d-flex.flex-column.align-items-center.fs-6
-        button#buzzer.btn.btn-buzzer.f-1.w-100.fs-1(data-bs-content="Click or press Spacebar to buzz" data-bs-title="Buzzer" data-bs-toggle="popover") Buzz
+include ../modals/fjPlayerWagerModal
+include ../modals/fjPlayerResponseModal
+.player-table.d-flex.flex-row.w-100.my-2
+    .player-lectern-mini.f-1.d-flex.flex-column(data-index="0")
+        .f-1.name-display
+        .f-1.score-display
+    .player-lectern-mini.f-1.d-flex.flex-column(data-index="1")
+        .f-1.name-display
+        .f-1.score-display
+    .player-lectern-mini.f-1.d-flex.flex-column(data-index="2")
+        .f-1.name-display
+        .f-1.score-display
+.board-display-container.mb-2    
+    .ratio.ratio-4x3
+        .category-large.d-none
+            .category-text
+.buzzer-container.f-1.p-2.d-flex.flex-column.align-items-center.fs-6
+    button#buzzer.btn.btn-buzzer.f-1.w-100.fs-1(data-bs-content="Click or press Spacebar to buzz" data-bs-title="Buzzer" data-bs-toggle="popover") Buzz

@@ -11,6 +11,15 @@ const hostKeys = ['arrowdown', 'space', 'spacebar', ' '];
 const isKey = location.href.indexOf('control') >= 0;
 let uid;
 
+let isMobile = false;
+document.addEventListener(
+	'touchstart',
+	() => {
+		isMobile = true;
+	},
+	{ once: true, passive: true }
+);
+
 const coverDiv = document.querySelector('#cover-div');
 if (coverDiv) {
 	const skb = coverDiv.querySelector('#show-key-button');
@@ -48,7 +57,6 @@ const startGame = (type, data) => {
 			withTimeout(
 				(data) => {
 					if (data.status !== 'OK') return showMessage('error', data.message);
-					console.log(data.gameState);
 					sh.setState(data.gameState);
 				},
 				() => {
@@ -97,6 +105,7 @@ const categoryScroll = gameContainer.querySelector(
 );
 const categoryScrollInner = categoryScroll.querySelector('.category-scroll');
 const categoryDisplays = getElementArray(categoryScroll, '.category-box');
+const categoryLarge = document.querySelector('.category-large');
 
 const liveClue = gameContainer.querySelector('.live-clue-display');
 const clueBoxes = getElementArray(gameContainer, '.clue-box');
@@ -208,7 +217,6 @@ const socketCB = (fn) =>
 	withTimeout(
 		(data) => {
 			if (data.status !== 'OK') return showMessage('error', data.message);
-
 			const newState = data.gameState;
 			if (!newState) return;
 
@@ -360,7 +368,11 @@ else {
 				? `Waiting for Daily Double wager from ${state.players[index].name}`
 				: `${state.players[index].name} to select a clue`;
 		if (state.isRemote) {
-			socket.emit('edit-game-data', { control: index, status }, socketCB());
+			socket.emit(
+				'edit-game-data',
+				{ gameData: { control: index, status } },
+				socketCB()
+			);
 		} else {
 			game.setGameState({
 				control: index,
@@ -469,7 +481,6 @@ const handleKeyPress = async (e) => {
 					state.players[playerIndex].key = e.key;
 					buzzerKey.setAttribute('data-key', e.key);
 					sh.setState(state);
-					console.log(state);
 				} else {
 					game.gameState.players[playerIndex].setKey(e.key);
 					buzzerKey.setAttribute('data-key', e.key);
@@ -549,7 +560,6 @@ if (!isKey) {
 	//main window - handling input sent from key window
 	document.addEventListener('receive-input', (e) => {
 		const { args } = e.detail;
-		console.log(args);
 		try {
 			if (game) game.handleInput(...args);
 			else if (socket) socket.emit('game-input', args, socketCB());
@@ -643,6 +653,48 @@ const validateGameData = (data) => {
 	return { status: 'OK' };
 };
 
+const catLarge = new StateHandler(false);
+const moveBoard = () => {
+	const elements = getElementArray(
+		document,
+		'.game-container > .ratio.ratio-4x3 > div'
+	);
+	const destination = document.querySelector(
+		'.board-display-container > .ratio.ratio-4x3'
+	);
+	elements.forEach((el) => destination.appendChild(el));
+	const showCategory = (e) => {
+		const state = sh.getState();
+		if (state.state !== 'select') return;
+		const box = e.target.closest('.category-box');
+		const inner = box.querySelector('.category-div');
+
+		if (!inner) return;
+
+		const txt = categoryLarge.querySelector('.category-text');
+		txt.innerHTML = inner.innerHTML;
+		categoryLarge.classList.remove('d-none');
+		catLarge.setState(true);
+	};
+
+	const hideCategory = () => {
+		const st = catLarge.getState();
+		if (st) {
+			categoryLarge.classList.add('d-none');
+			catLarge.setState(false);
+		}
+	};
+	gameHeaders.forEach((gh) => {
+		if (!isMobile) {
+			gh.addEventListener('mousedown', showCategory);
+			document.addEventListener('mouseup', hideCategory);
+		} else {
+			gh.addEventListener('touchstart', showCategory, { passive: true });
+			document.addEventListener('touchend', hideCategory);
+		}
+	});
+};
+
 document.addEventListener('DOMContentLoaded', () => {
 	const uidTest = localStorage.getItem('jp-client-id');
 	if (uidTest) uid = uidTest;
@@ -651,9 +703,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	if (!isKey) {
 		socket = io();
-		socket.on('disconnect', (reason, details) => {
-			console.log(`Disconnected (${reason})`);
-		});
+
 		socket.on('ack-connection', () => {
 			//see if a client id is stored in local storage
 			const myId = localStorage.getItem('jp-client-id');
@@ -689,6 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
 								localStorage.setItem('jp-client-id', uid);
 							}
 							if (data.gameState) sh.setState(data.gameState);
+							if (isPlayer()) moveBoard();
 						},
 						() => {
 							showMessage('error', 'Could not connect to server');
@@ -892,15 +943,22 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	sh.addWatcher(gameContainer, (e) => {
+		const other = document.querySelector('.board-display-container');
 		if (!uid) uid = localStorage.getItem('jp-client-id');
 		if (isKey) showPanel(e.target);
 		else if (!e.detail || e.detail.host.uid !== uid) hidePanel(e.target);
 		else showPanel(e.target);
 
-		if (!e.detail) e.target.setAttribute('data-round', 0);
-		else if (e.detail.round === e.detail.board.length - 1)
+		if (!e.detail) {
+			e.target.setAttribute('data-round', 0);
+			other.setAttribute('data-round', 0);
+		} else if (e.detail.round === e.detail.board.length - 1) {
 			e.target.setAttribute('data-round', 'fj');
-		else e.target.setAttribute('data-round', Math.max(0, e.detail.round) + 1);
+			other.setAttribute('data-round', 'fj');
+		} else {
+			e.target.setAttribute('data-round', Math.max(0, e.detail.round) + 1);
+			other.setAttribute('data-round', Math.max(0, e.detail.round) + 1);
+		}
 	});
 
 	const loadPlayerData = (e) => {
@@ -941,7 +999,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		playerSettingsModal.show();
 		const svgCont = psm ? psm.querySelector('.svg-container') : null;
 		if (svgCont) {
-			console.log(svgCont);
 			const tt = new bootstrap.Popover(svgCont);
 			tt.show();
 			setTimeout(() => {
@@ -1267,7 +1324,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (catInner) catInner.classList.remove('category-hidden');
 			else return;
 			const catText = catInner.querySelector('.category-div');
-			if (catText) catText.innerHTML = state.board.slice(-1).pop().category;
+			if (catText)
+				catText.innerHTML = state.board.slice(-1).pop().category.toUpperCase();
 			if (state.playSound && fjSound) fjSound.play();
 			if (isKey) {
 				const populateLabels = (lbl) => {
@@ -1494,6 +1552,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	);
 
 	const selectClue = (e) => {
+		if (!isHost()) return;
 		const [cat, row] = getCatRow(e.target);
 		const state = sh.getState();
 		if (state?.state !== 'select') return;
@@ -1634,9 +1693,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	//edited to handle both socket and local
 	const handlePrefixChange = (e) => {
 		if (!e.target.checked) return;
-		console.log(e.target);
 		let val = e.target.value;
-		console.log(val);
 		if (val === '[None]') val = '';
 		const state = sh.getState();
 
@@ -1778,14 +1835,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				};
 			});
 		};
-		let isMobile = false;
-		document.addEventListener(
-			'touchstart',
-			() => {
-				isMobile = true;
-			},
-			{ once: true }
-		);
+
 		getElementArray(document, '.name-canvas').forEach((nc) => {
 			nc.addEventListener('mousedown', startPath);
 			nc.addEventListener('touchstart', startPath, { passive: true });
@@ -1872,7 +1922,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			e.target.innerHTML = e.detail.status;
 		});
 		sh.addWatcher(openModalPanel, (e) => {
-			console.log(e.detail);
 			if (e.detail.modal) {
 				e.target.classList.remove('d-none');
 				openModal.innerHTML = e.detail.modalDescription;
@@ -1928,11 +1977,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// sh.addWatcher(null, (state) => {
-	// 	console.log(state);
-	// 	console.trace();
-	// });
-
 	//
 	const joinGameButton = document.querySelector('#join-game');
 	const spectateGameButton = document.querySelector('#spectate-game');
@@ -1968,6 +2012,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						if (data.status !== 'OK') showMessage('error', data.message);
 						else if (data.message) showMessage('info', data.message);
 						sh.setState(data.gameState);
+						moveBoard();
 					},
 					() => {
 						showMessage('error', 'Joining game timed out.');
@@ -1987,13 +2032,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	if (playerContainer)
 		sh.addWatcher(playerContainer, (e) => {
-			const nameContainer = e.target.querySelector('.name-container');
-			const nameCanvas = e.target.querySelector('svg');
-			const path = nameCanvas.querySelector('.player-name-path');
-			const playerLectern = e.target.querySelector('.lectern');
-
 			const state = e.detail;
-			const player = state.players.find((p) => p.uid === uid);
+			const player = state?.players?.find((p) => p.uid === uid);
 			const playerIndex = state.players.findIndex((p) => p.uid === uid);
 
 			if (player) {
@@ -2001,6 +2041,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				const editPlayer = e.target.querySelector('.edit-player');
 				hidePanel(editPlayer);
 
+				//should the buzzer be armed?
 				const buzzer = document.querySelector('#buzzer');
 				if (buzzer.getAttribute('data-bs-toggle') === 'popover') {
 					const tt = new bootstrap.Popover(buzzer);
@@ -2018,41 +2059,49 @@ document.addEventListener('DOMContentLoaded', () => {
 				) {
 					buzzer.classList.add('armed');
 				} else buzzer.classList.remove('armed');
-				console.log(state);
 
-				if (player.nameData.length > 0) {
-					hidePanel(nameContainer);
-					showPanel(nameCanvas);
-					player.nameData.forEach((nd) => {
-						const np = document.createElementNS(
-							'http://www.w3.org/2000/svg',
-							'path'
-						);
-						np.setAttribute('d', nd);
-						path.appendChild(np);
-					});
-				} else {
-					showPanel(nameContainer);
-					hidePanel(nameCanvas);
-					nameContainer.innerHTML = player.name;
-				}
+				const lecterns = getElementArray(
+					playerContainer,
+					'.player-lectern-mini'
+				);
+				lecterns.forEach((l) => {
+					const ind = Number(l.getAttribute('data-index'));
+					const nameDisp = l.querySelector('.name-display');
+					const scoreDisp = l.querySelector('.score-display');
+					if (
+						isNaN(ind) ||
+						ind < 0 ||
+						ind >= state.players.length ||
+						!nameDisp ||
+						!scoreDisp
+					)
+						return;
+					const p = state.players[ind];
+					const name = state.players[ind].name.trim();
+					nameDisp.innerHTML = name;
+					const score = p.score;
+					if (score < 0) scoreDisp.classList.add('neg');
+					else scoreDisp.classList.remove('neg');
 
-				if (playerIndex !== -1 && playerIndex === state.buzzedIn) {
-					playerLectern.classList.add('lit');
-					if (e.detail.state === 'buzz')
-						startTimerLights(
-							playerLectern,
-							e.detail.currentTime - e.detail.buzzTime
-						);
-				} else {
-					playerLectern.classList.remove('lit');
-				}
+					scoreDisp.innerHTML =
+						name === '' ? '' : `$${Math.abs(score).toLocaleString('en')}`;
+				});
+				// if (playerIndex !== -1 && playerIndex === state.buzzedIn) {
+				// 	playerLectern.classList.add('lit');
+				// 	if (e.detail.state === 'buzz')
+				// 		startTimerLights(
+				// 			playerLectern,
+				// 			e.detail.currentTime - e.detail.buzzTime
+				// 		);
+				// } else {
+				// 	playerLectern.classList.remove('lit');
+				// }
 
-				const score = player.score;
-				if (score < 0) playerScore.classList.add('neg');
-				else playerScore.classList.remove('neg');
+				// const score = player.score;
+				// if (score < 0) playerScore.classList.add('neg');
+				// else playerScore.classList.remove('neg');
 
-				playerScore.innerHTML = `$${Math.abs(score).toLocaleString('en')}`;
+				// playerScore.innerHTML = `$${Math.abs(score).toLocaleString('en')}`;
 			} else return hidePanel(e.target);
 		});
 

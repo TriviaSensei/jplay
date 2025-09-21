@@ -33,18 +33,21 @@
 	grid-template-rows: repeat(6, 1fr);
 }
 
-.game-container[data-round='1'] {
+.game-container[data-round='1'],
+.board-display-container[data-round='1'] {
 	.category-hidden {
 		background-image: url('/img/cat_header_1.jpg');
 	}
 }
-.game-container[data-round='2'] {
+.game-container[data-round='2'],
+.board-display-container[data-round='2'] {
 	.category-hidden {
 		background-image: url('/img/cat_header_2.jpg');
 	}
 }
 
-.game-container[data-round='fj'] {
+.game-container[data-round='fj'],
+.board-display-container[data-round='fj'] {
 	.category-hidden {
 		background-image: url('/img/fj.jpg');
 	}
@@ -60,6 +63,8 @@
 }
 
 .game-board {
+	width: 100%;
+	height: 100%;
 	.clue-box,
 	.category-box {
 		background-color: var(--blue);

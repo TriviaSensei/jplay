@@ -95,7 +95,7 @@
 						"response": "Frida Kahlo & Diego Rivera"
 					},
 					{
-						"text": "This couple fell in love while filming \"Cleopatra\"; they wed in '64, divorced after a decade, remarried in 1975<span class=\"nobreak\">--</span>&amp; split again in 1976",
+						"text": "This couple fell in love while filming \"Cleopatra\"; they wed in '64, divorced after a decade, remarried in 1975-&amp; split again in 1976",
 						"response": "Elizabeth Taylor & Richard Burton"
 					}
 				]
@@ -202,11 +202,11 @@
 				"comments": "",
 				"clues": [
 					{
-						"text": "The all-too-simple premise of the game show in this 2012 film<span class=\"nobreak\">--</span>kids murder each other",
+						"text": "The all-too-simple premise of the game show in this 2012 film-kids murder each other",
 						"response": "<i>The Hunger Games</i>"
 					},
 					{
-						"text": "The all-too-simple premise of the game show hosted by Richard Dawson in this 1987 film<span class=\"nobreak\">--</span>criminals are murdered",
+						"text": "The all-too-simple premise of the game show hosted by Richard Dawson in this 1987 film-criminals are murdered",
 						"response": "<i>The Running Man</i>"
 					},
 					{
@@ -280,7 +280,7 @@
 				"comments": "",
 				"clues": [
 					{
-						"text": "It's not just carnivores<span class=\"nobreak\">--</span>the harts of the red type of this roar to drive rival males away",
+						"text": "It's not just carnivores-the harts of the red type of this roar to drive rival males away",
 						"response": "deer"
 					},
 					{
