@@ -58,6 +58,9 @@ const startGame = (type, data) => {
 				(data) => {
 					if (data.status !== 'OK') return showMessage('error', data.message);
 					sh.setState(data.gameState);
+					console.log(
+						`Game successfully created (join code: ${data.gameState.joinCode.toUpperCase()})`
+					);
 				},
 				() => {
 					showMessage('error', `Request timed out - try again later`);
@@ -664,6 +667,7 @@ const moveBoard = () => {
 	);
 	elements.forEach((el) => destination.appendChild(el));
 	const showCategory = (e) => {
+		console.log('show category');
 		const state = sh.getState();
 		if (state.state !== 'select') return;
 		const box = e.target.closest('.category-box');
@@ -951,13 +955,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		if (!e.detail) {
 			e.target.setAttribute('data-round', 0);
-			other.setAttribute('data-round', 0);
+			if (other) other.setAttribute('data-round', 0);
 		} else if (e.detail.round === e.detail.board.length - 1) {
 			e.target.setAttribute('data-round', 'fj');
-			other.setAttribute('data-round', 'fj');
+			if (other) other.setAttribute('data-round', 'fj');
 		} else {
 			e.target.setAttribute('data-round', Math.max(0, e.detail.round) + 1);
-			other.setAttribute('data-round', Math.max(0, e.detail.round) + 1);
+			if (other)
+				other.setAttribute('data-round', Math.max(0, e.detail.round) + 1);
 		}
 	});
 
@@ -2073,7 +2078,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					playerContainer,
 					'.player-lectern-mini'
 				);
-				lecterns.forEach((l) => {
+				lecterns.forEach((l, i) => {
 					const ind = Number(l.getAttribute('data-index'));
 					const nameDisp = l.querySelector('.name-display .display-inner');
 					const scoreDisp = l.querySelector('.score-display .display-inner');
