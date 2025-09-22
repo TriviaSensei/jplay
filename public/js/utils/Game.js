@@ -659,7 +659,7 @@ class Game {
 					if (this.gameState.players.some((p) => p.getScore() > 0)) {
 						this.setGameState({
 							state: 'FJIntro',
-							status: 'Introducing final Jeopardy. Press advane to continue.',
+							status: 'Introducing final Jeopardy. Press advance to continue.',
 						});
 					} else {
 						this.setGameState({

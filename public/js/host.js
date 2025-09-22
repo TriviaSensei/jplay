@@ -1290,6 +1290,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (isKey) ddWagerModal.hide();
 		} else if (state.state === 'boardIntro' && state.categoryShown >= -1) {
 			showView(categoryScroll);
+			if (startGameModal) startGameModal.hide();
 			categoryDisplays.forEach((cb, i) => {
 				const ind = Number(cb.getAttribute('data-col'));
 				if (ind > state.categoryShown) cb.classList.add(`category-hidden`);
@@ -1378,13 +1379,18 @@ document.addEventListener('DOMContentLoaded', () => {
 				fjWagerModal.show();
 			} else if (isPlayer()) {
 				if (fjpwm) {
-					const ind = state.players.findIndex((p) => p.uid === uid);
-					const maxWager = state.players[ind].score;
-					const mw = fjpwm.querySelector('.fj-player-max-wager');
-					if (mw) mw.innerHTML = maxWager;
-					const inp = fjpwm.querySelector('.fj-player-wager');
-					inp.setAttribute('max', maxWager);
-					fjPlayerWagerModal.show();
+					const player = state.players.find((p) => p.uid === uid);
+					if (player) {
+						const currentWager = player.finalWager;
+						if (currentWager === -1 && player.score > 0) {
+							const maxWager = player.score;
+							const mw = fjpwm.querySelector('.fj-player-max-wager');
+							if (mw) mw.innerHTML = maxWager;
+							const inp = fjpwm.querySelector('.fj-player-wager');
+							inp.setAttribute('max', maxWager);
+							fjPlayerWagerModal.show();
+						}
+					}
 				}
 			}
 		} else if (state.state === 'showFJ') {

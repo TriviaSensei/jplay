@@ -36,6 +36,14 @@
 		}
 		.score-display {
 			font-family: Arial, Helvetica, sans-serif;
+			.display-inner.neg {
+				color: red;
+			}
+			.display-inner.neg::before {
+				content: '-';
+				color: red;
+				margin-right: 0.1em;
+			}
 		}
 	}
 
@@ -71,51 +79,107 @@
 				color: var(--white);
 			}
 		}
-	}
 
-	@media (min-aspect-ratio: 0.89) {
-		/* absolutely wide, wide aspect ratio */
+		.game-board {
+			width: 100%;
+			height: 100%;
+			.clue-box,
+			.category-box {
+				background-color: var(--blue);
+				color: var(--white);
+				border: 1px solid var(--white);
+			}
 
-		@media (min-width: 600px) {
-			.category-display,
-			.clue-display,
-			.value-display {
-				font-size: 24px !important;
+			.clue-box {
+				font-family: 'Swiss 911 Compressed', serif;
+				text-align: center;
+				display: flex;
+				padding: 10%;
+				color: var(--yellow);
+				cursor: pointer;
+
+				.clue-value {
+					margin: auto;
+					font-size: min(30px, 5vw) !important;
+				}
+
+				@media (max-height: 844px) {
+					.clue-value {
+						font-size: min(30px, 3.5vh) !important;
+					}
+				}
 			}
-			.clue-value {
-				font-size: 32px !important;
+			.category-box {
+				display: flex;
+				flex-direction: column;
+				padding: 0 5%;
+				font-size: min(15px, 2.5vw) !important;
+
+				.category-div {
+					font-family: 'Swiss 911 Compressed', sans-serif;
+					margin: auto;
+					text-align: center;
+					text-transform: uppercase;
+				}
+				.comment-div {
+					font-family: 'Korinna Regular BT', serif;
+					text-transform: uppercase;
+				}
+
+				@media (max-height: 844px) {
+					.category-div {
+						font-size: min(15px, 1.75vh);
+					}
+				}
 			}
-			.category-scroll .category-div {
-				font-size: 90px !important;
+
+			.dd-div {
+				width: 16%;
+				height: 16%;
+				transform: translate(-50%, -50%);
+				position: absolute;
+				display: none;
+				background-image: url('/img/dd.jpg');
+				background-color: var(--blue);
+				background-repeat: no-repeat;
+				background-size: contain;
+				background-position: center;
+				z-index: 3;
 			}
-			.category-large {
-				font-size: 80px;
+
+			.dd-div.animation {
+				display: block;
+				animation-name: dd-animate;
+				animation-duration: 3s;
 			}
 		}
+	}
 
-		/* absolutely narrow, wide aspect ratio */
-		@media (max-width: 600px) {
-			.clue-display,
-			.value-display,
-			.category-display {
-				font-size: 3vw !important;
-			}
+	/* wider aspect ratio*/
+	@media (min-aspect-ratio: 0.89) {
+		.category-display,
+		.clue-display,
+		.value-display {
+			font-size: min(24px, 3vw) !important;
+		}
+		.clue-value {
+			font-size: min(28px, 2vw) !important;
+		}
+		.category-scroll .category-div {
+			font-size: min(15vw, 90px) !important;
+		}
+		.category-large {
+			font-size: min(80px, 13.3vw) !important;
+		}
 
-			.clue-value {
-				font-size: 24px !important;
-			}
-			.category-scroll .category-div {
-				font-size: 12vh !important;
-			}
-			.category-large {
-				font-size: 10.8vh;
-			}
+		.category-box {
+			font-size: min(15px, 2.5vw) !important;
 		}
 	}
 
 	@media (max-aspect-ratio: 0.89) {
 		/* narrow,  tall aspect ratio*/
-		@media (max-width: 600px) {
+		/* @media (max-width: 600px) {
 			.clue-display,
 			.value-display,
 			.category-display {
@@ -131,9 +195,10 @@
 			.category-large {
 				font-size: 10.8vw;
 			}
-		}
+		} */
+
 		/* narrow, wide aspect ratio */
-		@media (min-width: 600px) {
+		/* @media (min-width: 600px) {
 			.clue-display,
 			.value-display,
 			.category-display {
@@ -149,6 +214,25 @@
 			.category-large {
 				font-size: 10.8vw;
 			}
+		} */
+
+		.category-display,
+		.clue-display,
+		.value-display {
+			font-size: min(24px, 3vw) !important;
+		}
+		.clue-value {
+			font-size: min(28px, 2vw) !important;
+		}
+		.category-scroll .category-div {
+			font-size: min(10vw, 90px) !important;
+		}
+		.category-large {
+			font-size: min(80px, 10.8vw) !important;
+		}
+
+		.category-box {
+			font-size: min(12px, 1vw) !important;
 		}
 	}
 
