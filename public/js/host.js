@@ -58,9 +58,6 @@ const startGame = (type, data) => {
 				(data) => {
 					if (data.status !== 'OK') return showMessage('error', data.message);
 					sh.setState(data.gameState);
-					console.log(
-						`Game successfully created (join code: ${data.gameState.joinCode.toUpperCase()})`
-					);
 				},
 				() => {
 					showMessage('error', `Request timed out - try again later`);
@@ -667,7 +664,6 @@ const moveBoard = () => {
 	);
 	elements.forEach((el) => destination.appendChild(el));
 	const showCategory = (e) => {
-		console.log('show category');
 		const state = sh.getState();
 		if (state.state !== 'select') return;
 		const box = e.target.closest('.category-box');
@@ -1387,6 +1383,12 @@ document.addEventListener('DOMContentLoaded', () => {
 					const player = state.players.find((p) => p.uid === uid);
 					if (player) {
 						const currentWager = player.finalWager;
+						const category =
+							state.board[state.board.length - 1].category.toUpperCase();
+						const catContainer = document.querySelector(
+							'#fj-category-container'
+						);
+						catContainer.innerHTML = category;
 						if (currentWager === -1 && player.score > 0) {
 							const maxWager = player.score;
 							const mw = fjpwm.querySelector('.fj-player-max-wager');
@@ -2106,22 +2108,6 @@ document.addEventListener('DOMContentLoaded', () => {
 					if (state.buzzedIn === ind) l.classList.add('lit');
 					else l.classList.remove('lit');
 				});
-				// if (playerIndex !== -1 && playerIndex === state.buzzedIn) {
-				// 	playerLectern.classList.add('lit');
-				// 	if (e.detail.state === 'buzz')
-				// 		startTimerLights(
-				// 			playerLectern,
-				// 			e.detail.currentTime - e.detail.buzzTime
-				// 		);
-				// } else {
-				// 	playerLectern.classList.remove('lit');
-				// }
-
-				// const score = player.score;
-				// if (score < 0) playerScore.classList.add('neg');
-				// else playerScore.classList.remove('neg');
-
-				// playerScore.innerHTML = `$${Math.abs(score).toLocaleString('en')}`;
 			} else return hidePanel(e.target);
 		});
 

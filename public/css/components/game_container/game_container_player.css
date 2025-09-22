@@ -148,72 +148,21 @@
 		.category-display,
 		.clue-display,
 		.value-display {
-			font-size: min(24px, 3vw) !important;
-		}
-		.clue-value {
-			font-size: min(28px, 2vw) !important;
-		}
-		.category-scroll .category-div {
-			font-size: min(15vw, 90px) !important;
+			font-size: min(24px, 4vw) !important;
 		}
 		.category-large {
 			font-size: min(80px, 13.3vw) !important;
 		}
-
 		.category-box {
 			font-size: min(15px, 2.5vw) !important;
 		}
 	}
 
 	@media (max-aspect-ratio: 0.89) {
-		/* narrow,  tall aspect ratio*/
-		/* @media (max-width: 600px) {
-			.clue-display,
-			.value-display,
-			.category-display {
-				font-size: 4vw !important;
-			}
-
-			.clue-value {
-				font-size: 5vw !important;
-			}
-			.category-scroll .category-div {
-				font-size: 12vw !important;
-			}
-			.category-large {
-				font-size: 10.8vw;
-			}
-		} */
-
-		/* narrow, wide aspect ratio */
-		/* @media (min-width: 600px) {
-			.clue-display,
-			.value-display,
-			.category-display {
-				font-size: 4vw !important;
-			}
-
-			.clue-value {
-				font-size: 5vw !important;
-			}
-			.category-scroll .category-div {
-				font-size: 12vw !important;
-			}
-			.category-large {
-				font-size: 10.8vw;
-			}
-		} */
-
 		.category-display,
 		.clue-display,
 		.value-display {
 			font-size: min(24px, 3vw) !important;
-		}
-		.clue-value {
-			font-size: min(28px, 2vw) !important;
-		}
-		.category-scroll .category-div {
-			font-size: min(10vw, 90px) !important;
 		}
 		.category-large {
 			font-size: min(80px, 10.8vw) !important;

@@ -502,6 +502,8 @@
 		display: flex;
 		.category-div {
 			margin: auto;
+			text-align: center;
+			text-transform: uppercase;
 		}
 	}
 	@media (max-aspect-ratio: 0.89) {
