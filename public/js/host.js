@@ -363,10 +363,19 @@ else {
 		const index = e.detail;
 		const state = sh.getState();
 		if (!state.players[index]?.name) return;
+		const cluesLeft = state.board[state.round].reduce((p, c) => {
+			return (
+				p +
+				c.clues.reduce((p2, c2) => {
+					if (c2.selected) return p2;
+					return p2 + 1;
+				}, 0)
+			);
+		}, 0);
 		const status =
 			state.state === 'waitingDD'
 				? `Waiting for Daily Double wager from ${state.players[index].name}`
-				: `${state.players[index].name} to select a clue`;
+				: `${cluesLeft} clues left. ${state.players[index].name} to select a clue`;
 		if (state.isRemote) {
 			socket.emit(
 				'edit-game-data',

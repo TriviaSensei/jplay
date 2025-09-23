@@ -179,6 +179,23 @@ class Game {
 		);
 	}
 
+	getCluesLeft() {
+		const round = this.gameState.round;
+		if (round < 0 || round >= this.gameState.board.length - 1) return 0;
+
+		const cluesSelected = this.gameState.board[round].reduce((p, c) => {
+			return (
+				p +
+				c.clues.reduce((p2, c2) => {
+					if (c2.selected) return p2 + 1;
+					return p2;
+				}, 0)
+			);
+		}, 0);
+
+		return cluesPerRound - cluesSelected;
+	}
+
 	handleResponse(correct) {
 		return () => {
 			try {
@@ -203,7 +220,7 @@ class Game {
 						this.setGameState({
 							state: 'select',
 							control: this.gameState.buzzedIn,
-							status: `${this.gameState.players[
+							status: `${this.getCluesLeft()} clues left. ${this.gameState.players[
 								this.gameState.buzzedIn
 							].getName()} to select a clue`,
 						});
@@ -239,9 +256,9 @@ class Game {
 						//go back to select without changing control of board
 						this.setGameState({
 							state: 'select',
-							status: `${this.gameState.players[
+							status: `${this.getCluesLeft()} clues left. ${this.gameState.players[
 								this.gameState.control
-							].getName()} to select clue`,
+							].getName()} to select a clue`,
 						});
 					} //round is over
 					else {
@@ -270,7 +287,7 @@ class Game {
 			//clear the wager
 			this.setGameState({
 				state: 'select',
-				status: `${this.gameState.players[
+				status: `${this.getCluesLeft()} clues left. ${this.gameState.players[
 					this.gameState.control
 				].getName()} to select a clue`,
 				wager: -1,
@@ -432,9 +449,9 @@ class Game {
 						message: `${this.gameState.players[control].getName()} starts the ${
 							roundNames[this.gameState.round]
 						}Jeopardy round.`,
-						status: `${this.gameState.players[
+						status: `${this.getCluesLeft()} clues left. ${this.gameState.players[
 							control
-						].getName()} to select clue`,
+						].getName()} to select a clue`,
 					});
 				}
 			},
@@ -504,9 +521,9 @@ class Game {
 						this.setGameState({
 							state: 'select',
 							timeout: false,
-							status: `${this.gameState.players[
+							status: `${this.getCluesLeft()} clues left. ${this.gameState.players[
 								this.gameState.control
-							].getName()} to select clue`,
+							].getName()} to select a clue`,
 						});
 					}
 					//round is over
@@ -561,7 +578,7 @@ class Game {
 				else {
 					this.setGameState({
 						state: 'select',
-						status: `${this.gameState.players[
+						status: `${this.getCluesLeft()} clues left. ${this.gameState.players[
 							this.gameState.control
 						].getName()} to select a clue`,
 					});
