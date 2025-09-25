@@ -2,41 +2,43 @@ import { getElementArray } from './utils/getElementArray.js';
 import { showMessage } from './utils/messages.js';
 import { createElement } from './utils/createElementFromSelector.js';
 
-const initState = {
-	name: '',
-	rounds: [
-		new Array(6).fill(0).map((el) => {
-			return {
+const getInitState = () => {
+	return {
+		name: '',
+		rounds: [
+			new Array(6).fill(0).map((el) => {
+				return {
+					category: '',
+					comments: '',
+					clues: new Array(5).fill(0).map((el) => {
+						return {
+							text: '',
+							response: '',
+						};
+					}),
+				};
+			}),
+			new Array(6).fill(0).map((el) => {
+				return {
+					category: '',
+					comments: '',
+					clues: new Array(5).fill(0).map((el) => {
+						return {
+							text: '',
+							response: '',
+						};
+					}),
+				};
+			}),
+			{
 				category: '',
-				comments: '',
-				clues: new Array(5).fill(0).map((el) => {
-					return {
-						text: '',
-						response: '',
-					};
-				}),
-			};
-		}),
-		new Array(6).fill(0).map((el) => {
-			return {
-				category: '',
-				comments: '',
-				clues: new Array(5).fill(0).map((el) => {
-					return {
-						text: '',
-						response: '',
-					};
-				}),
-			};
-		}),
-		{
-			category: '',
-			text: '',
-			response: '',
-		},
-	],
+				text: '',
+				response: '',
+			},
+		],
+	};
 };
-const sh = new StateHandler(initState);
+const sh = new StateHandler(getInitState());
 
 const msgDiv = document.querySelector('#header-message');
 
@@ -73,6 +75,9 @@ const textInputs = getElementArray(createArea, 'input[type="text"],textarea');
 
 const resultModal = new bootstrap.Modal('#create-data-modal');
 const list = document.querySelector('#data-warnings');
+
+const clearButton = document.querySelector('#confirm-clear');
+const clearModal = new bootstrap.Modal('#clear-create-modal');
 
 const hideHeaderMessage = () => {
 	msgDiv.classList.add('d-none');
@@ -373,7 +378,7 @@ addMetadata.addEventListener('click', (e) => {
 
 const validateData = (data) => {
 	let messages = [];
-	let newData = { ...initState };
+	let newData = getInitState();
 
 	if (!data.rounds || !Array.isArray(data.rounds)) {
 		messages.push('JSON object does not contain rounds array');
@@ -438,6 +443,7 @@ loadFile.addEventListener('change', (e) => {
 
 	const reader = new FileReader();
 	reader.addEventListener('load', () => {
+		console.log('file read');
 		const data = JSON.parse(reader.result);
 		const result = validateData(data);
 		if (resultModal && result.messages.length > 0) {
@@ -460,6 +466,7 @@ loadFile.addEventListener('change', (e) => {
 		}
 		gameNotes.value = '';
 		if (data.gameNotes) gameNotes.value = data.gameNotes;
+		loadFile.value = null;
 	});
 	reader.readAsText(file, 'utf-8');
 });
@@ -512,4 +519,11 @@ saveButton.addEventListener('click', () => {
 	dlAnchorElem.setAttribute('download', state.name || 'game.json');
 	dlAnchorElem.click();
 	dlAnchorElem.remove();
+});
+
+clearButton.addEventListener('click', () => {
+	sh.setState(getInitState());
+	metadataArea.innerHTML = '';
+	gameNotes.value = '';
+	clearModal.hide();
 });

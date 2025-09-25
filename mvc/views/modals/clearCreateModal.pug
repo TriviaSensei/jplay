@@ -1,0 +1,10 @@
+.modal#clear-create-modal(tabindex="-1" aria-labelledby="clear-create-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false")
+    .modal-dialog.modal-dialog-centered
+        .modal-content#clear-create-modal-content
+            input#player-index(type="hidden")
+            .modal-header
+                h5.modal-title#clear-create-label Clear data
+            .modal-body Are you sure you want to clear the form? This cannot be undone.
+            .modal-footer
+                button#cancel-clear.btn.btn-sm.btn-secondary(type="button" data-bs-dismiss="modal" data-key='Escape') No
+                button#confirm-clear.btn.btn-sm.btn-primary(type="button") Yes
