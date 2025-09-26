@@ -79,6 +79,9 @@ const list = document.querySelector('#data-warnings');
 const clearButton = document.querySelector('#confirm-clear');
 const clearModal = new bootstrap.Modal('#clear-create-modal');
 
+const moveCategoryButtons = getElementArray(document, '.move-category');
+const moveClueButtons = getElementArray(document, '.move-clue');
+
 const hideHeaderMessage = () => {
 	msgDiv.classList.add('d-none');
 };
@@ -443,7 +446,6 @@ loadFile.addEventListener('change', (e) => {
 
 	const reader = new FileReader();
 	reader.addEventListener('load', () => {
-		console.log('file read');
 		const data = JSON.parse(reader.result);
 		const result = validateData(data);
 		if (resultModal && result.messages.length > 0) {
@@ -527,3 +529,49 @@ clearButton.addEventListener('click', () => {
 	gameNotes.value = '';
 	clearModal.hide();
 });
+
+const moveClue = (e) => {
+	if (!e.target.classList.contains('move-clue')) return;
+
+	const dir = Number(e.target.getAttribute('data-dir'));
+	if (isNaN(dir)) return;
+	const state = sh.getState();
+
+	const sc = getSelectedClue();
+
+	const newPos = sc.clue + dir;
+	if (newPos < 0 || newPos >= state.rounds[sc.round][sc.category].clues.length)
+		return;
+
+	[
+		state.rounds[sc.round][sc.category].clues[newPos],
+		state.rounds[sc.round][sc.category].clues[sc.clue],
+	] = [
+		state.rounds[sc.round][sc.category].clues[sc.clue],
+		state.rounds[sc.round][sc.category].clues[newPos],
+	];
+	const newRadio = document.querySelector(`#selected-clue-${newPos}`);
+	if (newRadio) newRadio.checked = true;
+	sh.setState(state);
+};
+moveClueButtons.forEach((b) => b.addEventListener('click', moveClue));
+
+const moveCategory = (e) => {
+	if (!e.target.classList.contains('move-category')) return;
+
+	const dir = Number(e.target.getAttribute('data-dir'));
+	if (isNaN(dir)) return;
+	const state = sh.getState();
+
+	const sc = getSelectedClue();
+
+	const newPos = sc.category + dir;
+	if (newPos < 0 || newPos >= state.rounds[sc.round].length) return;
+	[state.rounds[sc.round][newPos], state.rounds[sc.round][sc.category]] = [
+		state.rounds[sc.round][sc.category],
+		state.rounds[sc.round][newPos],
+	];
+	categorySelect.selectedIndex = newPos;
+	sh.setState(state);
+};
+moveCategoryButtons.forEach((b) => b.addEventListener('click', moveCategory));
