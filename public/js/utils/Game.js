@@ -29,7 +29,7 @@ const lockTimeout = 250;
 const clueTime = 3500;
 const ddTime = 10000;
 const FJTime = 31000;
-const cluesPerRound = 30;
+const cluesPerRound = 3;
 
 class Player {
 	constructor(name, nameData, uid, socketId, key, isRemote) {
@@ -882,13 +882,20 @@ class Game {
 	};
 
 	refreshJoinCode = () => {
-		this.joinCode = randomString(4, letters);
-		this.gameState.joinCode = this.joinCode;
+		const badWords = require('./badWords');
+		this.joinCode = '';
+
+		while (this.joinCode === '') {
+			this.joinCode = randomString(4, letters);
+			if (badWords.some((re) => this.joinCode.match(re))) this.joinCode = '';
+		}
+
+		if (this.gameState) this.gameState.joinCode = this.joinCode;
 	};
 
 	constructor(board, host, io, socket, stateHandler) {
 		this.id = randomString(20, chars);
-		this.joinCode = randomString(4, letters);
+		if (io) this.refreshJoinCode();
 		// this.joinCode = 'A';
 		this.io = io;
 		this.socket = socket;

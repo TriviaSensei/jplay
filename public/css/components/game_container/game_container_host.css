@@ -274,34 +274,17 @@
 			font-family: 'Korinna Regular BT', serif;
 		}
 
-		@media (max-aspect-ratio: 0.89) {
-			.category-div {
-				font-size: 12vw;
-			}
-		}
-		@media (aspect-ratio > 0.89) {
-			.category-div {
-				font-size: 6vw;
-			}
+		.category-div {
+			font-size: min(72px, 12vw);
 		}
 	}
 
 	.category-box:has(.comment-div:not(:empty)) {
-		@media (max-aspect-ratio: 0.89) {
-			.category-div {
-				font-size: 6vw;
-			}
-			.comment-div {
-				font-size: 4vw;
-			}
+		.category-div {
+			font-size: min(36px, 6vw);
 		}
-		@media (aspect-ratio > 0.89) {
-			.category-div {
-				font-size: 6vh;
-			}
-			.comment-div {
-				font-size: 4vh;
-			}
+		.comment-div {
+			font-size: min(24px, 4vw);
 		}
 	}
 
@@ -581,17 +564,7 @@ div.fj-prefix {
 		height: 100%;
 	}
 
-	@media (max-aspect-ratio: 0.89) {
-		.display-inner {
-			font-size: 7vw;
-		}
-	}
-	/*
-		viewport is wide enough to fit everything - font size determined by the height of the window
-	*/
-	@media (aspect-ratio > 0.89) {
-		.display-inner {
-			font-size: 3.5vh;
-		}
+	.display-inner {
+		font-size: min(18px, 3vw);
 	}
 }
