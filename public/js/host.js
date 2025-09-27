@@ -1583,13 +1583,29 @@ document.addEventListener('DOMContentLoaded', () => {
 	clueBoxes.forEach((cb) => cb.addEventListener('click', selectClue));
 
 	sh.addWatcher(liveClue, (e) => {
-		if (
-			e?.detail?.state === 'clueLive' ||
-			e?.detail?.state === 'DDLive' ||
-			e?.detail?.state === 'FJLive'
-		)
-			e.target.classList.add('live');
-		else e.target.classList.remove('live');
+		const tl =
+			e.detail.state === 'clueLive'
+				? e.detail.clueTime
+				: e.detail.state === 'DDLive'
+				? e.detail.ddTime
+				: e.detail.state === 'FJLive'
+				? e.detail.FJTime
+				: null;
+
+		if (tl === null) return e.target.classList.remove('live');
+
+		const timeLimit = tl / 1000;
+
+		const style = `animation-duration:${timeLimit}s`;
+
+		sideLights.forEach((s) => {
+			const inner = s.querySelector('.side-light-inner');
+			inner.setAttribute('style', style);
+		});
+
+		setTimeout(() => {
+			liveClue.classList.add('live');
+		}, 1);
 	});
 
 	scoreDisplays.forEach((sd, i) => {

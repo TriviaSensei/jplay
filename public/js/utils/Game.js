@@ -27,7 +27,7 @@ const randomString = (len, str) => {
 
 const lockTimeout = 250;
 const clueTime = 3500;
-const ddTime = 7000;
+const ddTime = 10000;
 const FJTime = 31000;
 const cluesPerRound = 30;
 
@@ -991,6 +991,9 @@ class Game {
 			fjLock: false,
 			fjPrefix: 'What is',
 			round: -1,
+			ddTime,
+			clueTime,
+			FJTime,
 			modal: 'cancel-game-modal',
 			modalDescription: 'Cancel game',
 		};

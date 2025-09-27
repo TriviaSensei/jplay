@@ -14,6 +14,16 @@
 	}
 }
 
+@keyframes timer-animate {
+	0% {
+		display: block;
+		height: 100%;
+	}
+	100% {
+		height: 0;
+	}
+}
+
 #cover-div {
 	position: absolute;
 	height: 100%;
@@ -150,11 +160,17 @@
 		display: flex;
 	}
 
-	.side-light-right,
-	.side-light-left {
+	.side-light {
 		background-color: var(--dk-gray);
 		grid-row: 1/7;
+		display: flex;
+		.side-light-inner {
+			display: none;
+			margin: auto;
+			width: 100%;
+		}
 	}
+
 	.side-light-left {
 		grid-column: 1;
 	}
@@ -214,7 +230,12 @@
 .live-clue-display.live {
 	.side-light-left,
 	.side-light-right {
-		background-color: var(--white);
+		/* background-color: var(--white); */
+		.side-light-inner {
+			display: block;
+			background-color: var(--white);
+			animation-name: timer-animate;
+		}
 	}
 }
 
@@ -260,7 +281,7 @@
 		}
 		@media (aspect-ratio > 0.89) {
 			.category-div {
-				font-size: 12vh;
+				font-size: 6vw;
 			}
 		}
 	}
