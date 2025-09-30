@@ -235,6 +235,7 @@
 			display: block;
 			background-color: var(--white);
 			animation-name: timer-animate;
+			animation-timing-function: linear;
 		}
 	}
 }
