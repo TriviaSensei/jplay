@@ -7,6 +7,7 @@ import { createElement } from './utils/createElementFromSelector.js';
 const createButton = document.querySelector('#create-game');
 const fileUpload = document.querySelector('#game-file');
 let socket;
+const lsItem = 'jp-client-id';
 const hostKeys = ['arrowdown', 'space', 'spacebar', ' '];
 const isKey = location.href.indexOf('control') >= 0;
 let uid;
@@ -41,12 +42,34 @@ const csh = new StateHandler({
 const granularity = 1;
 
 let game;
+
+const retrieveClientId = () => {
+	let toReturn;
+	toReturn = localStorage.getItem(lsItem);
+	if (toReturn) return toReturn;
+
+	toReturn = document.cookie
+		.split(';')
+		.find((row) => row.startsWith(`${lsItem}=`))
+		?.split('=')[1];
+
+	return toReturn;
+};
+
+const setClientId = (id) => {
+	if (id) {
+		localStorage.setItem(lsItem, id);
+		document.cookie = `${lsItem}=${id}`;
+	}
+};
+
 const startGame = (type, data) => {
+	retrieveClientId();
 	if (type === 'local') {
-		uid = localStorage.getItem('jp-client-id');
+		uid = retrieveClientId();
 		game = new Game(data, { uid, keys: hostKeys }, null, null, sh);
 	} else if (type === 'remote') {
-		uid = localStorage.getItem('jp-client-id');
+		uid = retrieveClientId();
 		socket.emit(
 			'create-game',
 			{
@@ -705,7 +728,7 @@ const moveBoard = () => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-	const uidTest = localStorage.getItem('jp-client-id');
+	const uidTest = retrieveClientId();
 	if (uidTest) uid = uidTest;
 
 	if (isKey && !window.opener) location.href = '/';
@@ -715,7 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		socket.on('ack-connection', () => {
 			//see if a client id is stored in local storage
-			const myId = localStorage.getItem('jp-client-id');
+			const myId = retrieveClientId();
 			//if not, get one and store it
 			if (!myId) {
 				socket.emit(
@@ -726,7 +749,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							if (data.status !== 'OK') showMessage('error', data.message);
 							if (data.id) {
 								uid = data.id;
-								localStorage.setItem('jp-client-id', uid);
+								setClientId(uid);
 							}
 						},
 						() => {
@@ -745,7 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							if (data.status !== 'OK') showMessage('error', data.message);
 							if (data.id) {
 								uid = data.id;
-								localStorage.setItem('jp-client-id', uid);
+								setClientId(uid);
 							}
 							if (data.gameState) sh.setState(data.gameState);
 							if (isPlayer()) moveBoard();
@@ -953,7 +976,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	sh.addWatcher(gameContainer, (e) => {
 		const other = document.querySelector('.board-display-container');
-		if (!uid) uid = localStorage.getItem('jp-client-id');
+		if (!uid) uid = retrieveClientId();
 		if (isKey) showPanel(e.target);
 		else if (!e.detail || e.detail.host.uid !== uid) hidePanel(e.target);
 		else showPanel(e.target);
