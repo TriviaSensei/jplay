@@ -1,3 +1,4 @@
+const testClues = 3;
 const ddDistribution = [
 	[5, 756, 2491, 3636, 3112],
 	[2, 99, 286, 382, 231],
@@ -29,7 +30,8 @@ const lockTimeout = 250;
 const clueTime = 3500;
 const ddTime = 10000;
 const FJTime = 31000;
-const cluesPerRound = 30;
+
+const cluesPerRound = process.env.NODE_ENV === 'production' ? 30 : testClues;
 
 class Player {
 	constructor(name, nameData, uid, socketId, key, isRemote) {
