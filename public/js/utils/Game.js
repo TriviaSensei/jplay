@@ -14,7 +14,7 @@ const generateRandom = (dist) => {
 	});
 };
 
-const chars = 'abcdefghijklmnopqrstuvwxyz01234567890';
+const chars = 'abcdefghijklmnopqrstuvwxyz01234567809';
 const letters = 'abcdefghijklmnopqrstuvwxyz';
 const randomString = (len, str) => {
 	let toReturn = '';
