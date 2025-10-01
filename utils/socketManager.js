@@ -315,8 +315,17 @@ const socket = async (http, server) => {
 				(p) => p.socketId === socket.id
 			);
 			if (ind < 0) return cb({ status: 'fail', message: 'Player not found' });
-			if (data.wager < 0 || data.wager > game.gameState.players[ind].score)
+			const wager = Number(data.wager);
+			if (isNaN(wager))
+				return cb({ status: 'fail', message: 'Your wager must be a number' });
+			if (wager < 0 || wager > game.gameState.players[ind].score)
 				return cb({ status: 'fail', message: 'Invalid wager' });
+			else if (wager !== Math.floor(wager))
+				return cb({
+					status: 'fail',
+					message: 'You can only wager a whole number',
+				});
+
 			game.gameState.players[ind].finalWager = data.wager;
 			game.updateGameState();
 			cb({ status: 'OK' });

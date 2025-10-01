@@ -282,6 +282,8 @@ if (fjpwm) {
 	saveFJWager.addEventListener('click', () => {
 		const wager = Number(fjPlayerWager.value);
 		if (isNaN(wager)) return showMessage('error', 'Invalid wager');
+		else if (wager !== Math.floor(wager))
+			return showMessage('error', 'You can only wager a whole number');
 		socket.emit(
 			'save-fj-wager',
 			{ wager },

@@ -511,15 +511,9 @@
 			text-transform: uppercase;
 		}
 	}
-	@media (max-aspect-ratio: 0.89) {
-		.category-div {
-			font-size: 12vw;
-		}
-	}
-	@media (aspect-ratio > 0.89) {
-		.category-div {
-			font-size: 12vh;
-		}
+
+	.category-div {
+		font-size: min(12vw, 72px);
 	}
 }
 
