@@ -1,4 +1,6 @@
 const timer = document.querySelector('.timer');
+const music = document.querySelector('#think-sound');
+
 const initTime = 300;
 
 const getTimeString = (time) => {
@@ -10,13 +12,18 @@ const getTimeString = (time) => {
 document.addEventListener('DOMContentLoaded', () => {
 	let timeLeft = initTime;
 	let timerInterval = null;
+	let soundPlaying = false;
 	const decrementTimer = () => {
-		timeLeft = Math.max(0, timeLeft - 1);
-		timer.innerHTML = getTimeString(timeLeft);
-		if (timeLeft === 0) {
+		timeLeft = Math.max(-1, timeLeft - 1);
+		if (timeLeft === -1) {
 			clearInterval(timerInterval);
 			timerInterval = null;
+			return (timer.innerHTML = 'Soon!');
+		} else if (timeLeft === 30 && !soundPlaying) {
+			soundPlaying = true;
+			music.play();
 		}
+		timer.innerHTML = getTimeString(timeLeft);
 	};
 	timer.addEventListener(
 		'click',

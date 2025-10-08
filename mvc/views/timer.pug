@@ -16,7 +16,9 @@ html
                 .d-flex.flex-column
                     .m-auto.d-flex.flex-column
                         .timer-label.mb-2 Stream starting in: 
-                        .timer 5:00
+                        .timer Soon!
+        audio#think-sound(preload="auto" data-name="think")
+            source(src="/media/think.mp3" type="audio/mpeg")
 
         
     script(src="/js/timer.js" type="module" defer)
