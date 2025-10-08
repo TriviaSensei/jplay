@@ -347,6 +347,38 @@ const socket = async (http, server) => {
 			cb({ status: 'OK' });
 		});
 
+		//spectate game
+		socket.on('spectate-game', (data, cb) => {
+			const game = activeGames.find(
+				(g) => g.joinCode.toLowerCase() === data.joinCode.toLowerCase()
+			);
+
+			if (!game) return cb({ status: 'fail', message: 'Game not found' });
+
+			game.gameState.spectators.push(data.uid);
+			socket.join(game.id);
+			cb({ status: 'OK', gameState: game.gameState });
+		});
+		socket.on('unspectate-game', (data, cb) => {
+			//remove the player from the spectators of the game
+			const game = activeGames.find((g) => {
+				let toReturn = false;
+				g.gameState.spectators = g.gameState.spectators.filter((s) => {
+					if (s === data.uid) {
+						toReturn = true;
+						return false;
+					}
+					return true;
+				});
+				return toReturn;
+			});
+			if (!game)
+				return cb({ status: 'fail', message: 'You are not in a game' });
+
+			socket.leave(game.id);
+			return cb({ status: 'OK' });
+		});
+
 		socket.on('disconnect', (reason) => {
 			console.log(`a user has disconnected (${reason})`);
 		});

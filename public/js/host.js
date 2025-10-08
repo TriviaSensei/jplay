@@ -444,12 +444,18 @@ const isPlayer = () => {
 	return state.players.some((p) => p.uid && p.uid === uid);
 };
 
+const isSpectator = () => {
+	const state = sh.getState();
+	if (!state) return false;
+	return !isHost() && !isPlayer();
+};
+
 //handle key press
 const handleKeyPress = async (e) => {
+	if (!isHost() && !isPlayer()) return;
 	const setKey = setKeyButton.getAttribute('data-toggled') === 'true';
 	const state = sh.getState();
 	if (!state) return;
-	if (!isHost() && !isPlayer()) return;
 
 	//is it a modal key?
 	const openModal = document.querySelector('.modal.show');
@@ -617,14 +623,15 @@ if (!isKey) {
 	//main window - handling request for socket to send something from key window
 	document.addEventListener('emit-event', (e) => {
 		const { eventName, data, onSuccess, onTimeout } = e.detail;
-		socket.emit(
-			eventName,
-			data,
-			withTimeout(
-				onSuccess ? onSuccess : (data) => {},
-				onTimeout ? onTimeout : () => {}
-			)
-		);
+		if (isPlayer() || isHost())
+			socket.emit(
+				eventName,
+				data,
+				withTimeout(
+					onSuccess ? onSuccess : (data) => {},
+					onTimeout ? onTimeout : () => {}
+				)
+			);
 	});
 }
 //control window - on key press, send it to the main window to manage the state
@@ -979,7 +986,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	sh.addWatcher(gameContainer, (e) => {
 		const other = document.querySelector('.board-display-container');
 		if (!uid) uid = retrieveClientId();
-		if (isKey) showPanel(e.target);
+		if (isKey || isSpectator()) showPanel(e.target);
 		else if (!e.detail || e.detail.host.uid !== uid) hidePanel(e.target);
 		else showPanel(e.target);
 
@@ -1064,7 +1071,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		b.addEventListener('click', loadPlayerData);
 		sh.addWatcher(b, (e) => {
 			if (!e.detail) return;
-			if (isKey || e.detail.state !== 'pregame')
+			if (isKey || e.detail.state !== 'pregame' || !isHost())
 				e.target.classList.add('d-none');
 			else e.target.classList.remove('d-none');
 
@@ -1270,12 +1277,12 @@ document.addEventListener('DOMContentLoaded', () => {
 	//main screen display as function of state
 	sh.addWatcher(null, (state) => {
 		if (!state) return;
-
+		console.log(state);
 		if (state.state === 'waitingDD') {
 			//waiting for a DD wager
 			showView(gameBoard);
 			//play the sound
-			if (!isKey && isHost() && ddSound && state.playSound) {
+			if (!isKey && (isHost() || isSpectator()) && ddSound && state.playSound) {
 				ddSound.play();
 			} else if (isKey) {
 				//set up and show the dd wager modal
@@ -1445,7 +1452,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (isKey && liveResponse) liveResponse.innerHTML = fj.response;
 		} else if (state.state === 'FJLive') {
 			showView(liveClue);
-			if (state.playSound && thinkMusic) thinkMusic.play();
+			if (state.playSound && thinkMusic && (isHost() || isPlayer()))
+				thinkMusic.play();
 			if (isKey && fjResponseModal) fjResponseModal.show();
 			if (isPlayer()) fjPlayerResponseModal.show();
 		} else if (state.state === 'FJOver') {
@@ -1664,7 +1672,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			socket.emit('update-game-state', state, 1500);
 		if (state) {
 			if (isPlayer() || isKey) document.body.classList.add('dark');
-			else if (isHost()) document.body.classList.add('bg-jep');
+			else if (isHost() || isSpectator()) document.body.classList.add('bg-jep');
 		} else {
 			document.body.classList.remove('dark');
 			document.body.classList.remove('bg-jep');
@@ -2042,6 +2050,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	//
 	const joinGameButton = document.querySelector('#join-game');
+	const spectateGame = document.querySelector('#spectate-game');
 	const newPlayerName = document.querySelector('#player-name');
 	const joinCode = document.querySelector('#room-code');
 	const playerContainer = document.querySelector('.player-container');
@@ -2075,6 +2084,30 @@ document.addEventListener('DOMContentLoaded', () => {
 						else if (data.message) showMessage('info', data.message);
 						sh.setState(data.gameState);
 						moveBoard();
+					},
+					() => {
+						showMessage('error', 'Joining game timed out.');
+					}
+				)
+			);
+		});
+
+	if (spectateGame)
+		spectateGame.addEventListener('click', () => {
+			if (!joinCode.value)
+				return showMessage('error', 'You must enter a join code');
+
+			socket.emit(
+				'spectate-game',
+				{
+					uid,
+					joinCode: joinCode.value,
+				},
+				withTimeout(
+					(data) => {
+						if (data.status !== 'OK') showMessage('error', data.message);
+						else if (data.message) showMessage('info', data.message);
+						sh.setState(data.gameState);
 					},
 					() => {
 						showMessage('error', 'Joining game timed out.');

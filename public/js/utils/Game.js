@@ -31,7 +31,12 @@ const clueTime = 3500;
 const ddTime = 10000;
 const FJTime = 31000;
 
-const cluesPerRound = process.env.NODE_ENV === 'production' ? 30 : testClues;
+let cluesPerRound;
+try {
+	cluesPerRound = process?.env?.NODE_ENV === 'production' ? 30 : testClues;
+} catch (err) {
+	cluesPerRound = testClues;
+}
 
 class Player {
 	constructor(name, nameData, uid, socketId, key, isRemote) {
@@ -1003,6 +1008,7 @@ class Game {
 			ddTime,
 			clueTime,
 			FJTime,
+			spectators: [],
 			// modal: 'cancel-game-modal',
 			// modalDescription: 'Cancel game',
 		};
