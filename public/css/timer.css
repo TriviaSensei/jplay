@@ -1,0 +1,26 @@
+body {
+	background-image: url('/img/bg.jpg');
+	background-repeat: no-repeat;
+	background-size: cover;
+	display: flex;
+	flex-direction: column;
+
+	.timer-container {
+		width: min(800px, 100%);
+		margin: 3em auto;
+		background-color: var(--blue);
+		border: 2px solid gray;
+		color: var(--white);
+		text-shadow: 2px 2px #000;
+		.timer-label {
+			font-size: min(50px, 6.25vw);
+			font-family: 'Swiss 911 Compressed';
+			margin: auto;
+		}
+		.timer {
+			margin: auto;
+			font-size: min(100px, 12.5vw);
+			font-family: 'Korinna Regular BT';
+		}
+	}
+}

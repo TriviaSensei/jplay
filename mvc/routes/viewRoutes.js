@@ -7,5 +7,6 @@ router.get('/', viewController.getHome);
 router.get('/help', viewController.getHelp);
 // router.get('/test', viewController.getTest);
 router.get('/control', viewController.getControlPanel);
+router.get('/timer', viewController.getTimer);
 router.get('/games/:folder/:filename', viewController.getGame);
 module.exports = router;

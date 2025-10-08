@@ -76,8 +76,10 @@ exports.getControlPanel = async (req, res, next) => {
 	});
 };
 
-exports.getTest = async (req, res, next) => {
-	res.status(200).render('test');
+exports.getTimer = async (req, res, next) => {
+	if (process.env.NODE_ENV === 'development')
+		return res.status(200).render('timer');
+	else return res.redirect(`https://${req.header('host')}`);
 };
 
 exports.redirectToIndex = (req, res, next) => {
