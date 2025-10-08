@@ -60,6 +60,7 @@
 		width: min(600px, 100%, 72vh);
 		height: min(450px, 75vw, 54%);
 		position: relative;
+		text-shadow: 2px 2px #000;
 
 		.category-large {
 			width: 90%;
@@ -118,6 +119,7 @@
 				.comment-div {
 					font-family: 'Korinna Regular BT', serif;
 					text-transform: uppercase;
+					text-shadow: 2px 2px #000;
 				}
 			}
 

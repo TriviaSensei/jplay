@@ -33,6 +33,7 @@ body {
 		.clue-box.dd {
 			background-color: var(--yellow);
 			color: var(--blue);
+			text-shadow: none;
 		}
 	}
 }
@@ -43,6 +44,7 @@ body {
 		padding: 5%;
 		border: 1px solid white;
 		font-family: 'Korinna Regular BT', serif;
+		text-shadow: 2px 2px #000;
 	}
 	.clue-display {
 		grid-row: 3/6;

@@ -67,10 +67,12 @@ body.dark {
 
 .category-display {
 	font-family: 'Swiss 911 Compressed', sans-serif;
+	text-shadow: 2px 2px #000;
 }
 
 .clue-display {
 	font-family: 'Korinna Regular BT', serif;
+	text-shadow: 2px 2px #000;
 }
 
 .response-display {

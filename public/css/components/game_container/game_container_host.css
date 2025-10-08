@@ -76,6 +76,8 @@
 	.game-board {
 		width: 100%;
 		height: 100%;
+		text-shadow: 2px 2px #000;
+
 		.clue-box,
 		.category-box {
 			background-color: var(--blue);
@@ -90,6 +92,7 @@
 			padding: 10%;
 			color: var(--yellow);
 			cursor: pointer;
+
 			.clue-value {
 				margin: auto;
 			}
@@ -108,6 +111,8 @@
 			display: flex;
 			flex-direction: column;
 			padding: 0 5%;
+			text-shadow: 2px 2px #000;
+
 			.category-div {
 				font-family: 'Swiss 911 Compressed', sans-serif;
 				margin: auto;
@@ -152,6 +157,8 @@
 	}
 }
 .live-clue-display {
+	text-shadow: 2px 2px #000;
+
 	div {
 		color: white;
 		background-color: var(--blue);
@@ -254,6 +261,7 @@
 	display: flex;
 	flex-direction: row;
 	font-family: 'Swiss 911 Compressed', sans-serif;
+	text-shadow: 2px 2px #000;
 
 	.category-box {
 		height: 100%;
@@ -497,6 +505,8 @@
 	height: 100%;
 	align-content: center;
 	font-family: 'Swiss 911 Compressed', sans-serif;
+	text-shadow: 2px 2px #000;
+
 	.category-box {
 		height: 100%;
 		width: 100%;
