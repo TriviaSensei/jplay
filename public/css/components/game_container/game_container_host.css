@@ -214,22 +214,24 @@
 	}
 
 	@media (max-aspect-ratio: 0.89) {
-		.clue-display,
-		.value-display,
-		.category-display {
-			font-size: 7vw;
+		.category-display,
+		.value-display {
+			font-size: 5vw;
+		}
+		.clue-display {
+			font-size: 4vw;
 		}
 	}
 	/*
 		viewport is wide enough to fit everything - font size determined by the height of the window
 	*/
 	@media (aspect-ratio > 0.89) {
-		.clue-display,
+		.category-display,
 		.value-display {
-			font-size: 3.5vh;
+			font-size: 4.5vh;
 		}
-		.category-display {
-			font-size: 3.5vh;
+		.clue-display {
+			font-size: 3.6vh;
 		}
 	}
 }
