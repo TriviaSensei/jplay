@@ -67,7 +67,9 @@ const startGame = (type, data) => {
 	retrieveClientId();
 	if (type === 'local') {
 		uid = retrieveClientId();
-		game = new Game(data, { uid, keys: hostKeys }, null, null, sh);
+		const env =
+			location.href.indexOf('j-play') >= 0 ? 'production' : 'development';
+		game = new Game(data, { uid, keys: hostKeys }, null, null, sh, env);
 	} else if (type === 'remote') {
 		uid = retrieveClientId();
 		socket.emit(
@@ -1426,10 +1428,11 @@ document.addEventListener('DOMContentLoaded', () => {
 						const currentWager = player.finalWager;
 						const category =
 							state.board[state.board.length - 1].category.toUpperCase();
-						const catContainer = document.querySelector(
-							'#fj-category-container'
+						const catContainers = getElementArray(
+							document,
+							'.fj-category-container'
 						);
-						catContainer.innerHTML = category;
+						catContainers.forEach((c) => (c.innerHTML = category));
 						if (currentWager === -1 && player.score > 0) {
 							const maxWager = player.score;
 							const mw = fjpwm.querySelector('.fj-player-max-wager');
@@ -1455,7 +1458,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (state.playSound && thinkMusic && (isHost() || isPlayer()))
 				thinkMusic.play();
 			if (isKey && fjResponseModal) fjResponseModal.show();
-			if (isPlayer()) fjPlayerResponseModal.show();
+			if (isPlayer()) {
+				const clueContainer = document.querySelector('#fj-clue-container-resp');
+				if (clueContainer) {
+					const fj = state.board.slice(-1).pop();
+					clueContainer.innerHTML = fj.text;
+				}
+				fjPlayerResponseModal.show();
+			}
 		} else if (state.state === 'FJOver') {
 			if (thinkMusic) thinkMusic.pause();
 			// if (fjResponseModal) fjResponseModal.hide();
@@ -1493,6 +1503,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			e.target.classList.add('animate');
 			setTimeout(() => {
 				e.target.classList.add('revealed');
+				if (isKey) e.target.classList.add('revealed-sm');
 			}, 1);
 		}
 	});
@@ -1514,6 +1525,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			e.target.classList.add('animate');
 			setTimeout(() => {
 				e.target.classList.add('revealed');
+				if (isKey) e.target.classList.add('revealed-sm');
 			}, 1);
 		}
 	});

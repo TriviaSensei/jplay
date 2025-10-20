@@ -57,8 +57,8 @@
 	}
 
 	.board-display-container {
-		width: min(600px, 100%, 72vh);
-		height: min(450px, 75vw, 54%);
+		width: min(600px, 100%, 84vh);
+		height: min(450px, 75vw, 63%);
 		position: relative;
 		text-shadow: 2px 2px #000;
 
@@ -188,6 +188,10 @@
 			background-color: white;
 			color: var(--blue);
 		}
+	}
+
+	.display-inner {
+		font-size: min(4vw, 24px, 3vh);
 	}
 }
 

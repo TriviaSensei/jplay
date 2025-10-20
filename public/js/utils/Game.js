@@ -1,4 +1,4 @@
-const testClues = 3;
+const testClues = 1;
 const ddDistribution = [
 	[5, 756, 2491, 3636, 3112],
 	[2, 99, 286, 382, 231],
@@ -32,11 +32,6 @@ const ddTime = 10000;
 const FJTime = 31000;
 
 let cluesPerRound;
-try {
-	cluesPerRound = process?.env?.NODE_ENV === 'production' ? 30 : testClues;
-} catch (err) {
-	cluesPerRound = testClues;
-}
 
 class Player {
 	constructor(name, nameData, uid, socketId, key, isRemote) {
@@ -803,6 +798,13 @@ class Game {
 				modal: 'fj-response-modal',
 				modalDescription: 'Enter FJ Responses',
 			},
+			host: () => {
+				if (this.environment === 'development') {
+					this.setGameState({
+						state: 'FJOver',
+					});
+				} else return;
+			},
 			setFJResponses: (responses) => {
 				responses.forEach((res) => {
 					this.gameState.players[res.player].finalResponse = res.response;
@@ -900,12 +902,15 @@ class Game {
 		if (this.gameState) this.gameState.joinCode = this.joinCode;
 	};
 
-	constructor(board, host, io, socket, stateHandler) {
+	constructor(board, host, io, socket, stateHandler, environment) {
 		this.id = randomString(20, chars);
 		if (io) this.refreshJoinCode();
 		// this.joinCode = 'A';
 		this.io = io;
 		this.socket = socket;
+		this.environment = environment;
+		if (this.environment === 'production') cluesPerRound = 30;
+		else cluesPerRound = testClues;
 		if (this.socket) {
 			this.socket.on('update-game-state', (data) => {
 				if (data.reset) {

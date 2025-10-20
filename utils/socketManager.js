@@ -162,13 +162,13 @@ const socket = async (http, server) => {
 
 		//Things the host can emit
 		socket.on('create-game', (data, cb) => {
-			console.log('Creating remote game...');
 			const g = new Game(
 				data.rounds,
 				{ uid: data.uid, socketId: socket.id, keys: data.hostKeys },
 				io,
 				null,
-				null
+				null,
+				process.env.NODE_ENV
 			);
 			resetGameTimeout(g.id);
 			while (
