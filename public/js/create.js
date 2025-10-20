@@ -13,6 +13,7 @@ const getInitState = () => {
 					clues: new Array(5).fill(0).map((el) => {
 						return {
 							text: '',
+							image: '',
 							response: '',
 						};
 					}),
@@ -25,6 +26,7 @@ const getInitState = () => {
 					clues: new Array(5).fill(0).map((el) => {
 						return {
 							text: '',
+							image: '',
 							response: '',
 						};
 					}),
@@ -69,6 +71,9 @@ const valueSelect = getElementArray(
 	'input[type="radio"][name="selected-clue"]'
 );
 const clueText = createArea.querySelector('#edit-clue-text');
+const imageLink = createArea.querySelector('#picture-url');
+const previewContainer = createArea.querySelector('.preview-container');
+const imagePreview = createArea.querySelector('#picture-preview');
 const correctResponse = createArea.querySelector('#correct-response');
 
 const textInputs = getElementArray(createArea, 'input[type="text"],textarea');
@@ -125,6 +130,41 @@ const showHeaderMessage = (type, text, duration) => {
 	msgDiv.style = `color:${color};background-color:${bgcolor};opacity:1;`;
 	msgDiv.classList.remove('d-none');
 	msgTimeout.value = setTimeout(hideHeaderMessage, duration || 1000);
+};
+
+let req;
+const loadImage = async () => {
+	//remove and hide the image
+	imagePreview.setAttribute('src', '');
+	if (!imageLink.value) return previewContainer.classList.add('d-none');
+	previewContainer.classList.remove('d-none');
+	if (req) req.abort();
+	req = new XMLHttpRequest();
+	req.responseType = 'blob';
+	if (req.readyState === 0 || req.readyState === 4) {
+		req.open('GET', imageLink.value, true);
+		req.onreadystatechange = () => {
+			if (req.readyState === 4) {
+				console.log(req.status);
+				if (req.status === 0) return;
+				if (req.status !== 200 && req.status !== 304) {
+					imagePreview.setAttribute('src', '');
+					previewContainer.classList.add('d-none');
+					return showMessage('error', 'Could not get image file');
+				}
+				const reader = new FileReader();
+				reader.readAsDataURL(req.response);
+				reader.onloadend = () => {
+					const arr = reader.result.split(';');
+					if (!arr[0].toLowerCase().startsWith('data:image'))
+						return showMessage('error', 'File is not an image');
+					imagePreview.setAttribute('src', imageLink.value);
+				};
+			}
+		};
+		req.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+		req.send(null);
+	} else req.abort();
 };
 
 const getSelectedClue = () => {
@@ -198,10 +238,11 @@ const populateCategoryNames = () => {
 
 const populateSelectedClue = () => {
 	const sc = getSelectedClue();
-
 	categoryName.value = sc.data.category;
 	categoryComments.value = sc.data.comments;
 	clueText.value = sc.data.text;
+	imageLink.value = sc.data.image || '';
+	loadImage();
 	correctResponse.value = sc.data.response;
 
 	populateCategoryNames();
@@ -293,14 +334,19 @@ const handleDataChange = (e) => {
 			prev.rounds[2] = {
 				category: categoryName.value,
 				text: clueText.value,
+				image: '',
 				response: correctResponse.value,
 			};
 		else if (sc.round === 1 || sc.round === 0) {
-			prev.rounds[sc.round][sc.category].category = categoryName.value;
-			prev.rounds[sc.round][sc.category].comments = categoryComments.value;
-			prev.rounds[sc.round][sc.category].clues[sc.clue].text = clueText.value;
+			prev.rounds[sc.round][sc.category].category = categoryName.value.trim();
+			prev.rounds[sc.round][sc.category].comments =
+				categoryComments.value.trim();
+			prev.rounds[sc.round][sc.category].clues[sc.clue].text =
+				clueText.value.trim();
+			prev.rounds[sc.round][sc.category].clues[sc.clue].image =
+				imageLink.value.trim();
 			prev.rounds[sc.round][sc.category].clues[sc.clue].response =
-				correctResponse.value;
+				correctResponse.value.trim();
 		}
 		showHeaderMessage('info', 'Data saved');
 		return prev;
@@ -311,6 +357,8 @@ const handleDataChange = (e) => {
 textInputs.forEach((t) => {
 	t.addEventListener('change', handleDataChange);
 });
+
+imageLink.addEventListener('change', loadImage);
 
 const legalChars = 'abcdefghijklmnopqrstuvwxyz1234567890-_ ';
 const validateTitle = (e) => {
@@ -428,6 +476,7 @@ const validateData = (data) => {
 					cat.clues.forEach((clue, k) => {
 						if (k < newClues.length) {
 							newClues[k].text = clue.text || '';
+							newClues[k].image = clue.image || '';
 							newClues[k].response = clue.response || '';
 						}
 					});

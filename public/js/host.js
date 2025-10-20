@@ -140,6 +140,7 @@ const ddDiv = document.querySelector('.dd-div');
 
 const sideLights = getElementArray(liveClue, '.side-light');
 const liveClueText = liveClue.querySelector('.clue-text');
+const liveClueImage = liveClue.querySelector('#clue-image');
 const liveClueCategory = liveClue.querySelector('.category-text');
 const liveValue = liveClue.querySelector('.value-text');
 const liveResponse = isKey ? liveClue.querySelector('.response-text') : null;
@@ -1324,7 +1325,19 @@ document.addEventListener('DOMContentLoaded', () => {
 			showView(liveClue);
 			const liveCategory = getCategory(cat);
 			liveClueData = liveCategory.clues[row];
-			liveClueText.innerHTML = liveClueData.text;
+
+			if (liveClueData.image && !isKey) {
+				liveClueText.classList.add('d-none');
+				liveClueImage.classList.remove('d-none');
+				liveClueImage.setAttribute(
+					'style',
+					`background-image:url("${liveClueData.image}")`
+				);
+			} else {
+				liveClueText.classList.remove('d-none');
+				liveClueImage.classList.add('d-none');
+				liveClueText.innerHTML = liveClueData.text;
+			}
 			liveValue.innerHTML =
 				state.state === 'showDD' || state.state === 'DDLive'
 					? `DD: $${state.wager}`
@@ -1449,6 +1462,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (fjPlayerWagerModal) fjPlayerWagerModal.hide();
 			showView(liveClue);
 			const fj = state.board.slice(-1).pop();
+			liveClueText.classList.remove('d-none');
+			liveClueImage.classList.add('d-none');
 			liveClueText.innerHTML = fj.text;
 			liveValue.innerHTML = ``;
 			liveClueCategory.innerHTML = fj.category;
@@ -1462,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				const clueContainer = document.querySelector('#fj-clue-container-resp');
 				if (clueContainer) {
 					const fj = state.board.slice(-1).pop();
-					clueContainer.innerHTML = fj.text;
+					clueContainer.innerHTML = fj.text.toUpperCase();
 				}
 				fjPlayerResponseModal.show();
 			}

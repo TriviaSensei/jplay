@@ -216,6 +216,9 @@ input[type='radio']:disabled + label {
 			/* Recent browsers */
 			text-transform: none;
 		}
+		#picture-preview {
+			max-width: 100%;
+		}
 	}
 }
 
