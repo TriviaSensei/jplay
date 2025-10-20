@@ -144,8 +144,9 @@ const loadImage = async () => {
 	if (req.readyState === 0 || req.readyState === 4) {
 		req.open('GET', imageLink.value, true);
 		req.onreadystatechange = () => {
+			console.log(req.readyState);
 			if (req.readyState === 4) {
-				console.log(req.status);
+				console.log(req);
 				if (req.status === 0) return;
 				if (req.status !== 200 && req.status !== 304) {
 					imagePreview.setAttribute('src', '');
@@ -161,6 +162,12 @@ const loadImage = async () => {
 					imagePreview.setAttribute('src', imageLink.value);
 				};
 			}
+		};
+		req.onerror = () => {
+			showMessage('error', 'Something went wrong - could not load image', 1500);
+			imagePreview.setAttribute('src', '');
+			previewContainer.classList.add('d-none');
+			imageLink.value = '';
 		};
 		req.setRequestHeader('Content-type', 'application/json; charset=utf-8');
 		req.send(null);
