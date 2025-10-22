@@ -72,6 +72,7 @@ const startGame = (type, data) => {
 		game = new Game(data, { uid, keys: hostKeys }, null, null, sh, env);
 	} else if (type === 'remote') {
 		uid = retrieveClientId();
+		console.log('creating game...');
 		socket.emit(
 			'create-game',
 			{
@@ -931,9 +932,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (file.type.toLowerCase() !== 'application/json') {
 				e.target.value = '';
 				return showMessage('error', 'Only JSON files are accepted', 2000);
-			} else if (file.size > 20000) {
+			} else if (file.size > 2097152) {
 				e.target.value = '';
-				return showMessage('error', 'The maximum file size is 20 KB', 2000);
+				return showMessage('error', 'The maximum file size is 2 MB', 2000);
 			}
 			const lfn = document.querySelector('.load-file-name');
 			if (lfn) lfn.innerHTML = file.name;

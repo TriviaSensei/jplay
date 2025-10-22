@@ -94,6 +94,7 @@ const socket = async (http, server) => {
 	io = require('socket.io')(http, {
 		pingInterval,
 		pingTimeout,
+		maxHttpBufferSize: 2.2e6,
 	});
 
 	io.on('connection', async (socket) => {
@@ -170,6 +171,7 @@ const socket = async (http, server) => {
 				null,
 				process.env.NODE_ENV
 			);
+			console.log('creating game');
 			resetGameTimeout(g.id);
 			while (
 				activeGames.some((gm) => gm.gameState.joinCode === g.gameState.joinCode)

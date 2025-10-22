@@ -61,10 +61,13 @@ link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
                     textarea#edit-clue-text.w-100.h-100(placeholder="Clue text" maxlength="150")
     .input-row-v.no-fj
         .input-label Picture URL (optional; for picture clues only)
-        .input-container 
+        .input-container
             input#picture-url.w-100(type="text" placeholder="Picture URL")
-        .input-container.preview-container.w-100.d-none
-            img#picture-preview
+        .input-container.preview-container.d-none
+            .d-flex.flex-column
+                .w-100.d-flex.flex-column
+                    img#picture-preview.mb-1
+                    button#clear-image.btn.btn-sm.btn-primary Clear
     .input-row-v 
         .input-label Correct Response
         .input-container 

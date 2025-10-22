@@ -2,6 +2,8 @@ import { getElementArray } from './utils/getElementArray.js';
 import { showMessage } from './utils/messages.js';
 import { createElement } from './utils/createElementFromSelector.js';
 
+const defaultWidth = 400;
+
 const getInitState = () => {
 	return {
 		name: '',
@@ -70,10 +72,16 @@ const valueSelect = getElementArray(
 	createArea,
 	'input[type="radio"][name="selected-clue"]'
 );
+const valueLabels = getElementArray(
+	createArea,
+	'input[type="radio"][name="selected-clue"] + label > .label-inner'
+);
 const clueText = createArea.querySelector('#edit-clue-text');
 const imageLink = createArea.querySelector('#picture-url');
 const previewContainer = createArea.querySelector('.preview-container');
 const imagePreview = createArea.querySelector('#picture-preview');
+const clearImage = createArea.querySelector('#clear-image');
+const tempCanvas = document.querySelector('#temp-canvas');
 const correctResponse = createArea.querySelector('#correct-response');
 
 const textInputs = getElementArray(createArea, 'input[type="text"],textarea');
@@ -132,46 +140,42 @@ const showHeaderMessage = (type, text, duration) => {
 	msgTimeout.value = setTimeout(hideHeaderMessage, duration || 1000);
 };
 
-let req;
-const loadImage = async () => {
-	//remove and hide the image
+const hideImagePreview = () => {
 	imagePreview.setAttribute('src', '');
-	if (!imageLink.value) return previewContainer.classList.add('d-none');
+	previewContainer.classList.add('d-none');
+};
+
+const showImagePreview = (url) => {
+	imagePreview.setAttribute('src', url);
 	previewContainer.classList.remove('d-none');
-	if (req) req.abort();
-	req = new XMLHttpRequest();
-	req.responseType = 'blob';
-	if (req.readyState === 0 || req.readyState === 4) {
-		req.open('GET', imageLink.value, true);
-		req.onreadystatechange = () => {
-			console.log(req.readyState);
-			if (req.readyState === 4) {
-				console.log(req);
-				if (req.status === 0) return;
-				if (req.status !== 200 && req.status !== 304) {
-					imagePreview.setAttribute('src', '');
-					previewContainer.classList.add('d-none');
-					return showMessage('error', 'Could not get image file');
-				}
-				const reader = new FileReader();
-				reader.readAsDataURL(req.response);
-				reader.onloadend = () => {
-					const arr = reader.result.split(';');
-					if (!arr[0].toLowerCase().startsWith('data:image'))
-						return showMessage('error', 'File is not an image');
-					imagePreview.setAttribute('src', imageLink.value);
-				};
-			}
-		};
-		req.onerror = () => {
-			showMessage('error', 'Something went wrong - could not load image', 1500);
-			imagePreview.setAttribute('src', '');
-			previewContainer.classList.add('d-none');
-			imageLink.value = '';
-		};
-		req.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-		req.send(null);
-	} else req.abort();
+};
+
+const getImageUrl = async (data) => {
+	return new Promise((resolve, reject) => {
+		try {
+			const img = new Image();
+			img.setAttribute('src', data);
+			img.onload = () => {
+				const [width, height] = [img.width, img.height];
+				const ratio = defaultWidth / width;
+				const [w, h] = [defaultWidth, height * ratio];
+				tempCanvas.classList.remove('d-none');
+				tempCanvas.height = h;
+				tempCanvas.width = w;
+				const context = tempCanvas.getContext('2d');
+				context.drawImage(img, 0, 0, w, h);
+				const newFile = tempCanvas.toDataURL('image/jpeg', 1);
+				context.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+				tempCanvas.classList.add('d-none');
+				resolve(newFile);
+			};
+			img.onerror = () => {
+				reject('Could not fetch image');
+			};
+		} catch (err) {
+			reject('Could not fetch image');
+		}
+	});
 };
 
 const getSelectedClue = () => {
@@ -248,8 +252,9 @@ const populateSelectedClue = () => {
 	categoryName.value = sc.data.category;
 	categoryComments.value = sc.data.comments;
 	clueText.value = sc.data.text;
-	imageLink.value = sc.data.image || '';
-	loadImage();
+	imageLink.value = '';
+	if (sc.data.image) showImagePreview(sc.data.image);
+	else hideImagePreview();
 	correctResponse.value = sc.data.response;
 
 	populateCategoryNames();
@@ -316,6 +321,15 @@ sh.addWatcher(null, populateSelectedClue);
 [...roundSelect, ...valueSelect, categorySelect].forEach((el) =>
 	el.addEventListener('change', populateSelectedClue)
 );
+[...roundSelect].forEach((rs) =>
+	rs.addEventListener('change', (e) => {
+		const rd = Number(e.target.value);
+		if (rd === 2) return;
+		[...valueLabels].forEach(
+			(vs, i) => (vs.innerHTML = `$${(rd + 1) * (i + 1) * 200}`)
+		);
+	})
+);
 
 roundSelect.forEach((rs) =>
 	rs.addEventListener('change', () => {
@@ -327,6 +341,8 @@ sh.addWatcher(null, populateCategoryNames);
 sh.addWatcher(null, validateAll);
 //change data when text inputs change
 const handleDataChange = (e) => {
+	if (e.target === imageLink) return;
+
 	if (e.target === gameNotes) {
 		sh.setState((prev) => {
 			return {
@@ -350,8 +366,6 @@ const handleDataChange = (e) => {
 				categoryComments.value.trim();
 			prev.rounds[sc.round][sc.category].clues[sc.clue].text =
 				clueText.value.trim();
-			prev.rounds[sc.round][sc.category].clues[sc.clue].image =
-				imageLink.value.trim();
 			prev.rounds[sc.round][sc.category].clues[sc.clue].response =
 				correctResponse.value.trim();
 		}
@@ -365,7 +379,59 @@ textInputs.forEach((t) => {
 	t.addEventListener('change', handleDataChange);
 });
 
-imageLink.addEventListener('change', loadImage);
+imageLink.addEventListener('change', async (e) => {
+	try {
+		const url = await getImageUrl(e.target.value);
+		const cc = getSelectedClue();
+		showImagePreview(url);
+		const state = sh.getState();
+		state.rounds[cc.round][cc.category].clues[cc.clue].image = url;
+		sh.setState(state);
+	} catch (err) {
+		showMessage('error', err);
+		hideImagePreview();
+	}
+	e.target.value = '';
+});
+
+document.addEventListener('paste', async (e) => {
+	//if we're not in the create tab, don't bother
+	const activeTab = document.querySelector('#create-tab-pane.active.show');
+	if (!activeTab) return;
+
+	//see if the clipboard contains an image
+	const clipboardItems = e.clipboardData.items;
+	const items = [].slice.call(clipboardItems).filter(function (item) {
+		// Filter the image items only
+		return item.type.indexOf('image') !== -1;
+	});
+	//there is no picture on the clipboard...just return then
+	if (items.length === 0) return;
+	//there is a picture on the clipboard...don't paste the entire thing
+	e.preventDefault();
+	const cc = getSelectedClue();
+	//no picture clues in FJ
+	if (cc.round === 2) return;
+
+	const blob = items[0].getAsFile();
+	const reader = new FileReader();
+	reader.onloadend = async () => {
+		const newFile = await getImageUrl(reader.result);
+		showImagePreview(newFile);
+		const state = sh.getState();
+		state.rounds[cc.round][cc.category].clues[cc.clue].image = newFile;
+		sh.setState(state);
+	};
+	reader.readAsDataURL(blob);
+});
+
+clearImage.addEventListener('click', () => {
+	const cc = getSelectedClue();
+	const state = sh.getState();
+	state.rounds[cc.round][cc.category].clues[cc.clue].image = '';
+	sh.setState(state);
+	hideImagePreview();
+});
 
 const legalChars = 'abcdefghijklmnopqrstuvwxyz1234567890-_ ';
 const validateTitle = (e) => {
