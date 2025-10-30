@@ -72,7 +72,6 @@ const startGame = (type, data) => {
 		game = new Game(data, { uid, keys: hostKeys }, null, null, sh, env);
 	} else if (type === 'remote') {
 		uid = retrieveClientId();
-		console.log('creating game...');
 		socket.emit(
 			'create-game',
 			{

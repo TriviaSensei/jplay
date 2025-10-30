@@ -63,6 +63,7 @@
 		text-shadow: 2px 2px #000;
 
 		.category-large {
+			text-transform: uppercase;
 			width: 90%;
 			height: 90%;
 			position: absolute;
