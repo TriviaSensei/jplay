@@ -914,7 +914,6 @@ class Game {
 		else cluesPerRound = testClues;
 		if (this.socket) {
 			this.socket.on('update-game-state', (data) => {
-				console.log(data);
 				if (data.reset) {
 					delete data.reset;
 					if (this.stateHandler) this.stateHandler.setState(data);

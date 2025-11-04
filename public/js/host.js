@@ -795,7 +795,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		socket.on('update-game-state', (data) => {
 			const state = sh.getState();
-			console.log(data);
 			if (state.state !== data.state && data.state === 'FJOver') {
 				saveFJResponse(true);
 			}
