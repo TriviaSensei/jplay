@@ -931,9 +931,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (file.type.toLowerCase() !== 'application/json') {
 				e.target.value = '';
 				return showMessage('error', 'Only JSON files are accepted', 2000);
-			} else if (file.size > 2097152) {
+			} else if (file.size > 12485760) {
 				e.target.value = '';
-				return showMessage('error', 'The maximum file size is 2 MB', 2000);
+				return showMessage('error', 'The maximum file size is 10 MB', 2000);
 			}
 			const lfn = document.querySelector('.load-file-name');
 			if (lfn) lfn.innerHTML = file.name;
