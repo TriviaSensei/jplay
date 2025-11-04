@@ -224,7 +224,6 @@ const socket = async (http, server) => {
 		});
 
 		socket.on('edit-game-data', (data, cb) => {
-			console.log(data);
 			const game = getGameForSocketId(socket.id);
 			if (!game)
 				return cb({ status: 'fail', message: 'You are not part of a game' });
@@ -240,6 +239,8 @@ const socket = async (http, server) => {
 				...game.gameState,
 				...data.gameData,
 			};
+
+			console.log(data);
 
 			socket.to(game.id).emit('update-game-state', game.getGameState());
 			cb({

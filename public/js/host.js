@@ -795,7 +795,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		socket.on('update-game-state', (data) => {
 			const state = sh.getState();
-
+			console.log(data);
 			if (state.state !== data.state && data.state === 'FJOver') {
 				saveFJResponse(true);
 			}
@@ -1280,7 +1280,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	//main screen display as function of state
 	sh.addWatcher(null, (state) => {
 		if (!state) return;
-		console.log(state);
 		if (state.state === 'waitingDD') {
 			//waiting for a DD wager
 			showView(gameBoard);

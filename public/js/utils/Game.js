@@ -362,7 +362,7 @@ class Game {
 			editPlayer: (ind, data) => {
 				this.gameState.players[ind].setName(data.name);
 				this.gameState.players[ind].setScore(data.score);
-				this.updateGameState();
+				this.updateGameState(null, { players: this.gameState.players });
 			},
 		},
 		//each state has a data attribute of game state attributes that are always true during that game state, but may change
@@ -390,19 +390,20 @@ class Game {
 					this.gameState.players.length > 0 &&
 					this.gameState.players.some((p) => p.getName() !== '')
 				) {
-					this.setGameState({
+					const data = {
 						state: 'boardIntro',
 						round: 0,
 						categoryShown: -2,
 						status: 'Board intro - press advance to display next category',
-					});
+					};
+					this.setGameState(data);
 					// this.gameState.active = true;
 					// this.gameState.state = 'betweenRounds';
 					// this.gameState.round = 2;
 					// this.gameState.players.forEach((p, i) => {
 					// 	if (p.name) p.score = (i + 1) * 200;
 					// });
-					this.updateGameState();
+					this.updateGameState(null, data);
 				} else throw new Error('You must have at least one player.');
 			},
 			player: (p) => {
@@ -544,7 +545,7 @@ class Game {
 					if (this.gameState.timeout) return;
 					//if the clue is not yet started, lock them out for a period
 					this.lockPlayer(p, true);
-					this.updateGameState(p);
+					this.updateGameState(p, { players: this.gameState.players });
 				} catch (err) {
 					return console.log(err);
 				}
@@ -809,7 +810,7 @@ class Game {
 				responses.forEach((res) => {
 					this.gameState.players[res.player].finalResponse = res.response;
 				});
-				this.updateGameState();
+				this.updateGameState(null, { players: this.gameState.players });
 			},
 			setFJResponse: (player, response) => {
 				if (player >= 0 && player < this.gameState.players.length) {
@@ -913,6 +914,7 @@ class Game {
 		else cluesPerRound = testClues;
 		if (this.socket) {
 			this.socket.on('update-game-state', (data) => {
+				console.log(data);
 				if (data.reset) {
 					delete data.reset;
 					if (this.stateHandler) this.stateHandler.setState(data);
@@ -1077,7 +1079,8 @@ class Game {
 
 	//update the state handler.
 	//if it's the host for a remote game (io is not null), send the new state
-	updateGameState(player) {
+	updateGameState(player, data) {
+		const toSend = data || this.gameState;
 		if (this.stateHandler) this.stateHandler.setState(this.gameState);
 		if (this.io?.to) {
 			if (
@@ -1089,9 +1092,9 @@ class Game {
 				if (!p.socketId)
 					this.io
 						.to(this.gameState.host.socketId)
-						.emit('update-game-state', this.gameState);
-				else this.io.to(p.socketId).emit('update-game-state', this.gameState);
-			} else this.io.to(this.getId()).emit('update-game-state', this.gameState);
+						.emit('update-game-state', toSend);
+				else this.io.to(p.socketId).emit('update-game-state', toSend);
+			} else this.io.to(this.getId()).emit('update-game-state', toSend);
 		}
 		this.gameState.playSound = false;
 	}
@@ -1112,7 +1115,7 @@ class Game {
 			false
 		);
 		this.gameState.players.push(toAdd);
-		this.updateGameState();
+		this.updateGameState(null, { players: this.gameState.players });
 	}
 
 	addBlankPlayer() {
@@ -1141,7 +1144,7 @@ class Game {
 			this.gameState.players[index].setKey(keys[index]);
 			this.gameState.players[index].setRemote(this.isRemote);
 			this.gameState.players[index].setSocketId(null);
-			this.updateGameState();
+			this.updateGameState(null, { players: this.gameState.players });
 		}
 	}
 
@@ -1157,7 +1160,7 @@ class Game {
 		this.gameState.players = temp.map((p) => {
 			return p.player;
 		});
-		this.updateGameState();
+		this.updateGameState(null, { players: this.gameState.players });
 	}
 
 	swapPlayers(a, b) {
@@ -1171,7 +1174,7 @@ class Game {
 			this.gameState.players[b],
 			this.gameState.players[a],
 		];
-		this.updateGameState();
+		this.updateGameState(null, { players: this.gameState.players });
 	}
 
 	handleInput(...args) {
@@ -1210,7 +1213,7 @@ class Game {
 			...newData,
 		};
 		if (action) action();
-		this.updateGameState();
+		this.updateGameState(null, { ...state, ...newData });
 		if (this.gameState.message) this.gameState.message = '';
 		if (this.gameState.playSound) this.gameState.playSound = false;
 	}
@@ -1218,25 +1221,25 @@ class Game {
 	setPlayerScore(player, score) {
 		if (player >= this.gameState.players.length) return this.gameState;
 		else this.gameState.players[player].setScore(score);
-		this.updateGameState();
+		this.updateGameState(null, { players: this.gameState.players });
 	}
 
 	setPlayerKey(player, key) {
 		if (player >= this.gameState.players.length) return this.gameState;
 		else this.gameState.players[player].setKey(key);
-		this.updateGameState(player);
+		this.updateGameState(player, { players: this.gameState.players });
 	}
 
 	modifyPlayerScore(player, diff) {
 		if (player >= this.gameState.players.length) return this.gameState;
 		else this.gameState.players[player].modifyScore(diff);
-		this.updateGameState();
+		this.updateGameState(null, { players: this.gameState.players });
 	}
 
 	lockPlayer(player, autoUnlock) {
 		if (player >= 0 && player < this.gameState.players.length) {
 			this.gameState.players[player].locked = true;
-			this.updateGameState(player);
+			this.updateGameState(player, { players: this.gameState.players });
 			if (autoUnlock)
 				setTimeout(() => {
 					this.gameState.players[player].locked = false;
@@ -1248,13 +1251,13 @@ class Game {
 		this.gameState.players.forEach((p) => {
 			p.locked = false;
 		});
-		this.updateGameState();
+		this.updateGameState(null, { players: this.gameState.players });
 	}
 
 	unlockPlayer(player) {
 		if (player >= 0 && player < this.gameState.players.length) {
 			this.gameState.players[player].locked = false;
-			this.updateGameState(player);
+			this.updateGameState(player, { players: this.gameState.players });
 		}
 	}
 
@@ -1262,7 +1265,7 @@ class Game {
 		this.gameState.players.forEach((p) => {
 			p.locked = false;
 		});
-		this.updateGameState();
+		this.updateGameState(null, { players: this.gameState.players });
 	}
 
 	handleClueTimeout(nextState) {
