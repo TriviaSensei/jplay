@@ -808,6 +808,11 @@ document.addEventListener('DOMContentLoaded', () => {
 					...state,
 					...data,
 				};
+				if (state.selectedClue.some((rc) => rc !== -1)) {
+					newState.board[state.round][state.selectedClue[0]].clues[
+						state.selectedClue[1]
+					].selected = true;
+				}
 				sh.setState(newState);
 			}
 		});
@@ -1499,6 +1504,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
+	sh.addWatcher(null, (state) => {
+		if (state.state !== 'pregame') {
+			if (isKey)
+				document.title = `Control Panel - Game ${state.joinCode.toUpperCase()}`;
+		}
+	});
+
 	sh.addWatcher(fjResponseDisplay, (e) => {
 		const state = e.detail;
 		if (state.state !== 'FJOver' || state.fjStep === -1) return;
@@ -1692,7 +1704,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 
 	sh.addWatcher(null, (state) => {
-		if (state?.message?.trim()) showMessage('info', state.message);
+		if (state?.message?.trim()) {
+			showMessage('info', state.message);
+		}
 		if (state?.isRemote && socket)
 			socket.emit('update-game-state', state, 1500);
 		if (state) {
@@ -2013,6 +2027,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	if (isKey) {
+		//add player list to this area during pregame, so that we can shuffle players
 		const statusPanel = document.querySelector('.status-panel');
 		sh.addWatcher(statusPanel, (e) => {
 			e.target.innerHTML = e.detail.status;

@@ -240,8 +240,6 @@ const socket = async (http, server) => {
 				...data.gameData,
 			};
 
-			console.log(data);
-
 			socket.to(game.id).emit('update-game-state', game.getGameState());
 			cb({
 				status: 'OK',

@@ -1,4 +1,4 @@
-const testClues = 1;
+const testClues = 3;
 const ddDistribution = [
 	[5, 756, 2491, 3636, 3112],
 	[2, 99, 286, 382, 231],
@@ -1079,7 +1079,7 @@ class Game {
 	//update the state handler.
 	//if it's the host for a remote game (io is not null), send the new state
 	updateGameState(player, data) {
-		const toSend = data || this.gameState;
+		const toSend = this.gameState;
 		if (this.stateHandler) this.stateHandler.setState(this.gameState);
 		if (this.io?.to) {
 			if (
