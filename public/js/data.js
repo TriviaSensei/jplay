@@ -83,7 +83,7 @@ const stats = [
 				}
 			);
 			return `${agg.correct}/${agg.correct + agg.incorrect} (${(
-				agg.correct /
+				(100 * agg.correct) /
 				(agg.correct + agg.incorrect)
 			).toFixed(1)}%)`;
 		},
@@ -110,7 +110,31 @@ const stats = [
 				return p + c.data[i].result;
 			}, 0);
 
-			return `${coryat < 0 ? '-' : ''}${coryat.toLocaleString('en')}`;
+			return `${coryat < 0 ? '-' : ''}$${coryat.toLocaleString('en')}`;
+		},
+	},
+	{
+		title: 'DD',
+		aggregate: (gameData, i) => {
+			const agg = gameData.reduce(
+				(p, c) => {
+					if (c.isDD && c.data[i].result !== 0) {
+						return {
+							count: p.count + 1,
+							correct: p.correct + (c.data[i].result > 0 ? 1 : 0),
+							result: p.result + c.data[i].result,
+						};
+					} else return p;
+				},
+				{
+					count: 0,
+					correct: 0,
+					result: 0,
+				}
+			);
+			return `${agg.correct}/${agg.count} (${
+				agg.result < 0 ? '-' : ''
+			}$${Math.abs(agg.result).toLocaleString('en')})`;
 		},
 	},
 	{

@@ -651,6 +651,19 @@ class Game {
 			data: {
 				buzzerArmed: false,
 			},
+			player: (p) => {
+				if (p !== this.gameState.buzzedIn) {
+					const curr = this.getCurrentClueStats();
+					//only do this the first time they hit the buzzer if they're late
+					if (curr.buzz) return;
+					const elapsed = Date.now() - this.gameState.buzzerTime;
+					const rt = curr.data.find((d) => d.first);
+					const mrt = rt ? rt.time + 1000 : 1000;
+					if (elapsed <= mrt) {
+						this.updateGameStats(p, { buzz: true, time: elapsed });
+					}
+				}
+			},
 			correct: this.handleResponse(true),
 			incorrect: this.handleResponse(false),
 		},
