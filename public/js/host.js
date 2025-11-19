@@ -1702,10 +1702,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	scoreDisplays.forEach((sd, i) => {
 		sh.addWatcher(sd, (e) => {
 			if (!e.detail) return;
-			if (i === 0) {
-				console.log(e.detail);
-				console.trace();
-			}
 			if (isKey && e.detail.state === 'buzz') {
 				const bz = e.detail.currentBuzz;
 				if (bz.data.length >= i + 1 && bz.data[i].buzz) {
