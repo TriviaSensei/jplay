@@ -1497,7 +1497,14 @@ document.addEventListener('DOMContentLoaded', () => {
 					endGameModal.hide();
 					setTimeout(() => location.reload(), 1000);
 				});
-				endGameModal.show();
+				document.addEventListener('data-ready', () => endGameModal.show());
+				const evt = new CustomEvent('process-data', {
+					detail: {
+						players: state.players,
+						gameData: state.gameData || null,
+					},
+				});
+				document.dispatchEvent(evt);
 			}
 		} else {
 			showView(gameBoard);

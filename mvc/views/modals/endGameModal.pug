@@ -4,6 +4,14 @@
             input#player-index(type="hidden")
             .modal-header
                 h5.modal-title#end-game-label Game Over
-            #end-game-result.modal-body
+            .modal-body.d-flex.flex-column
+                #end-game-result.mb-2
+                h5.mb-2 Game Stats
+                table#result-table.mb-2
+                    tr#name-row 
+                        th
+                    tr#score-row 
+                        td Final Score  
+                //- svg#game-flow.w-100
             .modal-footer
-                button#end-game-ok.btn.btn-sm.btn-primary(type="button" data-key="Enter,Return") OK
+                button#end-game-ok.btn.btn-sm.btn-primary(type="button" data-key="Enter,Return") Return to Lobby

@@ -1,4 +1,4 @@
-const testClues = 3;
+const testClues = 2;
 const ddDistribution = [
 	[5, 756, 2491, 3636, 3112],
 	[2, 99, 286, 382, 231],
@@ -212,6 +212,10 @@ class Game {
 					correct ? clue.value : -clue.value
 				);
 
+				this.updateGameStats(this.gameState.buzzedIn, {
+					result: correct ? clue.value : -clue.value,
+				});
+
 				//a correct answer was given
 				if (correct) {
 					//unlock all buzzers
@@ -239,7 +243,7 @@ class Game {
 				else {
 					//lock this player out for the question
 					this.gameState.players[this.gameState.buzzedIn].locked = true;
-					//if any one is elibible, go back to clueLive
+					//if any one is eligible, go back to clueLive
 					if (this.gameState.players.some((p) => p.name && !p.isLocked())) {
 						this.setGameState({
 							state: 'clueLive',
@@ -281,9 +285,12 @@ class Game {
 		const p = this.gameState.control;
 		if (p < 0)
 			throw new Error('Invalid game state - no player in control for DD');
-		this.gameState.players[p].modifyScore(
-			correct ? this.gameState.wager : -this.gameState.wager
-		);
+
+		const ds = correct ? this.gameState.wager : -this.gameState.wager;
+		this.gameState.players[p].modifyScore(ds);
+		this.updateGameStats(this.gameState.control, {
+			result: ds,
+		});
 		//are there clues left?
 		if (!this.checkRoundOver()) {
 			//clear the wager
@@ -317,6 +324,7 @@ class Game {
 			fjStep: this.gameState.fjStep + 1,
 			status: `${fjData}<br><br>${player.name}'s Final Jeopardy wager revealed. Press advance to continue.`,
 		});
+		this.updateGameStats(p, { correct });
 	}
 
 	handleBuzz(p) {
@@ -334,9 +342,31 @@ class Game {
 				currentTime: now,
 				status: `${this.gameState.players[p].name} buzzed in`,
 			});
+			const curr = this.getCurrentClueStats();
+			if (!curr) return;
+			this.updateGameStats(p, {
+				buzz: true,
+				first: curr.data.every((d) => !d.first),
+				time: Date.now() - this.gameState.buzzerTime,
+			});
 		} catch (err) {
 			return console.log(err);
 		}
+	}
+
+	updateGameStats(p, data) {
+		if (this.gameData.length === 0) return;
+		if (this.gameData[this.gameData.length - 1].data.length <= p) return;
+
+		this.gameData[this.gameData.length - 1].data[p] = {
+			...this.gameData[this.gameData.length - 1].data[p],
+			...data,
+		};
+	}
+
+	getCurrentClueStats() {
+		if (this.gameData.length === 0) return null;
+		return this.gameData[this.gameData.length - 1];
 	}
 
 	/**
@@ -480,7 +510,22 @@ class Game {
 				const clue = this.gameState.board[rd][cat].clues[row];
 				if (clue.selected) return;
 				clue.selected = true;
-				if (clue.dailyDouble)
+				const newData = {
+					round: this.gameState.round,
+					category: cat,
+					clue: row,
+					data: new Array(3).fill(0).map(() => {
+						return {
+							buzz: false,
+							early: false,
+							first: false,
+							result: 0,
+							time: null,
+						};
+					}),
+				};
+
+				if (clue.dailyDouble) {
 					this.setGameState({
 						state: 'waitingDD',
 						playSound: true,
@@ -489,12 +534,21 @@ class Game {
 							this.gameState.control
 						].getName()}`,
 					});
-				else
+					this.gameData.push({
+						...newData,
+						isDD: true,
+					});
+				} else {
 					this.setGameState({
 						state: 'showClue',
 						status: `Reading clue. Press advance to arm buzzers`,
 						selectedClue: [cat, row],
 					});
+					this.gameData.push({
+						...newData,
+						isDD: false,
+					});
+				}
 			},
 		},
 		//showClue: clue is showing, but buzzer is not active
@@ -508,6 +562,7 @@ class Game {
 				if (!this.gameState.timeout) {
 					this.setGameState({
 						state: 'clueLive',
+						buzzerTime: Date.now(),
 					});
 					this.startClueTimer(clueTime, {
 						buzzerArmed: false,
@@ -546,6 +601,7 @@ class Game {
 					//if the clue is not yet started, lock them out for a period
 					this.lockPlayer(p, true);
 					this.updateGameState(p, { players: this.gameState.players });
+					this.updateGameStats(p, { buzz: true, early: true });
 				} catch (err) {
 					return console.log(err);
 				}
@@ -698,6 +754,15 @@ class Game {
 		},
 		FJIntro: {
 			host: () => {
+				this.gameData.push({
+					round: 3,
+					data: new Array(3).fill(0).map(() => {
+						return {
+							correct: false,
+							result: 0,
+						};
+					}),
+				});
 				this.setGameState({
 					state: 'FJCategory',
 					playSound: true,
@@ -872,6 +937,7 @@ class Game {
 					this.setGameState({
 						state: 'endGame',
 						status: newStatus,
+						gameData: this.gameData,
 						message: 'The game has ended',
 					});
 				}
@@ -953,6 +1019,7 @@ class Game {
 		}, test the buzzers, then press "advance" when ready.${
 			this.isRemote ? `<br><br>Join code: ${this.joinCode.toUpperCase()}` : ''
 		}`;
+		this.gameData = [];
 		this.gameState = {
 			active: false, //whether the game is active
 			state: 'pregame',
