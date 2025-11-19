@@ -362,6 +362,8 @@ class Game {
 			...this.gameData[this.gameData.length - 1].data[p],
 			...data,
 		};
+
+		this.updateGameState(-1, { currentBuzz: this.getCurrentClueStats() });
 	}
 
 	getCurrentClueStats() {
@@ -933,6 +935,7 @@ class Game {
 					}
 					this.setGameState({
 						fjStep,
+						players: this.gameState.players,
 						status: `${fjData}<br><br>${newStatus}`,
 					});
 				} else {
@@ -950,6 +953,7 @@ class Game {
 					this.setGameState({
 						state: 'endGame',
 						status: newStatus,
+						players: this.gameState.players,
 						gameData: this.gameData,
 						message: 'The game has ended',
 					});
@@ -1159,7 +1163,11 @@ class Game {
 	//update the state handler.
 	//if it's the host for a remote game (io is not null), send the new state
 	updateGameState(player, data) {
-		const toSend = this.gameState;
+		const toSendPre = data || this.gameState;
+		const toSend = {
+			...toSendPre,
+			message: this.gameState.message,
+		};
 		if (this.stateHandler) this.stateHandler.setState(this.gameState);
 		if (this.io?.to) {
 			if (
@@ -1173,6 +1181,11 @@ class Game {
 						.to(this.gameState.host.socketId)
 						.emit('update-game-state', toSend);
 				else this.io.to(p.socketId).emit('update-game-state', toSend);
+			} else if (player === -1) {
+				if (this.gameState.host?.socketId)
+					this.io
+						.to(this.gameState.host.socketId)
+						.emit('update-game-state', toSend);
 			} else this.io.to(this.getId()).emit('update-game-state', toSend);
 		}
 		this.gameState.playSound = false;
@@ -1292,7 +1305,11 @@ class Game {
 			...newData,
 		};
 		if (action) action();
-		this.updateGameState(null, { ...state, ...newData });
+		this.updateGameState(null, {
+			...state,
+			...newData,
+			players: this.gameState.players,
+		});
 		if (this.gameState.message) this.gameState.message = '';
 		if (this.gameState.playSound) this.gameState.playSound = false;
 	}

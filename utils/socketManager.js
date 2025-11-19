@@ -94,7 +94,7 @@ const socket = async (http, server) => {
 	io = require('socket.io')(http, {
 		pingInterval,
 		pingTimeout,
-		maxHttpBufferSize: 1.2e7,
+		maxHttpBufferSize: 1.3e7,
 	});
 
 	io.on('connection', async (socket) => {

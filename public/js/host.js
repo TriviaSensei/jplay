@@ -375,15 +375,20 @@ const sendGameInput = (...args) => {
 let keyWindow;
 //send game state to key window - called when key window is opened, or when
 //state is updated
-const sendGameState = () => {
+const sendGameState = (data) => {
 	if (isKey) return;
-	const state = sh.getState();
-	const evt = new CustomEvent('receive-state', { detail: state });
+	const evt = new CustomEvent('receive-state', { detail: data });
 	if (keyWindow?.document) keyWindow.document.dispatchEvent(evt);
 };
 //receive the game state from the main window
 const receiveGameState = (e) => {
-	sh.setState(e.detail);
+	console.log(e.detail);
+	sh.setState((prev) => {
+		return {
+			...prev,
+			...e.detail,
+		};
+	});
 };
 if (isKey) document.addEventListener('receive-state', receiveGameState);
 else {
@@ -432,7 +437,15 @@ const openKey = () => {
 			'Could not open key - please disable your popup blocker',
 			2000
 		);
-	else keyWindow.addEventListener('load', sendGameState, { once: true });
+	else
+		keyWindow.addEventListener(
+			'load',
+			() => {
+				const data = sh.getState();
+				sendGameState(data);
+			},
+			{ once: true }
+		);
 };
 
 const isHost = () => {
@@ -815,6 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 				sh.setState(newState);
 			}
+			if (!isKey) sendGameState(data);
 		});
 
 		socket.on('game-timeout', (data) => {
@@ -935,9 +949,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (file.type.toLowerCase() !== 'application/json') {
 				e.target.value = '';
 				return showMessage('error', 'Only JSON files are accepted', 2000);
-			} else if (file.size > 12485760) {
+			} else if (file.size > 1248576 * 2) {
 				e.target.value = '';
-				return showMessage('error', 'The maximum file size is 10 MB', 2000);
+				return showMessage('error', 'The maximum file size is 2 MB', 2000);
 			}
 			const lfn = document.querySelector('.load-file-name');
 			if (lfn) lfn.innerHTML = file.name;
@@ -1688,6 +1702,17 @@ document.addEventListener('DOMContentLoaded', () => {
 	scoreDisplays.forEach((sd, i) => {
 		sh.addWatcher(sd, (e) => {
 			if (!e.detail) return;
+			if (i === 0) {
+				console.log(e.detail);
+				console.trace();
+			}
+			if (isKey && e.detail.state === 'buzz') {
+				const bz = e.detail.currentBuzz;
+				if (bz.data.length >= i + 1 && bz.data[i].buzz) {
+					e.target.innerHTML = `${bz.data[i].time}ms`;
+					return;
+				}
+			}
 			const player = e.detail.players[i];
 			if (!player || !player.name) {
 				e.target.innerHTML = '';
@@ -1743,8 +1768,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		);
 
 	//send game state to key window on state update
-	if (!isKey) sh.addWatcher(null, sendGameState);
-	else
+	// if (!isKey) sh.addWatcher(null, sendGameState);
+	if (isKey)
 		sh.addWatcher(null, (state) => {
 			if (!state) return;
 			if (!Array.isArray(state.board[state.round])) return;

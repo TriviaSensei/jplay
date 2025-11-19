@@ -35,17 +35,41 @@ const stats = [
 	{
 		title: 'Early Buzz',
 		aggregate: (gameData, i) => {
-			return gameData.reduce((p, c) => {
-				return p + (c.data[i].early ? 1 : 0);
-			}, 0);
+			const agg = gameData.reduce(
+				(p, c) => {
+					return {
+						early: p.early + (c.data[i].early ? 1 : 0),
+						total: p.total + (c.data[i].buzz ? 1 : 0),
+					};
+				},
+				{
+					early: 0,
+					total: 0,
+				}
+			);
+			const pct =
+				agg.total === 0 ? NaN : ((100 * agg.early) / agg.total).toFixed(1);
+			return `${agg.early} ${agg.total === 0 ? '' : '(' + pct + '%)'}`;
 		},
 	},
 	{
 		title: 'First Buzz',
 		aggregate: (gameData, i) => {
-			return gameData.reduce((p, c) => {
-				return p + (c.data[i].first ? 1 : 0);
-			}, 0);
+			const agg = gameData.reduce(
+				(p, c) => {
+					return {
+						first: p.first + (c.data[i].first ? 1 : 0),
+						total: p.total + (c.data[i].buzz ? 1 : 0),
+					};
+				},
+				{
+					first: 0,
+					total: 0,
+				}
+			);
+			const pct =
+				agg.total === 0 ? NaN : ((100 * agg.first) / agg.total).toFixed(1);
+			return `${agg.first} ${agg.total === 0 ? '' : '(' + pct + '%)'}`;
 		},
 	},
 	{
