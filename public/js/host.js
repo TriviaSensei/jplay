@@ -1705,6 +1705,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (isKey && e.detail.state === 'buzz') {
 				const bz = e.detail.currentBuzz;
 				if (bz.data.length >= i + 1 && bz.data[i].buzz) {
+					e.target.classList.remove('neg');
 					e.target.innerHTML = `${bz.data[i].time}ms`;
 					return;
 				}

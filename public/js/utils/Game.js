@@ -248,6 +248,7 @@ class Game {
 						this.setGameState({
 							state: 'clueLive',
 							status: `Waiting for buzz`,
+							buzzerTime: Date.now(),
 						});
 						this.startClueTimer(clueTime, {
 							buzzerArmed: false,
@@ -343,7 +344,7 @@ class Game {
 				status: `${this.gameState.players[p].name} buzzed in`,
 			});
 			const curr = this.getCurrentClueStats();
-			if (!curr) return;
+			if (!curr || curr.data[p].buzz) return;
 			this.updateGameStats(p, {
 				buzz: true,
 				first: curr.data.every((d) => !d.first),
