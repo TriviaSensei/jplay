@@ -5,7 +5,7 @@
 	"main": "server.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start:dev": "set NODE_ENV=development&&nodemon server.js -e js,pug,html,env"
+		"start:dev": "set NODE_ENV=development&&nodemon server.js -e js,pug,html,env,css"
 	},
 	"author": "Chuck Yu",
 	"license": "ISC",

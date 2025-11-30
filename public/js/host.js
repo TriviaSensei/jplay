@@ -317,8 +317,9 @@ const saveFJResponse = (silent) => {
 		{ response: fjPlayerResponse.value },
 		withTimeout(
 			(data) => {
+				if (silent) return;
 				if (data.status !== 'OK') showMessage('error', data.message);
-				else if (!silent) showMessage('info', 'Response saved');
+				else showMessage('info', 'Response saved');
 			},
 			() => {
 				showMessage('error', 'Request timed out');

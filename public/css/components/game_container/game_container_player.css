@@ -82,6 +82,12 @@
 			}
 		}
 
+		.category-scroll {
+			.category-box {
+				font-size: min(72px, 12vw, 10vh);
+			}
+		}
+
 		.game-board {
 			width: 100%;
 			height: 100%;

@@ -150,6 +150,7 @@ const socket = async (http, server) => {
 		const resetGameTimeout = (gameId) => {
 			if (gameTimeout < 1) return;
 			const to = timeouts.find((t) => t.id === gameId);
+			if (process.env.NODE_ENV !== 'production') return;
 			if (!to)
 				timeouts.push({
 					id: gameId,
@@ -255,7 +256,7 @@ const socket = async (http, server) => {
 					return cb({ status: 'fail', message: 'Invalid input' });
 				const inp = data[0];
 				let game = getGameForSocketId(socket.id);
-				if (!game) throw new Error('You are not in a game');
+				if (!game) throw new Error('You are not in a game (1)');
 				resetGameTimeout(game.id);
 				//host input
 				if (['host', 'correct', 'incorrect', 'start', 'clue'].includes(inp)) {
@@ -297,7 +298,8 @@ const socket = async (http, server) => {
 
 		socket.on('buzz', (cb) => {
 			const g = getGameForSocketId(socket.id);
-			if (!g) return cb({ status: 'fail', message: 'You are not in a game' });
+			if (!g)
+				return cb({ status: 'fail', message: 'You are not in a game (2)' });
 
 			const ind = g.gameState.players.findIndex(
 				(p) => p.socketId === socket.id
@@ -310,7 +312,7 @@ const socket = async (http, server) => {
 		socket.on('save-fj-wager', (data, cb) => {
 			const game = getGameForSocketId(socket.id);
 			if (!game)
-				return cb({ status: 'fail', message: 'You are not in a game' });
+				return cb({ status: 'fail', message: 'You are not in a game (3)' });
 			resetGameTimeout(game.id);
 			const ind = game.gameState.players.findIndex(
 				(p) => p.socketId === socket.id
@@ -335,7 +337,7 @@ const socket = async (http, server) => {
 		socket.on('save-fj-response', (data, cb) => {
 			const game = getGameForSocketId(socket.id);
 			if (!game)
-				return cb({ status: 'fail', message: 'You are not in a game' });
+				return cb({ status: 'fail', message: 'You are not in a game (4)' });
 			resetGameTimeout(game.id);
 
 			const ind = game.gameState.players.findIndex(
@@ -374,7 +376,7 @@ const socket = async (http, server) => {
 				return toReturn;
 			});
 			if (!game)
-				return cb({ status: 'fail', message: 'You are not in a game' });
+				return cb({ status: 'fail', message: 'You are not in a game (5)' });
 
 			socket.leave(game.id);
 			return cb({ status: 'OK' });
