@@ -70,10 +70,6 @@ const setSocketId = (uid, socketId) => {
 	return g;
 };
 
-const getGameById = (id) => {
-	return activeGames.find((g) => g.id === id);
-};
-
 const getGameByPlayer = (uid) => {
 	return activeGames.find(
 		(g) =>
@@ -134,12 +130,6 @@ const socket = async (http, server) => {
 				});
 			}
 		});
-
-		const joinGame = (code) => {
-			const game = activeGames.find(
-				(g) => g.joinCode.toLowerCase() === code.toLowerCase()
-			);
-		};
 
 		const removeGame = (gameId) => {
 			io.to(gameId).emit('game-timeout', null);
@@ -399,19 +389,19 @@ const socket = async (http, server) => {
 			console.log(`a user has disconnected (${reason})`);
 		});
 
-		socket.on('log-game-state', (data, cb) => {
-			const user = getConnectedUser(socket.id);
-			if (!user) return cb({ status: 'fail', message: 'User not found' });
+		// socket.on('log-game-state', (data, cb) => {
+		// 	const user = getConnectedUser(socket.id);
+		// 	if (!user) return cb({ status: 'fail', message: 'User not found' });
 
-			const game = activeGames.find((g) => {
-				return g.gameManager.getMatchId() === user.matchId;
-			});
-			if (!game) return cb({ status: 'fail', message: 'Game not found' });
+		// 	const game = activeGames.find((g) => {
+		// 		return g.gameManager.getMatchId() === user.matchId;
+		// 	});
+		// 	if (!game) return cb({ status: 'fail', message: 'Game not found' });
 
-			const result = game.gameManager.sanitizeGameState(null);
-			cb({ status: 'OK' });
-			console.log(JSON.stringify(result));
-		});
+		// 	const result = game.gameManager.sanitizeGameState(null);
+		// 	cb({ status: 'OK' });
+		// 	console.log(JSON.stringify(result));
+		// });
 	});
 
 	io.listen(server);
