@@ -17,6 +17,7 @@ const getInitState = () => {
 							text: '',
 							image: '',
 							response: '',
+							dailyDouble: false,
 						};
 					}),
 				};
@@ -30,6 +31,7 @@ const getInitState = () => {
 							text: '',
 							image: '',
 							response: '',
+							dailyDouble: false,
 						};
 					}),
 				};
@@ -88,6 +90,10 @@ const textInputs = getElementArray(createArea, 'input[type="text"],textarea');
 
 const resultModal = new bootstrap.Modal('#create-data-modal');
 const list = document.querySelector('#data-warnings');
+
+const setDD = document.querySelector('#dd-box');
+const deleteDDs = getElementArray(document, 'button.delete-dd');
+const ddLabels = getElementArray(document, '.dd-item .dd-label');
 
 const clearButton = document.querySelector('#confirm-clear');
 const clearModal = new bootstrap.Modal('#clear-create-modal');
@@ -187,7 +193,6 @@ const getSelectedClue = () => {
 	if (isNaN(round)) return null;
 
 	const state = sh.getState();
-
 	if (round === 2)
 		return {
 			round: 2,
@@ -212,6 +217,8 @@ const getSelectedClue = () => {
 			...state.rounds[round][category].clues[clue],
 			category: state.rounds[round][category].category,
 			comments: state.rounds[round][category].comments,
+			dailyDouble:
+				state.rounds[round][category].clues[clue].dailyDouble || false,
 		},
 	};
 };
@@ -247,7 +254,7 @@ const populateCategoryNames = () => {
 	}
 };
 
-const populateSelectedClue = () => {
+const populateSelectedClue = (state) => {
 	const sc = getSelectedClue();
 	categoryName.value = sc.data.category;
 	categoryComments.value = sc.data.comments;
@@ -256,7 +263,7 @@ const populateSelectedClue = () => {
 	if (sc.data.image) showImagePreview(sc.data.image);
 	else hideImagePreview();
 	correctResponse.value = sc.data.response;
-
+	setDD.checked = sc.data.dailyDouble;
 	populateCategoryNames();
 	validateAll();
 };
@@ -318,25 +325,26 @@ const validateAll = () => {
 
 //populate clue data on selection
 sh.addWatcher(null, populateSelectedClue);
-[...roundSelect, ...valueSelect, categorySelect].forEach((el) =>
-	el.addEventListener('change', populateSelectedClue)
-);
-[...roundSelect].forEach((rs) =>
-	rs.addEventListener('change', (e) => {
-		const rd = Number(e.target.value);
-		if (rd === 2) return;
-		[...valueLabels].forEach(
-			(vs, i) => (vs.innerHTML = `$${(rd + 1) * (i + 1) * 200}`)
-		);
-	})
-);
-
 roundSelect.forEach((rs) =>
 	rs.addEventListener('change', () => {
 		populateCategoryNames();
 		categorySelect.selectedIndex = 0;
 	})
 );
+[...roundSelect, ...valueSelect, categorySelect].forEach((el) =>
+	el.addEventListener('change', populateSelectedClue)
+);
+[...roundSelect].forEach((rs) => {
+	rs.addEventListener('change', (e) => {
+		const rd = Number(e.target.value);
+		if (rd === 2) return;
+		[...valueLabels].forEach(
+			(vs, i) => (vs.innerHTML = `$${(rd + 1) * (i + 1) * 200}`)
+		);
+		sh.refreshState();
+	});
+});
+
 sh.addWatcher(null, populateCategoryNames);
 sh.addWatcher(null, validateAll);
 //change data when text inputs change
@@ -369,6 +377,7 @@ const handleDataChange = (e) => {
 			prev.rounds[sc.round][sc.category].clues[sc.clue].response =
 				correctResponse.value.trim();
 		}
+		localStorage.setItem('jp-creator-state', JSON.stringify(prev));
 		showHeaderMessage('info', 'Data saved');
 		return prev;
 	});
@@ -551,6 +560,7 @@ const validateData = (data) => {
 							newClues[k].text = clue.text || '';
 							newClues[k].image = clue.image || '';
 							newClues[k].response = clue.response || '';
+							newClues[k].dailyDouble = clue.dailyDouble || false;
 						}
 					});
 				}
@@ -697,3 +707,119 @@ const moveCategory = (e) => {
 	sh.setState(state);
 };
 moveCategoryButtons.forEach((b) => b.addEventListener('click', moveCategory));
+
+const updateDailyDoubles = (e) => {
+	const state = sh.getState();
+	const currentClue = getSelectedClue();
+
+	if (e.target === setDD) {
+		//make sure the round is valid
+		if (![0, 1].includes(currentClue.round)) {
+			setDD.checked = false;
+			return showMessage('error', 'Invalid round for daily double');
+		}
+		//if the box isn't checked, remove the DD at the indicated location
+		if (!e.target.checked) {
+			state.rounds[currentClue.round][currentClue.category].clues[
+				currentClue.clue
+			].dailyDouble = false;
+			sh.setState(state);
+		}
+		//if it is checked...
+		else {
+			//make sure we don't already have enough DD's this round
+			const ddCount = state.rounds[currentClue.round].reduce((p, c) => {
+				return (
+					p +
+					c.clues.reduce((p2, c2) => {
+						return p2 + (c2.dailyDouble ? 1 : 0);
+					}, 0)
+				);
+			}, 0);
+			if (ddCount > currentClue.round) {
+				e.target.checked = false;
+				return showMessage(
+					'error',
+					`You have already assigned ${ddCount} daily double${
+						ddCount === 1 ? '' : 's'
+					} this round.`
+				);
+			}
+			//make sure there is no other DD in this category
+			const ddInCategory = state.rounds[currentClue.round][
+				currentClue.category
+			].clues.some((c) => c.dailyDouble);
+			if (ddInCategory) {
+				e.target.checked = false;
+				return showMessage(
+					'error',
+					'You have already assigned a daily double in this category'
+				);
+			}
+			state.rounds[currentClue.round][currentClue.category].clues[
+				currentClue.clue
+			].dailyDouble = true;
+			sh.setState(state);
+		}
+	}
+	//only other thing to trigger this function is the delete buttons
+	else {
+		const category = Number(e.target.getAttribute('data-category'));
+		const clue = Number(e.target.getAttribute('data-clue'));
+		const categoryValid = !isNaN(category) && category >= 0 && category <= 5;
+		const clueValid = !isNaN(clue) && clue >= 0 && clue <= 4;
+		if (!categoryValid || !clueValid) {
+			const label = e.target.closest('.dd-item')?.querySelector('.dd-label');
+			if (label) label.innerHTML = '';
+			return showMessage(
+				'error',
+				'Invalid clue for daily double - refresh the page and try again'
+			);
+		}
+		state.rounds[currentClue.round][category].clues[clue].dailyDouble = false;
+		sh.setState(state);
+	}
+	localStorage.setItem('jp-creator-state', JSON.stringify(sh.getState()));
+};
+
+setDD.addEventListener('change', updateDailyDoubles);
+deleteDDs.forEach((d) => d.addEventListener('click', updateDailyDoubles));
+
+//display the daily double locations
+sh.addWatcher(null, (state) => {
+	const currentClue = getSelectedClue();
+	const currentRound = currentClue.round;
+	if (currentRound !== 0 && currentRound !== 1) {
+		ddLabels.forEach((d) => (d.innerHTML = ''));
+		return;
+	}
+	let ddCount = 0;
+	state.rounds[currentRound].some((cat, i) => {
+		const ddIndex = cat.clues.findIndex((clue) => clue.dailyDouble);
+		if (ddIndex >= 0) {
+			ddLabels[ddCount].innerHTML = `${
+				cat.category === '' ? 'Category ' + (i + 1) : cat.category
+			} for $${(ddIndex + 1) * 200 * (currentRound + 1)}`;
+			deleteDDs[ddCount].setAttribute('data-category', i);
+			deleteDDs[ddCount].setAttribute('data-clue', ddIndex);
+			ddCount++;
+		}
+		if (ddCount >= currentRound + 1) return true;
+	});
+
+	if (ddCount < currentRound + 1) {
+		for (var i = ddCount; i <= currentRound; i++) {
+			deleteDDs[i].setAttribute('data-category', -1);
+			deleteDDs[i].setAttribute('data-clue', -1);
+			ddLabels[i].innerHTML = '';
+		}
+	}
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+	const savedStateStr = localStorage.getItem('jp-creator-state');
+	if (savedStateStr) {
+		const savedState = JSON.parse(savedStateStr);
+		if (savedState) sh.setState(savedState);
+	}
+});

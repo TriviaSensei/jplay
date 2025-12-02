@@ -105,7 +105,43 @@
 		border: none;
 		outline: none;
 		resize: none;
-		font-size: 1.5em;
+		font-size: 1.2em;
+	}
+
+	.game-data:has(input[type='radio'][name='selected-round'][value='0']:checked)
+		.dd-2 {
+		display: none;
+	}
+
+	.dd-item {
+		display: flex;
+		flex-direction: row;
+		width: 75%;
+		.dd-label {
+			flex: 1;
+		}
+		button {
+			margin-left: 0.5em;
+		}
+		button.delete-dd::after {
+			content: '❌';
+		}
+	}
+
+	.dd-item:has(.dd-label:empty) {
+		button.delete-dd {
+			display: none;
+		}
+		.dd-label::after {
+			content: '(Random)';
+		}
+	}
+
+	.dd-1 .dd-label::before {
+		content: '1. ';
+	}
+	.dd-2 .dd-label::before {
+		content: '2. ';
 	}
 
 	.move-button {

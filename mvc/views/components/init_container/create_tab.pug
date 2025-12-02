@@ -54,11 +54,11 @@ link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
                 label(for=`selected-clue-${val}`)
                     .label-inner= `$${(val+1)*200}`
     .input-row-v
-        .input-label Clue Text (max 150 chars)
+        .input-label Clue Text (max 175 chars)
         .input-container
             .ratio.ratio-4x3 
                 div.p-4.clue-text-container
-                    textarea#edit-clue-text.w-100.h-100(placeholder="Clue text" maxlength="150")
+                    textarea#edit-clue-text.w-100.h-100(placeholder="Clue text" maxlength="175")
     .input-row-v.no-fj
         .input-label Picture URL (optional; for picture clues only)
         .input-container
@@ -72,6 +72,21 @@ link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
         .input-label Correct Response
         .input-container 
             input#correct-response.w-100(type="text" placeholder="Correct response")
+    .input-row-v.no-fj 
+        .input-label Daily Double
+        .input-container 
+            input#dd-box(type="checkbox" name="dd" value="yes")
+            label.d-flex(for="dd-box") 
+                .m-auto.ms-1 Set clue as Daily Double
+        .input-container
+            .d-flex.flex-column.w-100
+                .fw-bold.mb-1 Current daily double(s):
+                .dd-1.dd-item.mb-1
+                    .dd-label.m-auto.ms-1
+                    button.btn.btn-sm.btn-outline-danger.delete-dd(data-category="-1" data-clue="-1")
+                .dd-2.dd-item
+                    .dd-label.m-auto.ms-1
+                    button.btn.btn-sm.btn-outline-danger.delete-dd(data-category="-1" data-clue="-1")
     .input-row-v.no-fj
         .input-label Move Clue
         .input-container 

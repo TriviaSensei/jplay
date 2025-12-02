@@ -294,7 +294,7 @@
 		}
 
 		.category-div {
-			font-size: min(10.7vh, 12vw);
+			font-size: min(72px, 10.08vh, 12vw);
 		}
 	}
 

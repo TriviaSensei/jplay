@@ -193,6 +193,11 @@ input[type='radio']:disabled + label {
 		input {
 			width: 100%;
 		}
+		input[type='checkbox'] {
+			width: 1.5em;
+			height: 1.5em;
+			margin-right: 1em;
+		}
 		input.caps {
 			text-transform: uppercase;
 		}

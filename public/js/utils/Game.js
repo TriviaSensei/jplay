@@ -1018,19 +1018,51 @@ class Game {
 		this.stateHandler = stateHandler;
 		this.isRemote = io ? true : false;
 		this.clueTimeout = null;
-		//randomly place the DDs by distribution
-		const dd1c = Math.floor(Math.random() * board[0].length);
-		const dd1r = generateRandom(ddDistribution[0]);
 
-		const dd2c = [];
-		for (var i = 0; i < board[1].length; i++) {
-			if (Math.random() <= (2 - dd2c.length) / (board[1].length - i)) {
-				dd2c.push(i);
-			}
-			if (dd2c.length === 2) break;
+		//see if any clues are forced to be DDs
+		let dd1c, dd1r;
+		dd1c = board[0].findIndex((cat) => {
+			dd1r = cat.clues.findIndex((clue) => clue.dailyDouble);
+			return dd1r >= 0;
+		});
+		//and if not, randomize them by distribution
+		if (dd1c < 0) {
+			dd1c = Math.floor(Math.random() * board[0].length);
+			dd1r = generateRandom(ddDistribution[0]);
 		}
 
-		const dd2r = dd2c.map((el) => generateRandom(ddDistribution[1]));
+		//find the columns where daily doubles are located
+		const dd2c = [];
+		const dd2r = [];
+		board[1].some((cat, i) => {
+			const clue = cat.clues.findIndex((c) => c.dailyDouble);
+			if (clue >= 0) {
+				dd2c.push(i);
+				dd2r.push(clue);
+			}
+			if (dd2c.length === 2) return true;
+		});
+
+		//if there aren't two...
+		if (dd2c.length < 2) {
+			//iterate through the categories
+			for (var i = 0; i < board[1].length; i++) {
+				//if the category already has a DD, move on
+				if (dd2c.some((cat) => cat === i)) continue;
+				//otherwise, decide whether it should get a DD
+				//number of candidate categories remaining, from here to the right
+				const categoriesLeft =
+					board[1].length - i - (dd2c.length === 1 && dd2c[0] > i ? 1 : 0);
+				//number of DDs left to set divided by categories left should be the probability that a DD gets into this column
+				if (Math.random() <= (2 - dd2c.length) / categoriesLeft) {
+					//if it does, randomly decide the row where the DD should go, using the distribution
+					dd2c.push(i);
+					dd2r.push(generateRandom(ddDistribution[1]));
+				}
+				if (dd2c.length === 2) break;
+			}
+		}
+
 		this.pregameStatus = `Pregame - ${
 			this.isRemote
 				? 'share join code or have players join locally'
