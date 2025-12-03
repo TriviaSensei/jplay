@@ -496,7 +496,12 @@ const handleKeyPress = async (e) => {
 		return openKey();
 
 	//player input (remote game only)
-	if (state.isRemote && isPlayer() && e.key === ' ') {
+	console.log(e.key);
+	if (
+		state.isRemote &&
+		isPlayer() &&
+		['enter', 'return', ' '].includes(e.key.toLowerCase())
+	) {
 		return socket.emit(
 			'buzz',
 			withTimeout(

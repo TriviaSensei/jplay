@@ -344,6 +344,7 @@ class Game {
 				status: `${this.gameState.players[p].name} buzzed in`,
 			});
 			const curr = this.getCurrentClueStats();
+			if (!curr) return;
 			const alreadyBuzzed = curr.data[p].buzz && curr.data[p].time !== null;
 			if (!curr || alreadyBuzzed) return;
 			this.updateGameStats(p, {
