@@ -120,7 +120,7 @@
 			text-shadow: 2px 2px #000;
 
 			.category-div {
-				font-family: 'Swiss 911 Compressed', sans-serif;
+				font-family: 'Swiss 911', sans-serif;
 				margin: auto;
 				text-align: center;
 				text-transform: uppercase;
@@ -193,13 +193,13 @@
 	.category-display {
 		grid-row: 1;
 		grid-column: 2/6;
-		font-family: 'Swiss 911 Compressed', sans-serif;
+		font-family: 'Swiss 911', sans-serif;
 		border: 1px solid white;
 	}
 	.value-display {
 		grid-row: 2;
 		grid-column: 2/6;
-		font-family: 'Swiss 911 Compressed', sans-serif;
+		font-family: 'Swiss 911', sans-serif;
 		border: 1px solid white;
 
 		.value-text {
@@ -276,7 +276,7 @@
 	overflow: hidden;
 	display: flex;
 	flex-direction: row;
-	font-family: 'Swiss 911 Compressed', sans-serif;
+	font-family: 'Swiss 911', sans-serif;
 	text-shadow: 2px 2px #000;
 
 	.category-box {
@@ -520,7 +520,7 @@
 	width: 100%;
 	height: 100%;
 	align-content: center;
-	font-family: 'Swiss 911 Compressed', sans-serif;
+	font-family: 'Swiss 911', sans-serif;
 	text-shadow: 2px 2px #000;
 
 	.category-box {

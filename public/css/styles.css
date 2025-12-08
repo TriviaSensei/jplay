@@ -20,6 +20,11 @@
 @font-face {
 	font-family: 'Swiss 911 Compressed';
 	font-weight: 400;
+	src: url(./swiss_c.woff2) format('woff2'), url(./swiss_c.woff) format('woff');
+}
+@font-face {
+	font-family: 'Swiss 911';
+	font-weight: 400;
 	src: url(./swiss.woff2) format('woff2'), url(./swiss.woff) format('woff');
 }
 
@@ -66,7 +71,7 @@ body.dark {
 }
 
 .category-display {
-	font-family: 'Swiss 911 Compressed', sans-serif;
+	font-family: 'Swiss 911', sans-serif;
 	text-shadow: 2px 2px #000;
 }
 

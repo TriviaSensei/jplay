@@ -74,7 +74,7 @@
 			display: flex;
 			border: 2px solid var(--white);
 			background-color: var(--blue);
-			font-family: 'Swiss 911 Compressed', sans-serif;
+			font-family: 'Swiss 911', sans-serif;
 			.category-text {
 				margin: auto;
 				text-align: center;
@@ -118,7 +118,7 @@
 				font-size: min(15px, 2.5vw) !important;
 
 				.category-div {
-					font-family: 'Swiss 911 Compressed', sans-serif;
+					font-family: 'Swiss 911', sans-serif;
 					margin: auto;
 					text-align: center;
 					text-transform: uppercase;
