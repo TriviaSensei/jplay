@@ -33,7 +33,9 @@ body {
 		.clue-box.dd {
 			background-color: var(--yellow);
 			color: var(--blue);
-			text-shadow: none;
+			.clue-value {
+				text-shadow: none !important;
+			}
 		}
 	}
 }

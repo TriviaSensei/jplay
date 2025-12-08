@@ -301,6 +301,9 @@ class Game {
 					this.gameState.control
 				].getName()} to select a clue`,
 				wager: -1,
+				playSound: false,
+				modal: '',
+				modalDescription: '',
 			});
 		}
 		//round is over
@@ -309,6 +312,9 @@ class Game {
 				state: 'betweenRounds',
 				round: this.gameState.round + 1,
 				wager: -1,
+				playSound: false,
+				modal: '',
+				modalDescription: '',
 			});
 		}
 	}
@@ -1202,6 +1208,7 @@ class Game {
 		const toSend = {
 			...toSendPre,
 			message: this.gameState.message,
+			playSound: this.gameState.playSound,
 		};
 		if (this.stateHandler) this.stateHandler.setState(this.gameState);
 		if (this.io?.to) {

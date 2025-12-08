@@ -383,7 +383,6 @@ const sendGameState = (data) => {
 };
 //receive the game state from the main window
 const receiveGameState = (e) => {
-	console.log(e.detail);
 	sh.setState((prev) => {
 		return {
 			...prev,
@@ -496,7 +495,6 @@ const handleKeyPress = async (e) => {
 		return openKey();
 
 	//player input (remote game only)
-	console.log(e.key);
 	if (
 		state.isRemote &&
 		isPlayer() &&
@@ -1533,7 +1531,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	sh.addWatcher(null, (state) => {
 		if (state.state !== 'pregame') {
-			if (isKey)
+			if (isKey && state.isRemote)
 				document.title = `Control Panel - Game ${state.joinCode.toUpperCase()}`;
 		}
 	});
@@ -1771,7 +1769,11 @@ document.addEventListener('DOMContentLoaded', () => {
 		);
 
 	//send game state to key window on state update
-	// if (!isKey) sh.addWatcher(null, sendGameState);
+	if (!isKey)
+		sh.addWatcher(null, (state) => {
+			if (state.isRemote) return;
+			sendGameState(state);
+		});
 	if (isKey)
 		sh.addWatcher(null, (state) => {
 			if (!state) return;

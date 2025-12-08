@@ -55,7 +55,6 @@ class StateHandler {
 				return o.node === obj;
 			})
 		) {
-			console.log(obj);
 			throw new Error(`Object is already added to this state handler.`);
 		} else if (obj && (!obj.nodeType || obj.nodeType !== Node.ELEMENT_NODE))
 			throw new Error(`Object ${obj.toString()} is not a valid node`);
