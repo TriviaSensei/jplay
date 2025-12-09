@@ -141,6 +141,8 @@ const ddDiv = document.querySelector('.dd-div');
 const sideLights = getElementArray(liveClue, '.side-light');
 const liveClueText = liveClue.querySelector('.clue-text');
 const liveClueImage = liveClue.querySelector('#clue-image');
+const liveClueValue = liveClue.querySelector('.clue-value');
+
 const liveClueCategory = liveClue.querySelector('.category-text');
 const liveValue = liveClue.querySelector('.value-text');
 const liveResponse = isKey ? liveClue.querySelector('.response-text') : null;
@@ -1343,10 +1345,36 @@ document.addEventListener('DOMContentLoaded', () => {
 		} else if (state.selectedClue[0] !== -1 && state.selectedClue[1] !== -1) {
 			const [cat, row] = state.selectedClue;
 			if (cat === -1 || row === -1) return;
+			//show the live clue view
 			showView(liveClue);
 			const liveCategory = getCategory(cat);
 			liveClueData = liveCategory.clues[row];
 
+			//if the DD wager is set, show it (otherwise, the value of the clue)
+			liveValue.innerHTML =
+				state.state === 'showDD' ||
+				state.state === 'DDLive' ||
+				state.state === 'DDTimedOut'
+					? `DD: $${state.wager}`
+					: `$${liveClueData.value}`;
+			//display the category
+			liveClueCategory.innerHTML = liveCategory.category;
+
+			//display the response if we're in the key
+			if (isKey && liveResponse) liveResponse.innerHTML = liveClueData.response;
+
+			//if we're in the first 500 ms, flash the clue value and we're done
+			if (state.state === 'showClueValue') {
+				liveClueText.classList.add('d-none');
+				liveClueImage.classList.add('d-none');
+				liveClueValue.innerHTML = `$${liveClueData.value}`;
+				liveClueValue.classList.remove('d-none');
+				return;
+			}
+			//otherwise, disappear the large live clue value
+			liveClueValue.classList.add('d-none');
+
+			//if there's an image and it's not the key, show the image
 			if (liveClueData.image && !isKey) {
 				liveClueText.classList.add('d-none');
 				liveClueImage.classList.remove('d-none');
@@ -1354,17 +1382,15 @@ document.addEventListener('DOMContentLoaded', () => {
 					'style',
 					`background-image:url("${liveClueData.image}")`
 				);
-			} else {
+			}
+			//show the clue text in the key, or if there's no image
+			else {
 				liveClueText.classList.remove('d-none');
 				liveClueImage.classList.add('d-none');
 				liveClueText.innerHTML = liveClueData.text;
 			}
-			liveValue.innerHTML =
-				state.state === 'showDD' || state.state === 'DDLive'
-					? `DD: $${state.wager}`
-					: `$${liveClueData.value}`;
-			liveClueCategory.innerHTML = liveCategory.category;
-			if (isKey && liveResponse) liveResponse.innerHTML = liveClueData.response;
+
+			//in the key, display the correct response
 			if (isKey) ddWagerModal.hide();
 		} else if (state.state === 'boardIntro' && state.categoryShown >= -1) {
 			showView(categoryScroll);

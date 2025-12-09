@@ -214,6 +214,23 @@
 
 		font-family: 'Korinna Regular BT', serif;
 
+		.clue-value {
+			font-family: 'Swiss 911 Compressed', sans-serif;
+			color: var(--yellow);
+		}
+		@media (max-aspect-ratio: 0.89) {
+			.clue-value {
+				font-size: 22.4vw;
+				text-shadow: 2vw 2vw #000;
+			}
+		}
+		@media (aspect-ratio > 0.89) {
+			.clue-value {
+				font-size: 20vh;
+				text-shadow: 2vh 2vh #000;
+			}
+		}
+
 		#clue-image {
 			background-size: contain;
 			background-repeat: no-repeat;

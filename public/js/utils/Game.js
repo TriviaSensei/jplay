@@ -30,6 +30,7 @@ const lockTimeout = 250;
 const clueTime = 3500;
 const ddTime = 10000;
 const FJTime = 31000;
+const showClueDelay = 500;
 
 let cluesPerRound;
 
@@ -551,16 +552,26 @@ class Game {
 					});
 				} else {
 					this.setGameState({
-						state: 'showClue',
-						status: `Reading clue. Press advance to arm buzzers`,
+						state: 'showClueValue',
+						status: '',
 						selectedClue: [cat, row],
 					});
-					this.gameData.push({
-						...newData,
-						isDD: false,
-					});
+					setTimeout(() => {
+						this.setGameState({
+							state: 'showClue',
+							status: `Reading clue. Press advance to arm buzzers`,
+							selectedClue: [cat, row],
+						});
+						this.gameData.push({
+							...newData,
+							isDD: false,
+						});
+					}, showClueDelay);
 				}
 			},
+		},
+		showClueValue: {
+			data: {},
 		},
 		//showClue: clue is showing, but buzzer is not active
 		showClue: {
