@@ -570,6 +570,8 @@ class Game {
 				}
 			},
 		},
+		//showClueValue: temporary state after selecting a clue where the clue value is flashed on the screen
+		//no input accepted, will automatically advance after a predetermined period
 		showClueValue: {
 			data: {},
 		},

@@ -48,10 +48,14 @@ html
                     h6.fw-semibold Metadata 
                     p The metadata is also optional, but is helpful to describe the contents. You may add any number of pairs of key names and values to this object, and they will be displayed on screen when you open the file in the "host" tab. Each key name must be alphanumeric, and may also include dashes (-), underscores (_), and spaces. Below is an example of what you might put in metadata: 
                     code {
-                    code "Author": "Chuck Yu",
-                    code "Completed date": "2025-09-17",
-                    code "Theme": "None",
-                    code "Difficulty": "7",
+                    code
+                        code "Author": "Chuck Yu",
+                    code
+                        code "Completed date": "2025-09-17",
+                    code 
+                        code "Theme": "None",
+                    code 
+                        code "Difficulty": "7",
                     code }
                     p When the file is first opened, before the host clicks the "create game" button, the metadata will be displayed beneath the file chooser.
                     +imageSrc("File metadata","metadata.png")
@@ -59,7 +63,7 @@ html
                     p Game notes are a free-form field for reference by the creator. They will not be shown on screen at any point during the game, so they can be used to store notes for the host, list the categories used, ideas for clues, and so on.
                     h6.fw-semibold Rounds
                     p The "rounds" array has 3 elements, representing the three rounds of a game (Jeopardy, Double Jeopardy, and Final Jeopardy). 
-                    p For the Jeopardy and Double Jeopardy rounds, you must fill in each category, and for each of the 5 clues in each category, the text and correct response for each clue. If the category has any comments (e.g. a clarification of the category for the host to read to the contestants, like "each correct response starts with a C"), you may fill that in as well. Clue values will be automatically populated, and daily double locations will be randomly determined when the game file is loaded.
+                    p For the Jeopardy and Double Jeopardy rounds, you must fill in each category, and for each of the 5 clues in each category, the text and correct response for each clue. If the category has any comments (e.g. a clarification of the category for the host to read to the contestants, like "each correct response starts with a C"), you may fill that in as well. Each clue may be set as a daily double.  Clue values will be automatically populated. If not enough clues are set as Daily Doubles, the remaining ones will be randomly determined when the game file is loaded. If too many are set, then the ones to the left will be prioritized.
                     +image("Manually creating a game")
                     p Final Jeopardy is a single object with a category, text, and response attribute. All three must be filled in.
                     p Additionally, clue texts and responses can support basic HTML formatting (&lt;i&gt; for italic text, &lt;br&gt; for a new line). If you need a quotation mark, you can escape it with a backslash (\"):
