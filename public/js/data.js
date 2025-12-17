@@ -77,9 +77,10 @@ const stats = [
 		aggregate: (gameData, i) => {
 			const agg = gameData.reduce(
 				(p, c) => {
+					const race = c.data[i].buzz && c.data[i].time <= 750;
 					return {
-						total: c.data[i].buzz ? p.total + c.data[i].time : p.total,
-						count: c.data[i].buzz ? p.count + 1 : p.count,
+						total: race ? p.total + c.data[i].time : p.total,
+						count: race ? p.count + 1 : p.count,
 					};
 				},
 				{

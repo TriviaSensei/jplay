@@ -134,14 +134,17 @@ const categoryLarge = document.querySelector('.category-large');
 
 const liveClue = gameContainer.querySelector('.live-clue-display');
 const clueBoxes = getElementArray(gameContainer, '.clue-box');
-const clueValues = getElementArray(gameContainer, '.clue-value');
+const clueValues = getElementArray(
+	gameContainer,
+	'.clue-value:not(.clue-value-flash)'
+);
 
 const ddDiv = document.querySelector('.dd-div');
 
 const sideLights = getElementArray(liveClue, '.side-light');
 const liveClueText = liveClue.querySelector('.clue-text');
 const liveClueImage = liveClue.querySelector('#clue-image');
-const liveClueValue = liveClue.querySelector('.clue-value');
+const liveClueValue = liveClue.querySelector('.clue-value-flash');
 
 const liveClueCategory = liveClue.querySelector('.category-text');
 const liveValue = liveClue.querySelector('.value-text');
@@ -1367,6 +1370,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (state.state === 'showClueValue') {
 				liveClueText.classList.add('d-none');
 				liveClueImage.classList.add('d-none');
+				console.log(cat, row, liveClueData.value);
 				liveClueValue.innerHTML = `$${liveClueData.value}`;
 				liveClueValue.classList.remove('d-none');
 				return;
@@ -1618,7 +1622,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			const state = e.detail;
 			if (!state) return;
 			const clue = getClue(cat, row);
-
 			if (
 				!clue ||
 				state.round >= state.board.length - 1 ||

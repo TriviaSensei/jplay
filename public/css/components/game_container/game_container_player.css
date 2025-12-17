@@ -157,9 +157,11 @@
 	/* wider aspect ratio*/
 	@media (min-aspect-ratio: 0.89) {
 		.category-display,
-		.clue-display,
 		.value-display {
 			font-size: min(24px, 4vw) !important;
+		}
+		.clue-display {
+			font-size: min(21px, 3.5vw) !important;
 		}
 		.category-large {
 			font-size: min(80px, 13.3vw) !important;
@@ -171,9 +173,11 @@
 
 	@media (max-aspect-ratio: 0.89) {
 		.category-display,
-		.clue-display,
 		.value-display {
 			font-size: min(24px, 3vw) !important;
+		}
+		.clue-display {
+			font-size: min(21px, 3.625vw) !important;
 		}
 		.category-large {
 			font-size: min(80px, 10.8vw) !important;

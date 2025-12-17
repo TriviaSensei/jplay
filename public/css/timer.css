@@ -14,7 +14,7 @@ body {
 		text-shadow: 2px 2px #000;
 		.timer-label {
 			font-size: min(50px, 6.25vw);
-			font-family: 'Swiss 911 Compressed';
+			font-family: 'Swiss 911';
 			margin: auto;
 		}
 		.timer {

@@ -220,13 +220,13 @@
 		}
 		@media (max-aspect-ratio: 0.89) {
 			.clue-value {
-				font-size: 22.4vw;
+				font-size: 20vw;
 				text-shadow: 2vw 2vw #000;
 			}
 		}
 		@media (aspect-ratio > 0.89) {
 			.clue-value {
-				font-size: 20vh;
+				font-size: 16vh;
 				text-shadow: 2vh 2vh #000;
 			}
 		}
