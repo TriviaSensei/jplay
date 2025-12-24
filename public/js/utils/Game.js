@@ -460,6 +460,12 @@ class Game {
 					status: this.pregameStatus,
 				});
 			},
+			shuffle: () => {
+				this.shufflePlayers();
+			},
+			movePlayer: (player, direction) => {
+				this.movePlayer(player, direction);
+			},
 		},
 		//boardIntro: fill board, show categories
 		boardIntro: {
@@ -1296,17 +1302,33 @@ class Game {
 	}
 
 	shufflePlayers() {
-		if (this.gameState.active) return;
+		if (this.gameState.state !== 'pregame') return;
 		const temp = this.gameState.players.map((p) => {
 			return {
 				player: p,
-				order: Math.random(),
+				order: p.name ? Math.random() : 2,
 			};
 		});
 		temp.sort((a, b) => a.order - b.order);
 		this.gameState.players = temp.map((p) => {
 			return p.player;
 		});
+		this.updateGameState(null, { players: this.gameState.players });
+	}
+
+	movePlayer(player, direction) {
+		const p1 = this.gameState.players[player];
+		const player2 =
+			direction === 'up' ? player - 1 : direction === 'down' ? player + 1 : NaN;
+		if (isNaN(player2)) return;
+		const p2 = this.gameState.players[player2];
+		if (!p1.name || !p2.name) return;
+
+		[this.gameState.players[player], this.gameState.players[player2]] = [
+			this.gameState.players[player2],
+			this.gameState.players[player],
+		];
+
 		this.updateGameState(null, { players: this.gameState.players });
 	}
 

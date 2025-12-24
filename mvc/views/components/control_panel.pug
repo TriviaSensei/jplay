@@ -1,7 +1,18 @@
-.button-panel.mb-2
+.button-panel.mb-5
     button#advance-btn.btn.btn-primary(data-input="host") Advance 
     button#correct-btn.btn.btn-success(data-input="correct") Correct 
     button#incorrect-btn.btn.btn-danger(data-input="incorrect") Incorrect
+#move-player-panel.button-panel.mb-2 
+    button#shuffle-button.btn.btn-info.mb-2(data-input="shuffle") Randomize Order 
+    ol#player-order 
+        - var p = 0
+        - while (p<3)
+            li.player-order-item(data-player=`${p}`)
+                .player-order-inner
+                    span.player-order-name (Empty)
+                    button.move-player(data-direction="up" disabled) &#x25B2;
+                    button.move-player(data-direction="down" disabled) &#x25BC;
+            - p++
 .status-panel.w-100.mb-2 
 .modal-open.button-panel.mb-2.d-none
     button#open-modal.btn.btn-light(data-bs-toggle="modal")

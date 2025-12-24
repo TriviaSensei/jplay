@@ -18,3 +18,17 @@
 .status-panel {
 	color: white;
 }
+
+.player-order-item {
+	width: 100%;
+	color: white;
+	.player-order-inner {
+		width: 100%;
+		display: flex;
+		flex-direction: row;
+		color: white;
+		span {
+			flex: 1;
+		}
+	}
+}

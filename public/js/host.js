@@ -217,7 +217,11 @@ let fjw,
 	openModal,
 	advanceButton,
 	correctButton,
-	incorrectButton;
+	incorrectButton,
+	randomizeButton,
+	movePlayerPanel,
+	movePlayerLabels,
+	movePlayerButtons;
 
 if (isKey) {
 	fjw = document.querySelector('#fj-wager-modal');
@@ -242,6 +246,10 @@ if (isKey) {
 	advanceButton = document.querySelector('#advance-btn');
 	correctButton = document.querySelector('#correct-btn');
 	incorrectButton = document.querySelector('#incorrect-btn');
+	randomizeButton = document.querySelector('#shuffle-button');
+	movePlayerPanel = document.querySelector('#move-player-panel');
+	movePlayerLabels = getElementArray(document, 'span.player-order-name');
+	movePlayerButtons = getElementArray(document, '.move-player');
 }
 
 const socketCB = (fn) =>
@@ -2116,6 +2124,90 @@ document.addEventListener('DOMContentLoaded', () => {
 		[advanceButton, correctButton, incorrectButton].forEach((b) =>
 			b.addEventListener('click', sendInputFromKey)
 		);
+
+		randomizeButton.addEventListener('click', () => {
+			const state = sh.getState();
+			if (!state) return;
+
+			if (!state.isRemote) sendGameInput('shuffle');
+			else {
+				emitEvent({
+					eventName: 'shuffle-players',
+				});
+			}
+		});
+
+		const handleMovePlayer = (e) => {
+			const playerItem = e.target.closest('.player-order-item');
+			if (!playerItem) return;
+			const player = Number(playerItem.getAttribute('data-player'));
+			if (isNaN(player)) return;
+			const direction = e.target.getAttribute('data-direction');
+			if (!direction) return;
+			const state = sh.getState();
+			if (!state) return;
+			if (!state.isRemote) {
+				sendGameInput('movePlayer', player, direction);
+			} else {
+				emitEvent({
+					eventName: 'move-player',
+					data: {
+						player,
+						direction,
+					},
+				});
+			}
+		};
+		movePlayerButtons.forEach((b) => {
+			b.addEventListener('click', handleMovePlayer);
+		});
+		sh.addWatcher(movePlayerPanel, (e) => {
+			if (e.detail.state !== 'pregame') e.target.classList.add('d-none');
+			else e.target.classList.remove('d-none');
+		});
+		sh.addWatcher(randomizeButton, (e) => {
+			e.target.disabled =
+				e.detail.state !== 'pregame' ||
+				e.detail.players.every((p) => p.name === '');
+		});
+		sh.addWatcher(null, (state) => {
+			movePlayerButtons.forEach((b) => {
+				const player = Number(
+					b.closest('.player-order-item')?.getAttribute('data-player')
+				);
+				if (isNaN(player)) {
+					b.disabled = true;
+					return;
+				}
+				const direction = b.getAttribute('data-direction');
+				if (direction === 'up')
+					b.disabled =
+						player === 0 ||
+						state.players[player].name === '' ||
+						state.players[player - 1].name === '';
+				else if (direction === 'down')
+					b.disabled =
+						player === state.players.length - 1 ||
+						state.players[player].name === '' ||
+						state.players[player + 1].name === '';
+				else b.disabled = true;
+			});
+		});
+		sh.addWatcher(null, (state) => {
+			movePlayerLabels.forEach((l) => {
+				const player = Number(
+					l.closest('.player-order-item')?.getAttribute('data-player')
+				);
+				if (isNaN(player)) {
+					l.innerHTML = '(Empty)';
+					return;
+				} else {
+					const name = state.players[player].name;
+					l.innerHTML = `${name.trim() !== '' ? name.trim() : '(Empty)'}`;
+				}
+			});
+		});
+
 		const handleGameCancel = () => {
 			const evt = new CustomEvent('cancel-game', { detail: null });
 			if (window.opener) window.opener.document.dispatchEvent(evt);

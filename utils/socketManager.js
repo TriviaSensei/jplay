@@ -175,6 +175,32 @@ const socket = async (http, server) => {
 			cb({ status: 'OK', gameState: g.getGameState() });
 		});
 
+		socket.on('shuffle-players', (data, cb) => {
+			const game = getGameForSocketId(socket.id);
+			if (!game)
+				return cb({ status: 'fail', message: 'You are not part of a game' });
+			else if (game.gameState.host.socketId !== socket.id)
+				return cb({
+					status: 'fail',
+					message: 'Only the host may rearrange players',
+				});
+
+			game.shufflePlayers();
+		});
+
+		socket.on('move-player', (data, cb) => {
+			const game = getGameForSocketId(socket.id);
+			if (!game)
+				return cb({ status: 'fail', message: 'You are not part of a game' });
+			else if (game.gameState.host.socketId !== socket.id)
+				return cb({
+					status: 'fail',
+					message: 'Only the host may rearrange players',
+				});
+
+			game.movePlayer(data.player, data.direction);
+		});
+
 		socket.on('cancel-game', (data, cb) => {
 			const game = getGameForSocketId(socket.id);
 			if (!game)
