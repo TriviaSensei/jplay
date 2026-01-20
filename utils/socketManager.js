@@ -50,7 +50,7 @@ const getGameForUser = (id) => {
 	return activeGames.find(
 		(g) =>
 			(g.gameState.host?.uid && g.gameState.host.uid === id) ||
-			g.gameState.players.some((p) => p.uid === id)
+			g.gameState.players.some((p) => p.uid === id),
 	);
 };
 
@@ -74,7 +74,7 @@ const getGameByPlayer = (uid) => {
 	return activeGames.find(
 		(g) =>
 			g.gameState.host.uid === uid ||
-			g.gameState.players.some((p) => p.uid === uid)
+			g.gameState.players.some((p) => p.uid === uid),
 	);
 };
 
@@ -82,7 +82,7 @@ const getGameForSocketId = (id) => {
 	return activeGames.find(
 		(g) =>
 			g.gameState.host.socketId === id ||
-			g.gameState.players.some((p) => p.socketId === id)
+			g.gameState.players.some((p) => p.socketId === id),
 	);
 };
 
@@ -100,7 +100,7 @@ const socket = async (http, server) => {
 
 		//get the user, see if they're reconnecting or something
 		console.log(
-			`A user has connected from ${socket.handshake.address} with socket ID ${socket.id}`
+			`A user has connected from ${socket.handshake.address} with socket ID ${socket.id}`,
 		);
 		io.to(socket.id).emit('ack-connection', null);
 		//user sends this to get a new UUID
@@ -160,7 +160,7 @@ const socket = async (http, server) => {
 				io,
 				null,
 				null,
-				process.env.NODE_ENV
+				process.env.NODE_ENV,
 			);
 			console.log('creating game');
 			resetGameTimeout(g.id);
@@ -286,13 +286,13 @@ const socket = async (http, server) => {
 				if (game.gameState.state === 'endGame') {
 					activeGames = activeGames.filter((g) => g.id !== game.getId());
 				}
-			})
+			}),
 		);
 
 		//Things players can emit
 		socket.on('join-game', (data, cb) => {
 			const game = activeGames.find(
-				(g) => g.joinCode.toLowerCase() === data.joinCode.toLowerCase()
+				(g) => g.joinCode.toLowerCase() === data.joinCode.toLowerCase(),
 			);
 
 			if (!game) return cb({ status: 'fail', message: 'Game not found' });
@@ -322,7 +322,7 @@ const socket = async (http, server) => {
 				});
 
 			const ind = g.gameState.players.findIndex(
-				(p) => p.socketId === socket.id
+				(p) => p.socketId === socket.id,
 			);
 			g.handleInput('player', ind);
 			resetGameTimeout(g.id);
@@ -338,7 +338,7 @@ const socket = async (http, server) => {
 				});
 			resetGameTimeout(game.id);
 			const ind = game.gameState.players.findIndex(
-				(p) => p.socketId === socket.id
+				(p) => p.socketId === socket.id,
 			);
 			if (ind < 0) return cb({ status: 'fail', message: 'Player not found' });
 			const wager = Number(data.wager);
@@ -367,7 +367,7 @@ const socket = async (http, server) => {
 			resetGameTimeout(game.id);
 
 			const ind = game.gameState.players.findIndex(
-				(p) => p.socketId === socket.id
+				(p) => p.socketId === socket.id,
 			);
 			if (ind < 0) return cb({ status: 'fail', message: 'Player not found' });
 
@@ -379,7 +379,7 @@ const socket = async (http, server) => {
 		//spectate game
 		socket.on('spectate-game', (data, cb) => {
 			const game = activeGames.find(
-				(g) => g.joinCode.toLowerCase() === data.joinCode.toLowerCase()
+				(g) => g.joinCode.toLowerCase() === data.joinCode.toLowerCase(),
 			);
 
 			if (!game) return cb({ status: 'fail', message: 'Game not found' });

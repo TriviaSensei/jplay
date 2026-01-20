@@ -20,7 +20,7 @@ const randomString = (len, str) => {
 	let toReturn = '';
 	for (var i = 0; i < len; i++) {
 		toReturn = `${toReturn}${str.charAt(
-			Math.floor(Math.random() * str.length)
+			Math.floor(Math.random() * str.length),
 		)}`;
 	}
 	return toReturn;
@@ -163,7 +163,7 @@ class Game {
 			(p, c) => {
 				return p + c.clues.reduce((p2, c2) => p2 + (c2.selected ? 1 : 0), 0);
 			},
-			0
+			0,
 		);
 
 		if (
@@ -172,7 +172,7 @@ class Game {
 			cluesUsed === cluesPerRound
 		)
 			this.gameState.players.forEach((p) =>
-				p.scoreHistory.unshift(p.getScore())
+				p.scoreHistory.unshift(p.getScore()),
 			);
 
 		return !(
@@ -210,7 +210,7 @@ class Game {
 					this.gameState.board[this.gameState.round][sc[0]].clues[sc[1]];
 				//adjust the score
 				this.gameState.players[this.gameState.buzzedIn].modifyScore(
-					correct ? clue.value : -clue.value
+					correct ? clue.value : -clue.value,
 				);
 
 				this.updateGameStats(this.gameState.buzzedIn, {
@@ -710,7 +710,7 @@ class Game {
 				const maxWager = Math.max(minMaxWager, p.getScore());
 				if (wager < minWager || wager > maxWager)
 					throw new Error(
-						`Please submit a valid wager from $${minWager} to $${maxWager}`
+						`Please submit a valid wager from $${minWager} to $${maxWager}`,
 					);
 				//valid wager has been submitted - show the clue
 				this.setGameState({
@@ -823,7 +823,7 @@ class Game {
 				const inv = this.gameState.players.find(
 					(p) =>
 						p.getScore() > 0 &&
-						(p.getFinalWager() < 0 || p.getFinalWager() > p.getScore())
+						(p.getFinalWager() < 0 || p.getFinalWager() > p.getScore()),
 				);
 				if (inv)
 					throw new Error(`Invalid or missing wager from ${inv.getName()}`);
@@ -857,7 +857,7 @@ class Game {
 					throw new Error(
 						`Invalid wager data for player ${this.gameState.players[
 							inv.player
-						].getName()}`
+						].getName()}`,
 					);
 				} else {
 					this.setGameState({
@@ -951,10 +951,10 @@ class Game {
 						fjSubstep === 0
 							? `Revealing Final Jeopardy for ${fjPlayer.name}. Press advance to continue.`
 							: fjSubstep === 1
-							? `${fjPlayer.name}'s Final Jeopardy response revealed. Press correct/incorrect to set result.`
-							: fjSubstep === 2
-							? `${fjPlayer.name}'s Final Jeopardy wager revealed. Press advance to continue`
-							: `${fjPlayer.name}'s result set. Press advance to continue.`;
+								? `${fjPlayer.name}'s Final Jeopardy response revealed. Press correct/incorrect to set result.`
+								: fjSubstep === 2
+									? `${fjPlayer.name}'s Final Jeopardy wager revealed. Press advance to continue`
+									: `${fjPlayer.name}'s result set. Press advance to continue.`;
 					if (fjSubstep === 3) {
 						const ind =
 							this.gameState.fjOrder[Math.floor(this.gameState.fjStep / 4)];
@@ -1265,7 +1265,7 @@ class Game {
 			id || randomString(20, chars),
 			null,
 			keys[this.gameState.players.length],
-			false
+			false,
 		);
 		this.gameState.players.push(toAdd);
 		this.updateGameState(null, { players: this.gameState.players });
@@ -1470,7 +1470,7 @@ class Game {
 		if (wager < 5) throw new Error('Minimum wager is $5');
 		const maxWager = Math.max(
 			(this.gameState.round + 1) * 1000,
-			player.getScore()
+			player.getScore(),
 		);
 		if (wager > maxWager) throw new Error(`Maximum wager is $${maxWager}`);
 		this.gameState.wager = wager;

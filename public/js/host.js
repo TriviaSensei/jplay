@@ -18,7 +18,7 @@ document.addEventListener(
 	() => {
 		isMobile = true;
 	},
-	{ once: true, passive: true }
+	{ once: true, passive: true },
 );
 
 const coverDiv = document.querySelector('#cover-div');
@@ -29,7 +29,7 @@ if (coverDiv) {
 		() => {
 			coverDiv.remove();
 		},
-		{ once: true }
+		{ once: true },
 	);
 }
 
@@ -86,8 +86,8 @@ const startGame = (type, data) => {
 				},
 				() => {
 					showMessage('error', `Request timed out - try again later`);
-				}
-			)
+				},
+			),
 		);
 	}
 };
@@ -95,7 +95,7 @@ const startGame = (type, data) => {
 const initContainer = document.querySelector('.init-container');
 const loadType = getElementArray(
 	document,
-	'input[type="radio"][name="load-type"]'
+	'input[type="radio"][name="load-type"]',
 );
 let currentFile;
 const gameMetadata = document.querySelector('.game-metadata');
@@ -126,7 +126,7 @@ const gameBoard = gameContainer.querySelector('.game-board');
 const gameHeaders = getElementArray(gameBoard, '.category-box');
 
 const categoryScroll = gameContainer.querySelector(
-	'.category-scroll-container'
+	'.category-scroll-container',
 );
 const categoryScrollInner = categoryScroll.querySelector('.category-scroll');
 const categoryDisplays = getElementArray(categoryScroll, '.category-box');
@@ -136,7 +136,7 @@ const liveClue = gameContainer.querySelector('.live-clue-display');
 const clueBoxes = getElementArray(gameContainer, '.clue-box');
 const clueValues = getElementArray(
 	gameContainer,
-	'.clue-value:not(.clue-value-flash)'
+	'.clue-value:not(.clue-value-flash)',
 );
 
 const ddDiv = document.querySelector('.dd-div');
@@ -190,10 +190,10 @@ const fjSound = document.querySelector('#fj-reveal-sound');
 
 const fjResponseDiv = document.querySelector('.fj-response-div');
 const fjResponseDisplay = fjResponseDiv.querySelector(
-	'.fj-response-display > .display-inner'
+	'.fj-response-display > .display-inner',
 );
 const fjWagerDisplay = fjResponseDiv.querySelector(
-	'.fj-wager-display > .display-inner'
+	'.fj-wager-display > .display-inner',
 );
 
 const views = [liveClue, categoryScroll, gameBoard, fjCategory, fjResponseDiv];
@@ -236,7 +236,7 @@ if (isKey) {
 	wagerMax = fjw.querySelector('.wager-max');
 	fjPrefixes = getElementArray(
 		document,
-		'.fj-prefix-container input[type="radio"]'
+		'.fj-prefix-container input[type="radio"]',
 	);
 	fjResponseLabels = getElementArray(fjr, 'label.fj-response-label');
 	fjResponses = getElementArray(fjr, '.fj-response');
@@ -273,7 +273,7 @@ const socketCB = (fn) =>
 		() => {
 			console.trace();
 			showMessage('error', 'Input timed out');
-		}
+		},
 	);
 
 /*TODO: implement opening this and having user submit their FJ wager and response */
@@ -313,8 +313,8 @@ if (fjpwm) {
 				},
 				() => {
 					showMessage('error', 'Request timed out');
-				}
-			)
+				},
+			),
 		);
 	});
 }
@@ -336,8 +336,8 @@ const saveFJResponse = (silent) => {
 			},
 			() => {
 				showMessage('error', 'Request timed out');
-			}
-		)
+			},
+		),
 	);
 };
 if (fjprm) {
@@ -426,7 +426,7 @@ else {
 			socket.emit(
 				'edit-game-data',
 				{ gameData: { control: index, status } },
-				socketCB()
+				socketCB(),
 			);
 		} else {
 			game.setGameState({
@@ -448,7 +448,7 @@ const openKey = () => {
 		showMessage(
 			'error',
 			'Could not open key - please disable your popup blocker',
-			2000
+			2000,
 		);
 	else
 		keyWindow.addEventListener(
@@ -457,7 +457,7 @@ const openKey = () => {
 				const data = sh.getState();
 				sendGameState(data);
 			},
-			{ once: true }
+			{ once: true },
 		);
 };
 
@@ -521,8 +521,8 @@ const handleKeyPress = async (e) => {
 				},
 				() => {
 					showMessage('error', 'Buzz timed out');
-				}
-			)
+				},
+			),
 		);
 	}
 	//game is not active, local player setting their buzzer key
@@ -587,7 +587,7 @@ const handleKeyPress = async (e) => {
 	//non-remote player key pressed
 	else {
 		const ind = state.players.findIndex(
-			(p) => e.key === p.key && p.name !== '' && !p.isRemote
+			(p) => e.key === p.key && p.name !== '' && !p.isRemote,
 		);
 		if (ind < 0) return;
 		sendGameInput('player', ind);
@@ -662,8 +662,8 @@ if (!isKey) {
 				data,
 				withTimeout(
 					onSuccess ? onSuccess : (data) => {},
-					onTimeout ? onTimeout : () => {}
-				)
+					onTimeout ? onTimeout : () => {},
+				),
 			);
 	});
 }
@@ -684,7 +684,7 @@ const validateGameData = (data) => {
 		return fail('Data must have a rounds array of 3 rounds');
 	else if (!data[2].category || !data[2].text || !data[2].response) {
 		return fail(
-			'Final Jeopardy round is missing category, text, or response data'
+			'Final Jeopardy round is missing category, text, or response data',
 		);
 	} else {
 		for (var round = 0; round <= 1; round++) {
@@ -696,14 +696,14 @@ const validateGameData = (data) => {
 					return fail(
 						`Round ${round + 1}, category ${
 							category + 1
-						} does not have valid category text`
+						} does not have valid category text`,
 					);
 				const clues = rd[category].clues;
 				if (clues.length !== 5)
 					return fail(
 						`Round ${round + 1}, category ${
 							category + 1
-						} does not contain 5 valid clues`
+						} does not contain 5 valid clues`,
 					);
 
 				for (var clue = 0; clue < 5; clue++) {
@@ -712,13 +712,13 @@ const validateGameData = (data) => {
 						return fail(
 							`Round ${round + 1}, category ${category + 1}, clue ${
 								clue + 1
-							} does not contain text`
+							} does not contain text`,
 						);
 					if (!cl.response || cl.response.trim() === '')
 						return fail(
 							`Round ${round + 1}, category ${category + 1}, clue ${
 								clue + 1
-							} does not contain a response`
+							} does not contain a response`,
 						);
 				}
 			}
@@ -731,10 +731,12 @@ const catLarge = new StateHandler(false);
 const moveBoard = () => {
 	const elements = getElementArray(
 		document,
-		'.game-container > .ratio.ratio-4x3 > div'
+		// '.game-container > .ratio.ratio-4x3 > div'
+		'.game-container > .ratio.screen-ratio > div',
 	);
 	const destination = document.querySelector(
-		'.board-display-container > .ratio.ratio-4x3'
+		// '.board-display-container > .ratio.ratio-4x3',
+		'.board-display-container > .ratio.screen-ratio',
 	);
 	elements.forEach((el) => destination.appendChild(el));
 	const showCategory = (e) => {
@@ -796,8 +798,8 @@ document.addEventListener('DOMContentLoaded', () => {
 						},
 						() => {
 							showMessage('error', 'Could not connect to server');
-						}
-					)
+						},
+					),
 				);
 			}
 			//if so, send it to get our state back
@@ -817,8 +819,8 @@ document.addEventListener('DOMContentLoaded', () => {
 						},
 						() => {
 							showMessage('error', 'Could not connect to server');
-						}
-					)
+						},
+					),
 				);
 			}
 		});
@@ -878,13 +880,13 @@ document.addEventListener('DOMContentLoaded', () => {
 	if (createButton) {
 		createButton.addEventListener('click', async () => {
 			const gameType = document.querySelector(
-				'[name="play-type"]:checked'
+				'[name="play-type"]:checked',
 			)?.value;
 			if (!gameType) return showMessage('error', 'No game type selected');
 			else if (gameType !== 'local' && gameType !== 'remote')
 				return showMessage('error', 'Invalid game type selected');
 			const fileType = document.querySelector(
-				'[name="load-type"]:checked'
+				'[name="load-type"]:checked',
 			)?.value;
 			if (!fileType) return showMessage('error', 'File location not specified');
 			let data;
@@ -954,7 +956,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	if (!isKey) {
 		fileUpload.addEventListener('change', (e) => {
 			const selectedRadio = document.querySelector(
-				'input[type="radio"][name="load-type"][value="local"]:checked'
+				'input[type="radio"][name="load-type"][value="local"]:checked',
 			);
 			if (!selectedRadio) return;
 			let file = e.target.files[0];
@@ -1064,7 +1066,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			nameData.forEach((p) => {
 				const np = document.createElementNS(
 					'http://www.w3.org/2000/svg',
-					'path'
+					'path',
 				);
 				np.setAttribute('d', p);
 				namePath.appendChild(np);
@@ -1153,7 +1155,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			nameData.forEach((nd) => {
 				const np = document.createElementNS(
 					'http://www.w3.org/2000/svg',
-					'path'
+					'path',
 				);
 				np.setAttribute('d', nd);
 				path.appendChild(np);
@@ -1167,7 +1169,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			const curr = e.target.getAttribute('data-toggled');
 			e.target.setAttribute(
 				'data-toggled',
-				curr === 'false' ? 'true' : 'false'
+				curr === 'false' ? 'true' : 'false',
 			);
 			e.target.innerHTML = curr === 'false' ? '[Press a key]' : 'Set key';
 		});
@@ -1197,7 +1199,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						game.gameState.players[index].setKey(key);
 						if (Array.isArray(nameData.paths)) {
 							game.gameState.players[index].setNameData(
-								nameData.paths.map((p) => p.getAttribute('d'))
+								nameData.paths.map((p) => p.getAttribute('d')),
 							);
 						}
 					}
@@ -1224,7 +1226,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					socket.emit(
 						'edit-player',
 						data,
-						socketCB(() => playerSettingsModal.hide())
+						socketCB(() => playerSettingsModal.hide()),
 					);
 				}
 			});
@@ -1347,7 +1349,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					`left:${((100 * (cat + 0.5)) / 6).toFixed(3)}%;top:${(
 						(100 * (row + 1.5)) /
 						6
-					).toFixed(3)}%`
+					).toFixed(3)}%`,
 				);
 				setTimeout(() => {
 					ddDiv.classList.add('animation');
@@ -1392,7 +1394,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				liveClueImage.classList.remove('d-none');
 				liveClueImage.setAttribute(
 					'style',
-					`background-image:url("${liveClueData.image}")`
+					`background-image:url("${liveClueData.image}")`,
 				);
 			}
 			//show the clue text in the key, or if there's no image
@@ -1502,7 +1504,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							state.board[state.board.length - 1].category.toUpperCase();
 						const catContainers = getElementArray(
 							document,
-							'.fj-category-container'
+							'.fj-category-container',
 						);
 						catContainers.forEach((c) => (c.innerHTML = category));
 						if (currentWager === -1 && player.score > 0) {
@@ -1702,7 +1704,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			) {
 				e.target.classList.add('lit');
 			} else e.target.classList.remove('lit');
-		})
+		}),
 	);
 
 	const selectClue = (e) => {
@@ -1719,10 +1721,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			e.detail.state === 'clueLive'
 				? e.detail.clueTime
 				: e.detail.state === 'DDLive'
-				? e.detail.ddTime
-				: e.detail.state === 'FJLive'
-				? e.detail.FJTime
-				: null;
+					? e.detail.ddTime
+					: e.detail.state === 'FJLive'
+						? e.detail.FJTime
+						: null;
 
 		if (tl === null) return e.target.classList.remove('live');
 
@@ -1802,7 +1804,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			(state) => {
 				if (state && isHost() && !keyWindow) openKey();
 			},
-			{ once: true }
+			{ once: true },
 		);
 
 	//send game state to key window on state update
@@ -1838,7 +1840,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (wager > maxWager)
 				return showMessage(
 					'error',
-					`Invalid wager - maximum wager is $${maxWager}`
+					`Invalid wager - maximum wager is $${maxWager}`,
 				);
 			sendGameInput('setWager', wager);
 		});
@@ -1861,7 +1863,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const wagerSetter = (isMax) => {
 		return () => {
 			const checked = fjw.querySelector(
-				'input[type="radio"][name="fj-wager-radio"]:checked'
+				'input[type="radio"][name="fj-wager-radio"]:checked',
 			);
 			if (!checked) return;
 			const ind = checked.getAttribute('data-index');
@@ -1909,7 +1911,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 		});
 		let pf = fjr?.querySelector(
-			'.fj-prefix-container input[type="radio"]:checked'
+			'.fj-prefix-container input[type="radio"]:checked',
 		);
 		if (pf) {
 			const val = pf.value;
@@ -2007,7 +2009,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				const newPath = document.createElementNS(
 					'http://www.w3.org/2000/svg',
-					'path'
+					'path',
 				);
 				newPath.setAttribute('d', `M ${x} ${y} l 0 0 `);
 				const path = canvas.querySelector('.name-path');
@@ -2043,7 +2045,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				if (!currentPath) return;
 				currentPath.setAttribute(
 					'd',
-					`${currentPath.getAttribute('d')} L ${x} ${y}`
+					`${currentPath.getAttribute('d')} L ${x} ${y}`,
 				);
 			}
 		};
@@ -2093,10 +2095,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		};
 
 		getElementArray(document, 'button.undo-stroke').forEach((b) =>
-			b.addEventListener('click', undoStroke)
+			b.addEventListener('click', undoStroke),
 		);
 		getElementArray(document, 'button.clear-stroke').forEach((b) =>
-			b.addEventListener('click', clearStroke)
+			b.addEventListener('click', clearStroke),
 		);
 	}
 
@@ -2118,11 +2120,11 @@ document.addEventListener('DOMContentLoaded', () => {
 		const sendInputFromKey = (e) => {
 			const inp = e.target.getAttribute('data-input');
 			window.opener.document.dispatchEvent(
-				new CustomEvent('key-input', { detail: { input: inp } })
+				new CustomEvent('key-input', { detail: { input: inp } }),
 			);
 		};
 		[advanceButton, correctButton, incorrectButton].forEach((b) =>
-			b.addEventListener('click', sendInputFromKey)
+			b.addEventListener('click', sendInputFromKey),
 		);
 
 		randomizeButton.addEventListener('click', () => {
@@ -2173,7 +2175,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		sh.addWatcher(null, (state) => {
 			movePlayerButtons.forEach((b) => {
 				const player = Number(
-					b.closest('.player-order-item')?.getAttribute('data-player')
+					b.closest('.player-order-item')?.getAttribute('data-player'),
 				);
 				if (isNaN(player)) {
 					b.disabled = true;
@@ -2196,7 +2198,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		sh.addWatcher(null, (state) => {
 			movePlayerLabels.forEach((l) => {
 				const player = Number(
-					l.closest('.player-order-item')?.getAttribute('data-player')
+					l.closest('.player-order-item')?.getAttribute('data-player'),
 				);
 				if (isNaN(player)) {
 					l.innerHTML = '(Empty)';
@@ -2285,8 +2287,8 @@ document.addEventListener('DOMContentLoaded', () => {
 					},
 					() => {
 						showMessage('error', 'Joining game timed out.');
-					}
-				)
+					},
+				),
 			);
 		});
 
@@ -2309,15 +2311,15 @@ document.addEventListener('DOMContentLoaded', () => {
 					},
 					() => {
 						showMessage('error', 'Joining game timed out.');
-					}
-				)
+					},
+				),
 			);
 		});
 	if (buzzerButton)
 		buzzerButton.addEventListener('click', (e) => {
 			const state = sh.getState();
 			const ind = state.players.findIndex(
-				(p) => uid === p.uid && p.name !== ''
+				(p) => uid === p.uid && p.name !== '',
 			);
 			if (ind < 0) return;
 			sendGameInput('player', ind);
@@ -2359,7 +2361,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				const lecterns = getElementArray(
 					playerContainer,
-					'.player-lectern-mini'
+					'.player-lectern-mini',
 				);
 				lecterns.forEach((l, i) => {
 					const ind = Number(l.getAttribute('data-index'));
@@ -2395,7 +2397,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	let to, tt;
 	const handlePopover = (e) => {
 		const svgCont = document.querySelector(
-			'#play-tab-pane .svg-container[data-bs-toggle="popover"]'
+			'#play-tab-pane .svg-container[data-bs-toggle="popover"]',
 		);
 		const disposeTT = () => {
 			try {

@@ -88,7 +88,7 @@
 			font-family: 'Swiss 911 Compressed', serif;
 			text-align: center;
 			display: flex;
-			padding: 10%;
+			padding: 5% 10%;
 			color: var(--yellow);
 			cursor: pointer;
 
@@ -97,13 +97,15 @@
 			}
 			@media (max-aspect-ratio: 0.89) {
 				.clue-value {
-					font-size: 5.6vw;
+					font-size: 4.8vw;
+					letter-spacing: 0.27vw;
 					text-shadow: 0.5vw 0.5vw #000;
 				}
 			}
 			@media (aspect-ratio > 0.89) {
 				.clue-value {
-					font-size: 5vh;
+					font-size: 4.2vh;
+					letter-spacing: 0.25vh;
 					text-shadow: 0.5vh 0.5vh #000;
 				}
 			}
@@ -220,7 +222,7 @@
 		}
 		@media (max-aspect-ratio: 0.89) {
 			.clue-value {
-				font-size: 20vw;
+				font-size: 16vw;
 				text-shadow: 2vw 2vw #000;
 			}
 		}
@@ -250,7 +252,7 @@
 			font-size: 5vw;
 		}
 		.clue-display {
-			font-size: 4vw;
+			font-size: 3.8vw;
 		}
 	}
 	/*
@@ -262,7 +264,7 @@
 			font-size: 4.5vh;
 		}
 		.clue-display {
-			font-size: 3.6vh;
+			font-size: 3.42vh;
 		}
 	}
 }
@@ -317,7 +319,7 @@
 		}
 
 		.category-div {
-			font-size: min(72px, 10.08vh, 12vw);
+			font-size: min(10.08vh, 12vw);
 		}
 	}
 

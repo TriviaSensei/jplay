@@ -15,17 +15,23 @@
 @font-face {
 	font-family: 'Korinna Regular BT';
 	font-weight: 400;
-	src: url(./Korinna.woff2) format('woff2'), url(./Korinna.woff) format('woff');
+	src:
+		url(./Korinna.woff2) format('woff2'),
+		url(./Korinna.woff) format('woff');
 }
 @font-face {
 	font-family: 'Swiss 911 Compressed';
 	font-weight: 400;
-	src: url(./swiss_c.woff2) format('woff2'), url(./swiss_c.woff) format('woff');
+	src:
+		url(./swiss_c.woff2) format('woff2'),
+		url(./swiss_c.woff) format('woff');
 }
 @font-face {
 	font-family: 'Swiss 911';
 	font-weight: 400;
-	src: url(./swiss.woff2) format('woff2'), url(./swiss.woff) format('woff');
+	src:
+		url(./swiss.woff2) format('woff2'),
+		url(./swiss.woff) format('woff');
 }
 
 html {
@@ -68,6 +74,10 @@ body.dark {
 		cursor: pointer;
 		opacity: 50%;
 	}
+}
+
+.screen-ratio {
+	--bs-aspect-ratio: 58.13%;
 }
 
 .category-display {
@@ -131,7 +141,7 @@ body.dark {
 }
 
 .game-container {
-	width: min(89vh, 100%);
+	width: min(100vh, 100%);
 	padding: 1%;
 	/* background-color: black; */
 }
