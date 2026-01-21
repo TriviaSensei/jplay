@@ -17,6 +17,7 @@ const getInitState = () => {
 							text: '',
 							image: '',
 							response: '',
+							caps: true,
 							dailyDouble: false,
 						};
 					}),
@@ -31,6 +32,7 @@ const getInitState = () => {
 							text: '',
 							image: '',
 							response: '',
+							caps: true,
 							dailyDouble: false,
 						};
 					}),
@@ -39,6 +41,7 @@ const getInitState = () => {
 			{
 				category: '',
 				text: '',
+				caps: true,
 				response: '',
 			},
 		],
@@ -54,17 +57,17 @@ const loadFile = document.querySelector('#create-tab-pane #load-file');
 const saveButton = document.querySelector('#create-tab-pane #save-data');
 
 const metadataArea = document.querySelector(
-	'#create-tab-pane .create-game-metadata'
+	'#create-tab-pane .create-game-metadata',
 );
 const addMetadata = document.querySelector(
-	'#create-tab-pane #create-game-metadata'
+	'#create-tab-pane #create-game-metadata',
 );
 
 const gameNotes = document.querySelector('#game-notes');
 
 const roundSelect = getElementArray(
 	createArea,
-	'input[type="radio"][name="selected-round"]'
+	'input[type="radio"][name="selected-round"]',
 );
 const categorySelect = createArea.querySelector('#category-select');
 const categories = getElementArray(categorySelect, 'option');
@@ -72,11 +75,11 @@ const categoryName = createArea.querySelector('#category-name');
 const categoryComments = createArea.querySelector('#category-comments');
 const valueSelect = getElementArray(
 	createArea,
-	'input[type="radio"][name="selected-clue"]'
+	'input[type="radio"][name="selected-clue"]',
 );
 const valueLabels = getElementArray(
 	createArea,
-	'input[type="radio"][name="selected-clue"] + label > .label-inner'
+	'input[type="radio"][name="selected-clue"] + label > .label-inner',
 );
 const clueText = createArea.querySelector('#edit-clue-text');
 const imageLink = createArea.querySelector('#picture-url');
@@ -87,7 +90,7 @@ const tempCanvas = document.querySelector('#temp-canvas');
 const correctResponse = createArea.querySelector('#correct-response');
 
 const textInputs = getElementArray(createArea, 'input[type="text"],textarea');
-
+const allCaps = document.querySelector('#all-caps-clue');
 const resultModal = new bootstrap.Modal('#create-data-modal');
 const list = document.querySelector('#data-warnings');
 
@@ -241,7 +244,7 @@ const populateCategoryNames = () => {
 				c.classList.add('invalid');
 			} else if (
 				round[val].clues.some(
-					(clue) => clue.text.trim() === '' || clue.response.trim === ''
+					(clue) => clue.text.trim() === '' || clue.response.trim === '',
 				)
 			) {
 				c.innerHTML = `${val + 1}. ${round[val].category} ⚠️`;
@@ -254,11 +257,12 @@ const populateCategoryNames = () => {
 	}
 };
 
-const populateSelectedClue = (state) => {
+const populateSelectedClue = () => {
 	const sc = getSelectedClue();
 	categoryName.value = sc.data.category;
 	categoryComments.value = sc.data.comments;
 	clueText.value = sc.data.text;
+	allCaps.checked = sc.data.caps === true || sc.data.caps === undefined;
 	imageLink.value = '';
 	if (sc.data.image) showImagePreview(sc.data.image);
 	else hideImagePreview();
@@ -271,14 +275,14 @@ const populateSelectedClue = (state) => {
 const validateAll = () => {
 	const state = sh.getState();
 	const selectedRound = createArea.querySelector(
-		`input[type="radio"][name="selected-round"]:checked`
+		`input[type="radio"][name="selected-round"]:checked`,
 	);
 	if (!selectedRound) return;
 	const selectedRoundNo = Number(selectedRound.getAttribute('value'));
 	//for each round
 	state.rounds.forEach((round, rd) => {
 		const radio = createArea.querySelector(
-			`input[type="radio"][name="selected-round"][value="${rd}"]`
+			`input[type="radio"][name="selected-round"][value="${rd}"]`,
 		);
 		//assume it's valid to start
 		radio.classList.remove('invalid');
@@ -307,11 +311,11 @@ const validateAll = () => {
 						rd === selectedRoundNo
 					) {
 						const clueRadio = createArea.querySelector(
-							`input[type="radio"][name="selected-clue"][value="${clueNo}"]`
+							`input[type="radio"][name="selected-clue"][value="${clueNo}"]`,
 						);
 						if (clueRadio) {
 							const lbl = createArea.querySelector(
-								`label[for="${clueRadio.id}"]`
+								`label[for="${clueRadio.id}"]`,
 							);
 							if (!clueValid) clueRadio.classList.add('invalid');
 							else clueRadio.classList.remove('invalid');
@@ -329,17 +333,17 @@ roundSelect.forEach((rs) =>
 	rs.addEventListener('change', () => {
 		populateCategoryNames();
 		categorySelect.selectedIndex = 0;
-	})
+	}),
 );
 [...roundSelect, ...valueSelect, categorySelect].forEach((el) =>
-	el.addEventListener('change', populateSelectedClue)
+	el.addEventListener('change', populateSelectedClue),
 );
 [...roundSelect].forEach((rs) => {
 	rs.addEventListener('change', (e) => {
 		const rd = Number(e.target.value);
 		if (rd === 2) return;
 		[...valueLabels].forEach(
-			(vs, i) => (vs.innerHTML = `$${(rd + 1) * (i + 1) * 200}`)
+			(vs, i) => (vs.innerHTML = `$${(rd + 1) * (i + 1) * 200}`),
 		);
 		sh.refreshState();
 	});
@@ -365,6 +369,7 @@ const handleDataChange = (e) => {
 			prev.rounds[2] = {
 				category: categoryName.value,
 				text: clueText.value,
+				caps: allCaps.checked,
 				image: '',
 				response: correctResponse.value,
 			};
@@ -374,8 +379,11 @@ const handleDataChange = (e) => {
 				categoryComments.value.trim();
 			prev.rounds[sc.round][sc.category].clues[sc.clue].text =
 				clueText.value.trim();
+			prev.rounds[sc.round][sc.category].clues[sc.clue].caps = allCaps.checked;
 			prev.rounds[sc.round][sc.category].clues[sc.clue].response =
 				correctResponse.value.trim();
+
+			console.log(prev.rounds[sc.round][sc.category].clues[sc.clue]);
 		}
 		localStorage.setItem('jp-creator-state', JSON.stringify(prev));
 		showHeaderMessage('info', 'Data saved');
@@ -387,6 +395,7 @@ const handleDataChange = (e) => {
 textInputs.forEach((t) => {
 	t.addEventListener('change', handleDataChange);
 });
+allCaps.addEventListener('change', handleDataChange);
 
 imageLink.addEventListener('change', async (e) => {
 	try {
@@ -528,13 +537,13 @@ const validateData = (data) => {
 				messages.push(
 					`Round ${i + 1}, category ${j + 1}${
 						cat.category ? ` (${cat.category.toUpperCase()})` : ''
-					} does not contain a clue array`
+					} does not contain a clue array`,
 				);
 			else if (cat.clues.length !== 5)
 				messages.push(
 					`Round ${i + 1}, category ${j + 1}${
 						cat.category ? ` (${cat.category.toUpperCase()})` : ''
-					} does not contain 5 clues`
+					} does not contain 5 clues`,
 				);
 		});
 	});
@@ -646,7 +655,7 @@ saveButton.addEventListener('click', () => {
 			JSON.stringify({
 				metadata,
 				...state,
-			})
+			}),
 		);
 	const dlAnchorElem = createElement('a');
 	dlAnchorElem.setAttribute('href', dataStr);
@@ -742,7 +751,7 @@ const updateDailyDoubles = (e) => {
 					'error',
 					`You have already assigned ${ddCount} daily double${
 						ddCount === 1 ? '' : 's'
-					} this round.`
+					} this round.`,
 				);
 			}
 			//make sure there is no other DD in this category
@@ -753,7 +762,7 @@ const updateDailyDoubles = (e) => {
 				e.target.checked = false;
 				return showMessage(
 					'error',
-					'You have already assigned a daily double in this category'
+					'You have already assigned a daily double in this category',
 				);
 			}
 			state.rounds[currentClue.round][currentClue.category].clues[
@@ -773,7 +782,7 @@ const updateDailyDoubles = (e) => {
 			if (label) label.innerHTML = '';
 			return showMessage(
 				'error',
-				'Invalid clue for daily double - refresh the page and try again'
+				'Invalid clue for daily double - refresh the page and try again',
 			);
 		}
 		state.rounds[currentClue.round][category].clues[clue].dailyDouble = false;

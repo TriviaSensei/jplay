@@ -55,8 +55,11 @@ link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
                     .label-inner= `$${(val+1)*200}`
     .input-row-v
         .input-label Clue Text (max 175 chars)
-        .input-container
-            .ratio.ratio-4x3 
+        .input-container.flex-column-reverse
+            .input-row.d-flex.flex-row.all-caps-container
+                input(type="checkbox" id="all-caps-clue")
+                label(for="all-caps-clue") Clue in all caps
+            .ratio.ratio-4x3.mb-2.clue-text-container
                 div.p-4.clue-text-container
                     textarea#edit-clue-text.w-100.h-100(placeholder="Clue text" maxlength="175")
     .input-row-v.no-fj

@@ -98,7 +98,6 @@
 	}
 	#edit-clue-text {
 		background-color: var(--blue);
-		text-transform: uppercase;
 		text-align: center;
 		vertical-align: middle;
 		color: white;
@@ -106,6 +105,12 @@
 		outline: none;
 		resize: none;
 		font-size: 1.2em;
+	}
+
+	.all-caps-container:has(#all-caps-clue:checked)
+		+ .clue-text-container
+		#edit-clue-text {
+		text-transform: uppercase;
 	}
 
 	.game-data:has(input[type='radio'][name='selected-round'][value='0']:checked)
@@ -160,8 +165,8 @@
 }
 
 #create-tab-pane:has(
-		input[type='radio'][name='selected-round'][value='2']:checked
-	) {
+	input[type='radio'][name='selected-round'][value='2']:checked
+) {
 	.no-fj {
 		display: none;
 	}
