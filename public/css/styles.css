@@ -218,9 +218,6 @@ input[type='radio']:disabled + label {
 		input {
 			width: 100%;
 		}
-		input[type='text'] {
-			letter-spacing: 0.15em;
-		}
 		input[type='checkbox'] {
 			width: 1.5em;
 			height: 1.5em;
@@ -274,5 +271,6 @@ input[type='radio']:disabled + label {
 	input[type='text'] {
 		height: 2em;
 		font-size: 1.5em;
+		letter-spacing: 0.15em;
 	}
 }
