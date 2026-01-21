@@ -41,6 +41,11 @@
 		url(./swiss.woff) format('woff');
 }
 
+@font-face {
+	font-family: 'Zurich';
+	src: url(./Zurich.ttf);
+}
+
 html {
 	height: 100%;
 }
@@ -147,7 +152,7 @@ body.dark {
 
 .game-container {
 	width: min(100vh, 100%);
-	padding: 1%;
+	padding: 10px;
 	/* background-color: black; */
 }
 
@@ -213,6 +218,9 @@ input[type='radio']:disabled + label {
 		input {
 			width: 100%;
 		}
+		input[type='text'] {
+			letter-spacing: 0.15em;
+		}
 		input[type='checkbox'] {
 			width: 1.5em;
 			height: 1.5em;
@@ -224,22 +232,27 @@ input[type='radio']:disabled + label {
 		::-webkit-input-placeholder {
 			/* WebKit browsers */
 			text-transform: none;
+			letter-spacing: 0;
 		}
 		:-moz-placeholder {
 			/* Mozilla Firefox 4 to 18 */
 			text-transform: none;
+			letter-spacing: 0;
 		}
 		::-moz-placeholder {
 			/* Mozilla Firefox 19+ */
 			text-transform: none;
+			letter-spacing: 0;
 		}
 		:-ms-input-placeholder {
 			/* Internet Explorer 10+ */
 			text-transform: none;
+			letter-spacing: 0;
 		}
 		::placeholder {
 			/* Recent browsers */
 			text-transform: none;
+			letter-spacing: 0;
 		}
 		#picture-preview {
 			max-width: 100%;
@@ -255,4 +268,11 @@ input[type='radio']:disabled + label {
 }
 .f-1 {
 	flex: 1;
+}
+
+#play-tab-pane {
+	input[type='text'] {
+		height: 2em;
+		font-size: 1.5em;
+	}
 }

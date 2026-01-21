@@ -9,6 +9,7 @@
 	.player-table {
 		height: min(20vh, 4em);
 		font-size: min(7.5vh, 1.5em);
+		letter-spacing: min(0.25vh, 0.05em);
 	}
 	.player-lectern-mini {
 		display: flex;
@@ -35,7 +36,8 @@
 			text-wrap: wrap;
 		}
 		.score-display {
-			font-family: Arial, Helvetica, sans-serif;
+			font-family: 'Zurich', Arial, Helvetica, sans-serif;
+			letter-spacing: 0;
 			.display-inner.neg {
 				color: red;
 			}
@@ -78,6 +80,7 @@
 			background-image: url('/img/clue_bg_blue.png');
 			background-size: cover;
 			font-family: 'Swiss 911', sans-serif;
+			padding: 0 5%;
 			.category-text {
 				margin: auto;
 				text-align: center;
@@ -89,6 +92,8 @@
 			.category-box {
 				.category-div {
 					font-size: min(96px, 12vw);
+					line-height: min(104px, 10.4vw);
+					letter-spacing: min(3.2px, 0.4vw);
 				}
 			}
 		}
@@ -167,6 +172,7 @@
 					text-align: center;
 					text-transform: uppercase;
 				}
+
 				.comment-div {
 					font-family: 'Korinna Regular BT', serif;
 					text-transform: uppercase;
@@ -210,9 +216,18 @@
 	}
 	.category-large {
 		font-size: min(108px, 10.8vw) !important;
+		line-height: min(117px, 11.7vw) !important;
+		letter-spacing: min(3.6px, 0.36vw) !important;
 	}
 	.category-box {
-		font-size: min(18px, 1.8vw) !important;
+		font-size: min(22px, 2.2vw) !important;
+		line-height: min(24px, 2.4vw) !important;
+		letter-spacing: min(0.8px, 0.8vw) !important;
+	}
+	.category-div.long-cat {
+		font-size: min(17.6px, 17.6vw);
+		line-height: min(19.2px, 19.2vw);
+		letter-spacing: min(0.064vh, 0.064vw);
 	}
 
 	.buzzer-container {
@@ -231,6 +246,9 @@
 
 	.display-inner {
 		font-size: min(4vw, 24px, 3vh);
+		span.currency {
+			margin-right: min(0.457vw, 2.74px, 0.343vh);
+		}
 	}
 }
 

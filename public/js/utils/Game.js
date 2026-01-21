@@ -353,7 +353,7 @@ class Game {
 			const curr = this.getCurrentClueStats();
 			if (!curr) return;
 			const alreadyBuzzed = curr.data[p].buzz && curr.data[p].time !== null;
-			if (!curr || alreadyBuzzed) return;
+			if (!alreadyBuzzed) return;
 			this.updateGameStats(p, {
 				buzz: true,
 				first: curr.data.every((d) => !d.first),
@@ -682,12 +682,17 @@ class Game {
 				buzzerArmed: false,
 			},
 			player: (p) => {
+				//if this player is not the buzzed in player, update their stats
 				if (p !== this.gameState.buzzedIn) {
 					const curr = this.getCurrentClueStats();
 					//only do this the first time they hit the buzzer if they're late
-					if (curr.buzz) return;
+					if (curr.data.length <= p || curr.data[p].buzz) return;
 					const elapsed = Date.now() - this.gameState.buzzerTime;
+					//has someone already buzzed in? find someone who has buzzed in first
 					const rt = curr.data.find((d) => d.first);
+					// max reaction time -
+					// if you buzz in more than a second after the first player
+					// your buzz will not count towards game stats, reaction time, etc.
 					const mrt = rt ? rt.time + 1000 : 1000;
 					if (elapsed <= mrt) {
 						this.updateGameStats(p, { buzz: true, time: elapsed });

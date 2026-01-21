@@ -95,46 +95,46 @@
 			/*width of .game-container is min(80%,1000px)*/
 			.clue-value {
 				margin: auto;
-				font-size: min(4.8vw, 60px);
-				letter-spacing: min(0.27vw, 3.375px);
+				font-size: min(4.8vw, 4.8vh);
+				letter-spacing: min(0.27vw, 0.27vh);
 				text-shadow:
-					black 0vw 0vw 0vw,
-					black 0.01vw 0.01vw 0vw,
-					black 0.02vw 0.02vw 0vw,
-					black 0.03vw 0.03vw 0vw,
-					black 0.04vw 0.04vw 0vw,
-					black 0.05vw 0.05vw 0vw,
-					black 0.06vw 0.06vw 0vw,
-					black 0.07vw 0.07vw 0vw,
-					black 0.08vw 0.08vw 0vw,
-					black 0.09vw 0.09vw 0vw,
-					black 0.1vw 0.1vw 0vw,
-					black 0.11vw 0.11vw 0vw,
-					black 0.12vw 0.12vw 0vw,
-					black 0.13vw 0.13vw 0vw,
-					black 0.14vw 0.14vw 0vw,
-					black 0.15vw 0.15vw 0vw,
-					black 0.16vw 0.16vw 0vw,
-					black 0.17vw 0.17vw 0vw,
-					black 0.18vw 0.18vw 0vw,
-					black 0.19vw 0.19vw 0vw,
-					black 0.2vw 0.2vw 0vw,
-					black 0.21vw 0.21vw 0vw,
-					black 0.22vw 0.22vw 0vw,
-					black 0.23vw 0.23vw 0vw,
-					black 0.24vw 0.24vw 0vw,
-					black 0.25vw 0.25vw 0vw,
-					black 0.26vw 0.26vw 0vw,
-					black 0.27vw 0.27vw 0vw,
-					black 0.28vw 0.28vw 0vw,
-					black 0.29vw 0.29vw 0vw,
-					black 0.3vw 0.3vw 0vw,
-					black 0.31vw 0.31vw 0vw,
-					black 0.32vw 0.32vw 0vw,
-					black 0.33vw 0.33vw 0vw,
-					black 0.34vw 0.34vw 0vw,
-					black 0.35vw 0.35vw 0vw,
-					black 0.36vw 0.36vw 0vw;
+					black min(0vw, 0vh) min(0vw, 0vh) 0vw,
+					black min(0.01vw, 0.01vh) min(0.01vw, 0.01vh) 0vw,
+					black min(0.02vw, 0.02vh) min(0.02vw, 0.02vh) 0vw,
+					black min(0.03vw, 0.03vh) min(0.03vw, 0.03vh) 0vw,
+					black min(0.04vw, 0.04vh) min(0.04vw, 0.04vh) 0vw,
+					black min(0.05vw, 0.05vh) min(0.05vw, 0.05vh) 0vw,
+					black min(0.06vw, 0.06vh) min(0.06vw, 0.06vh) 0vw,
+					black min(0.07vw, 0.07vh) min(0.07vw, 0.07vh) 0vw,
+					black min(0.08vw, 0.08vh) min(0.08vw, 0.08vh) 0vw,
+					black min(0.09vw, 0.09vh) min(0.09vw, 0.09vh) 0vw,
+					black min(0.1vw, 0.1vh) min(0.1vw, 0.1vh) 0vw,
+					black min(0.11vw, 0.11vh) min(0.11vw, 0.11vh) 0vw,
+					black min(0.12vw, 0.12vh) min(0.12vw, 0.12vh) 0vw,
+					black min(0.13vw, 0.13vh) min(0.13vw, 0.13vh) 0vw,
+					black min(0.14vw, 0.14vh) min(0.14vw, 0.14vh) 0vw,
+					black min(0.15vw, 0.15vh) min(0.15vw, 0.15vh) 0vw,
+					black min(0.16vw, 0.16vh) min(0.16vw, 0.16vh) 0vw,
+					black min(0.17vw, 0.17vh) min(0.17vw, 0.17vh) 0vw,
+					black min(0.18vw, 0.18vh) min(0.18vw, 0.18vh) 0vw,
+					black min(0.19vw, 0.19vh) min(0.19vw, 0.19vh) 0vw,
+					black min(0.2vw, 0.2vh) min(0.2vw, 0.2vh) 0vw,
+					black min(0.21vw, 0.21vh) min(0.21vw, 0.21vh) 0vw,
+					black min(0.22vw, 0.22vh) min(0.22vw, 0.22vh) 0vw,
+					black min(0.23vw, 0.23vh) min(0.23vw, 0.23vh) 0vw,
+					black min(0.24vw, 0.24vh) min(0.24vw, 0.24vh) 0vw,
+					black min(0.25vw, 0.25vh) min(0.25vw, 0.25vh) 0vw,
+					black min(0.26vw, 0.26vh) min(0.26vw, 0.26vh) 0vw,
+					black min(0.27vw, 0.27vh) min(0.27vw, 0.27vh) 0vw,
+					black min(0.28vw, 0.28vh) min(0.28vw, 0.28vh) 0vw,
+					black min(0.29vw, 0.29vh) min(0.29vw, 0.29vh) 0vw,
+					black min(0.3vw, 0.3vh) min(0.3vw, 0.3vh) 0vw,
+					black min(0.31vw, 0.31vh) min(0.31vw, 0.31vh) 0vw,
+					black min(0.32vw, 0.32vh) min(0.32vw, 0.32vh) 0vw,
+					black min(0.33vw, 0.33vh) min(0.33vw, 0.33vh) 0vw,
+					black min(0.34vw, 0.34vh) min(0.34vw, 0.34vh) 0vw,
+					black min(0.35vw, 0.35vh) min(0.35vw, 0.35vh) 0vw,
+					black min(0.36vw, 0.36vh) min(0.36vw, 0.36vh) 0vw;
 			}
 		}
 
@@ -156,6 +156,13 @@
 				text-align: center;
 				text-transform: uppercase;
 				font-size: min(2.2vh, 2.2vw);
+				line-height: min(2.4vh, 2.4vw);
+				letter-spacing: min(0.07vh, 0.07vw);
+			}
+			.category-div.long-cat {
+				font-size: min(1.76vh, 1.76vw);
+				line-height: min(1.92vh, 1.92vw);
+				letter-spacing: min(0.056vh, 0.056vw);
 			}
 			.comment-div {
 				font-family: 'Korinna Regular BT', serif;
@@ -235,10 +242,14 @@
 	.clue-display {
 		grid-row: 3/7;
 		grid-column: 2/6;
-		padding: 5%;
 		border: 1px solid white;
 		font-family: 'Korinna', 'Korinna Regular BT', sans-serif;
 		font-size: min(26px, 4.6vw) !important;
+		letter-spacing: min(0.08px, 0.15vw);
+		/* line-height: min(30.3px, 5.37vw); */
+		text-align: center;
+		padding: 0 12%;
+		white-space: pre-line;
 		text-shadow:
 			black min(0vw, 0px) min(0vw, 0px) 0vw,
 			black min(0.01vw, 0.057666666666666665px)
@@ -349,11 +360,7 @@
 			black min(0.59vw, 3.402333333333333px) min(0.59vw, 3.402333333333333px)
 				0vw,
 			black min(0.6vw, 3.46px) min(0.6vw, 3.46px) 0vw;
-		letter-spacing: min(0.08px, 0.15vw);
-		/* line-height: min(30.3px, 5.37vw); */
-		text-align: center;
-		padding: 0 12%;
-		white-space: pre-line;
+
 		.clue-value {
 			font-family: 'Swiss 911 Compressed', sans-serif;
 			color: var(--yellow);
@@ -434,6 +441,7 @@
 
 		.category-div {
 			font-size: min(120px, 12vw);
+			line-height: min(130px, 13vw);
 		}
 	}
 
@@ -506,9 +514,13 @@
 					height: 20%;
 					background-image: url('/img/clue_bg_blue.png');
 					background-size: cover;
-					font-family: Arial, Helvetica, sans-serif;
+					font-family: 'Zurich', Arial, Helvetica, sans-serif;
 					font-weight: bold;
 					text-align: center;
+					letter-spacing: 0;
+					span.currency {
+						margin-right: min(0.357vw, 0.357vh);
+					}
 				}
 				.score.neg {
 					color: red;
@@ -582,7 +594,7 @@
 				font-size: min(2vw, 2vh);
 			}
 			.score-display {
-				font-size: min(2.8vh, 2.8vw);
+				font-size: min(3vh, 3vw);
 			}
 
 			.lectern-left::before,

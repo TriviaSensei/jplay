@@ -114,7 +114,11 @@ const setKeyButton = document.querySelector('#set-button');
 const buzzerKey = document.querySelector('#current-key');
 const startGameModal = isKey ? null : new bootstrap.Modal('#start-game-modal');
 const cancelGame = document.querySelector('#confirm-cancel');
-
+const joinGameButton = document.querySelector('#join-game');
+const spectateGame = document.querySelector('#spectate-game');
+const newPlayerName = document.querySelector('#player-name');
+const joinCode = document.querySelector('#room-code');
+const playerContainer = document.querySelector('.player-container');
 const egm = document.querySelector('#end-game-modal');
 
 const endGameMessage = egm?.querySelector('#end-game-result');
@@ -479,9 +483,89 @@ const isSpectator = () => {
 	return !isHost() && !isPlayer();
 };
 
+const handleCreateGame = async () => {
+	const gameType = document.querySelector('[name="play-type"]:checked')?.value;
+	if (!gameType) return showMessage('error', 'No game type selected');
+	else if (gameType !== 'local' && gameType !== 'remote')
+		return showMessage('error', 'Invalid game type selected');
+	const fileType = document.querySelector('[name="load-type"]:checked')?.value;
+	if (!fileType) return showMessage('error', 'File location not specified');
+	let data;
+	if (fileType === 'local') {
+		const file = fileUpload.files[0] || currentFile;
+		if (!file) return showMessage('error', 'No file specified');
+		else if (file.type !== 'application/json')
+			return showMessage('error', 'Invalid file format');
+		const reader = new FileReader();
+		reader.addEventListener('load', () => {
+			data = JSON.parse(reader.result);
+			const val = validateGameData(data.rounds);
+			if (val.status !== 'OK') return showMessage('error', val.message, 2000);
+			startGame(gameType, data.rounds);
+		});
+		reader.readAsText(file, 'utf-8');
+	} else if (fileType === 'remote') {
+		const filename = document
+			.querySelector('.file.selected')
+			?.getAttribute('data-file');
+		if (!filename) return showMessage('error', 'No file selected');
+		const handler = (res) => {
+			if (res.status === 'success') data = res.data.rounds;
+			else return showMessage('error', res.message);
+
+			const val = validateGameData(data);
+			if (val.status !== 'OK') return showMessage('error', val.message);
+			startGame(gameType, data);
+		};
+		const url = `/games/${filename}`;
+		showMessage('info', 'Starting game...');
+		handleRequest(url, 'GET', null, handler);
+	} else return showMessage('error', 'Invalid file location specified');
+};
+const handleJoinGame = () => {
+	const st = csh.getState();
+	const nameData = st.paths.map((p) => p.getAttribute('d'));
+	const name = newPlayerName.value;
+
+	if (!name) return showMessage('error', 'You must enter your name');
+	if (!joinCode.value)
+		return showMessage('error', 'You must enter a join code');
+
+	socket.emit(
+		'join-game',
+		{
+			name,
+			nameData,
+			uid,
+			joinCode: joinCode.value,
+		},
+		withTimeout(
+			(data) => {
+				if (data.status !== 'OK') showMessage('error', data.message);
+				else if (data.message) showMessage('info', data.message);
+				sh.setState(data.gameState);
+				moveBoard();
+			},
+			() => {
+				showMessage('error', 'Joining game timed out.');
+			},
+		),
+	);
+};
+
 //handle key press
 const handleKeyPress = async (e) => {
-	if (!isHost() && !isPlayer()) return;
+	if (!isHost() && !isPlayer()) {
+		if (['enter', 'return'].includes(e.key.toLowerCase())) {
+			const tp = document.querySelector('.tab-pane.active.show');
+			if (!tp) return;
+			const tpId = tp.getAttribute('id');
+			if (tpId === 'host-tab-pane') return handleCreateGame();
+			else if (tpId === 'play-tab-pane') return handleJoinGame();
+			else return;
+		}
+		return;
+	}
 	const setKey = setKeyButton.getAttribute('data-toggled') === 'true';
 	const state = sh.getState();
 	if (!state) return;
@@ -878,50 +962,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	if (createButton) {
-		createButton.addEventListener('click', async () => {
-			const gameType = document.querySelector(
-				'[name="play-type"]:checked',
-			)?.value;
-			if (!gameType) return showMessage('error', 'No game type selected');
-			else if (gameType !== 'local' && gameType !== 'remote')
-				return showMessage('error', 'Invalid game type selected');
-			const fileType = document.querySelector(
-				'[name="load-type"]:checked',
-			)?.value;
-			if (!fileType) return showMessage('error', 'File location not specified');
-			let data;
-			if (fileType === 'local') {
-				const file = fileUpload.files[0] || currentFile;
-				if (!file) return showMessage('error', 'No file specified');
-				else if (file.type !== 'application/json')
-					return showMessage('error', 'Invalid file format');
-				const reader = new FileReader();
-				reader.addEventListener('load', () => {
-					data = JSON.parse(reader.result);
-					const val = validateGameData(data.rounds);
-					if (val.status !== 'OK')
-						return showMessage('error', val.message, 2000);
-					startGame(gameType, data.rounds);
-				});
-				reader.readAsText(file, 'utf-8');
-			} else if (fileType === 'remote') {
-				const filename = document
-					.querySelector('.file.selected')
-					?.getAttribute('data-file');
-				if (!filename) return showMessage('error', 'No file selected');
-				const handler = (res) => {
-					if (res.status === 'success') data = res.data.rounds;
-					else return showMessage('error', res.message);
-
-					const val = validateGameData(data);
-					if (val.status !== 'OK') return showMessage('error', val.message);
-					startGame(gameType, data);
-				};
-				const url = `/games/${filename}`;
-				showMessage('info', 'Starting game...');
-				handleRequest(url, 'GET', null, handler);
-			} else return showMessage('error', 'Invalid file location specified');
-		});
+		createButton.addEventListener('click', handleCreateGame);
 	}
 
 	const createMetadataTags = (metadata) => {
@@ -1380,7 +1421,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (state.state === 'showClueValue') {
 				liveClueText.classList.add('d-none');
 				liveClueImage.classList.add('d-none');
-				console.log(cat, row, liveClueData.value);
 				liveClueValue.innerHTML = `$${liveClueData.value}`;
 				liveClueValue.classList.remove('d-none');
 				return;
@@ -1424,9 +1464,16 @@ document.addEventListener('DOMContentLoaded', () => {
 		} else if (state.state === 'select') {
 			showView(gameBoard);
 			gameHeaders.forEach((g, i) => {
-				g.classList.remove('category-hidden');
 				const cd = g.querySelector('.category-div');
-				cd.innerHTML = getCategory(i)?.category || '';
+				const cat = getCategory(i);
+				if (!cat || cat.clues.every((c) => c.selected)) {
+					cd.innerHTML = '';
+				} else {
+					if (cat.category.trim().length >= 30) cd.classList.add('long-cat');
+					else cd.classList.remove('long-cat');
+					cd.innerHTML = cat.category.trim();
+				}
+				g.classList.remove('category-hidden');
 			});
 		} else if (state.state === 'betweenRounds') {
 			showView(gameBoard);
@@ -1747,9 +1794,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (!e.detail) return;
 			if (isKey && e.detail.state === 'buzz') {
 				const bz = e.detail.currentBuzz;
-				if (bz.data.length >= i + 1 && bz.data[i].buzz) {
+				if (
+					bz.data.length >= i + 1 &&
+					bz.data[i].buzz &&
+					bz.data[i].time !== null &&
+					!isNaN(bz.data[i].time)
+				) {
 					e.target.classList.remove('neg');
-					e.target.innerHTML = `${bz.data[i].time}ms`;
+					e.target.innerHTML = `${bz.data[i].time} ms`;
 					return;
 				}
 			}
@@ -1765,7 +1817,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			else e.target.classList.add('neg');
 
 			const str = Math.abs(score).toLocaleString('en');
-			e.target.innerHTML = `$${str}`;
+			e.target.innerHTML = `<span class="currency">$</span>${str}`;
 		});
 	});
 
@@ -2248,49 +2300,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	//
-	const joinGameButton = document.querySelector('#join-game');
-	const spectateGame = document.querySelector('#spectate-game');
-	const newPlayerName = document.querySelector('#player-name');
-	const joinCode = document.querySelector('#room-code');
-	const playerContainer = document.querySelector('.player-container');
 	let buzzerButton, playerScore;
 	if (playerContainer) {
 		buzzerButton = playerContainer.querySelector('#buzzer');
 		playerScore = playerContainer.querySelector('.score');
 	}
 
-	if (joinGameButton)
-		joinGameButton.addEventListener('click', () => {
-			const st = csh.getState();
-			const nameData = st.paths.map((p) => p.getAttribute('d'));
-			const name = newPlayerName.value;
-
-			if (!name) return showMessage('error', 'You must enter your name');
-			if (!joinCode.value)
-				return showMessage('error', 'You must enter a join code');
-
-			socket.emit(
-				'join-game',
-				{
-					name,
-					nameData,
-					uid,
-					joinCode: joinCode.value,
-				},
-				withTimeout(
-					(data) => {
-						if (data.status !== 'OK') showMessage('error', data.message);
-						else if (data.message) showMessage('info', data.message);
-						sh.setState(data.gameState);
-						moveBoard();
-					},
-					() => {
-						showMessage('error', 'Joining game timed out.');
-					},
-				),
-			);
-		});
+	if (joinGameButton) joinGameButton.addEventListener('click', handleJoinGame);
 
 	if (spectateGame)
 		spectateGame.addEventListener('click', () => {
@@ -2383,7 +2399,9 @@ document.addEventListener('DOMContentLoaded', () => {
 					else scoreDisp.classList.remove('neg');
 
 					scoreDisp.innerHTML =
-						name === '' ? '' : `$${Math.abs(score).toLocaleString('en')}`;
+						name === ''
+							? ''
+							: `<span class="currency">$</span>${Math.abs(score).toLocaleString('en')}`;
 
 					if (state.control === ind) l.classList.add('control');
 					else l.classList.remove('control');

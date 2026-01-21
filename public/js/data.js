@@ -45,7 +45,7 @@ const stats = [
 				{
 					early: 0,
 					total: 0,
-				}
+				},
 			);
 			const pct =
 				agg.total === 0 ? NaN : ((100 * agg.early) / agg.total).toFixed(1);
@@ -65,7 +65,7 @@ const stats = [
 				{
 					first: 0,
 					total: 0,
-				}
+				},
 			);
 			const pct =
 				agg.total === 0 ? NaN : ((100 * agg.first) / agg.total).toFixed(1);
@@ -77,7 +77,10 @@ const stats = [
 		aggregate: (gameData, i) => {
 			const agg = gameData.reduce(
 				(p, c) => {
-					const race = c.data[i].buzz && c.data[i].time <= 750;
+					//we buzzed, a time was registered, and it was <= 750ms
+					//if we buzzed, but it took longer than 750ms, it will not count against our reaction time
+					const race =
+						c.data[i].buzz && c.data[i].time !== null && c.data[i].time <= 750;
 					return {
 						total: race ? p.total + c.data[i].time : p.total,
 						count: race ? p.count + 1 : p.count,
@@ -86,7 +89,7 @@ const stats = [
 				{
 					total: 0,
 					count: 0,
-				}
+				},
 			);
 			if (agg.count > 0) return `${(agg.total / agg.count).toFixed(0)}`;
 			return `N/A`;
@@ -105,7 +108,7 @@ const stats = [
 				{
 					correct: 0,
 					incorrect: 0,
-				}
+				},
 			);
 			return `${agg.correct}/${agg.correct + agg.incorrect} (${(
 				(100 * agg.correct) /
@@ -155,7 +158,7 @@ const stats = [
 					count: 0,
 					correct: 0,
 					result: 0,
-				}
+				},
 			);
 			return `${agg.correct}/${agg.count} (${
 				agg.result < 0 ? '-' : ''
@@ -185,7 +188,7 @@ document.addEventListener(
 			nameRow.appendChild(cell);
 			const score = createElement(`td${p.score < 0 ? '.neg' : ''}`);
 			score.innerHTML = `${p.score < 0 ? '-' : ''}$${Math.abs(
-				p.score
+				p.score,
 			).toLocaleString('en')}`;
 			scoreRow.appendChild(score);
 		});
@@ -206,5 +209,5 @@ document.addEventListener(
 		const evt = new CustomEvent('data-ready');
 		document.dispatchEvent(evt);
 	},
-	{ once: true }
+	{ once: true },
 );

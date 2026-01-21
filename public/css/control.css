@@ -4,7 +4,7 @@ body {
 }
 
 .game-container {
-	width: min(1000px, 80%);
+	width: min(1020px, calc(80% + 20px));
 }
 
 .game-container[data-round='1'] {
@@ -30,71 +30,89 @@ body {
 	.lectern {
 		display: none;
 	} */
-	.game-board {
-		/*actually 80% of the window*/
-		width: min(100%, 1000px);
-		.clue-box {
-			box-sizing: border-box;
-			.clue-value {
-				margin: auto;
-				font-size: min(4vw, 50px);
-				letter-spacing: min(0.225vw, 2.8125px);
-				text-shadow:
-					black min(0vw, 0px) min(0vw, 0px) 0vw,
-					black min(0.008vw, 0.1px) min(0.008vw, 0.1px) 0vw,
-					black min(0.016vw, 0.2px) min(0.016vw, 0.2px) 0vw,
-					black min(0.024vw, 0.3px) min(0.024vw, 0.3px) 0vw,
-					black min(0.032vw, 0.4px) min(0.032vw, 0.4px) 0vw,
-					black min(0.04vw, 0.5px) min(0.04vw, 0.5px) 0vw,
-					black min(0.048vw, 0.6px) min(0.048vw, 0.6px) 0vw,
-					black min(0.056vw, 0.7px) min(0.056vw, 0.7px) 0vw,
-					black min(0.064vw, 0.8px) min(0.064vw, 0.8px) 0vw,
-					black min(0.072vw, 0.9px) min(0.072vw, 0.9px) 0vw,
-					black min(0.08vw, 1px) min(0.08vw, 1px) 0vw,
-					black min(0.088vw, 1.1px) min(0.088vw, 1.1px) 0vw,
-					black min(0.096vw, 1.2px) min(0.096vw, 1.2px) 0vw,
-					black min(0.104vw, 1.3px) min(0.104vw, 1.3px) 0vw,
-					black min(0.112vw, 1.4px) min(0.112vw, 1.4px) 0vw,
-					black min(0.12vw, 1.5px) min(0.12vw, 1.5px) 0vw,
-					black min(0.128vw, 1.6px) min(0.128vw, 1.6px) 0vw,
-					black min(0.136vw, 1.7px) min(0.136vw, 1.7px) 0vw,
-					black min(0.144vw, 1.8px) min(0.144vw, 1.8px) 0vw,
-					black min(0.152vw, 1.9px) min(0.152vw, 1.9px) 0vw,
-					black min(0.16vw, 2px) min(0.16vw, 2px) 0vw,
-					black min(0.168vw, 2.1px) min(0.168vw, 2.1px) 0vw,
-					black min(0.176vw, 2.2px) min(0.176vw, 2.2px) 0vw,
-					black min(0.184vw, 2.3px) min(0.184vw, 2.3px) 0vw,
-					black min(0.192vw, 2.4px) min(0.192vw, 2.4px) 0vw,
-					black min(0.2vw, 2.5px) min(0.2vw, 2.5px) 0vw,
-					black min(0.208vw, 2.6px) min(0.208vw, 2.6px) 0vw,
-					black min(0.216vw, 2.7px) min(0.216vw, 2.7px) 0vw,
-					black min(0.224vw, 2.8px) min(0.224vw, 2.8px) 0vw,
-					black min(0.232vw, 2.9px) min(0.232vw, 2.9px) 0vw,
-					black min(0.24vw, 3px) min(0.24vw, 3px) 0vw,
-					black min(0.248vw, 3.1px) min(0.248vw, 3.1px) 0vw,
-					black min(0.256vw, 3.2px) min(0.256vw, 3.2px) 0vw,
-					black min(0.264vw, 3.3px) min(0.264vw, 3.3px) 0vw,
-					black min(0.272vw, 3.4px) min(0.272vw, 3.4px) 0vw,
-					black min(0.28vw, 3.5px) min(0.28vw, 3.5px) 0vw,
-					black min(0.288vw, 3.6px) min(0.288vw, 3.6px) 0vw,
-					black min(0.296vw, 3.7px) min(0.296vw, 3.7px) 0vw;
+	.board-container {
+		.category-scroll {
+			.category-box .category-div {
+				font-size: min(96px, 9.6vw);
+				line-height: min(104px, 10.4vw);
+				letter-spacing: min(3.2px, 0.32vw);
 			}
 		}
-		.clue-box.dd {
-			background-image: none;
-			background-color: var(--yellow);
-			color: var(--blue);
-			.clue-value {
-				text-shadow: none !important;
+		.game-board {
+			/*actually 80% of the window*/
+			width: min(100%, 1000px);
+			.clue-box {
+				box-sizing: border-box;
+				.clue-value {
+					margin: auto;
+					font-size: min(4vw, 50px);
+					letter-spacing: min(0.225vw, 2.8125px);
+					text-shadow:
+						black min(0vw, 0px) min(0vw, 0px) 0vw,
+						black min(0.008vw, 0.1px) min(0.008vw, 0.1px) 0vw,
+						black min(0.016vw, 0.2px) min(0.016vw, 0.2px) 0vw,
+						black min(0.024vw, 0.3px) min(0.024vw, 0.3px) 0vw,
+						black min(0.032vw, 0.4px) min(0.032vw, 0.4px) 0vw,
+						black min(0.04vw, 0.5px) min(0.04vw, 0.5px) 0vw,
+						black min(0.048vw, 0.6px) min(0.048vw, 0.6px) 0vw,
+						black min(0.056vw, 0.7px) min(0.056vw, 0.7px) 0vw,
+						black min(0.064vw, 0.8px) min(0.064vw, 0.8px) 0vw,
+						black min(0.072vw, 0.9px) min(0.072vw, 0.9px) 0vw,
+						black min(0.08vw, 1px) min(0.08vw, 1px) 0vw,
+						black min(0.088vw, 1.1px) min(0.088vw, 1.1px) 0vw,
+						black min(0.096vw, 1.2px) min(0.096vw, 1.2px) 0vw,
+						black min(0.104vw, 1.3px) min(0.104vw, 1.3px) 0vw,
+						black min(0.112vw, 1.4px) min(0.112vw, 1.4px) 0vw,
+						black min(0.12vw, 1.5px) min(0.12vw, 1.5px) 0vw,
+						black min(0.128vw, 1.6px) min(0.128vw, 1.6px) 0vw,
+						black min(0.136vw, 1.7px) min(0.136vw, 1.7px) 0vw,
+						black min(0.144vw, 1.8px) min(0.144vw, 1.8px) 0vw,
+						black min(0.152vw, 1.9px) min(0.152vw, 1.9px) 0vw,
+						black min(0.16vw, 2px) min(0.16vw, 2px) 0vw,
+						black min(0.168vw, 2.1px) min(0.168vw, 2.1px) 0vw,
+						black min(0.176vw, 2.2px) min(0.176vw, 2.2px) 0vw,
+						black min(0.184vw, 2.3px) min(0.184vw, 2.3px) 0vw,
+						black min(0.192vw, 2.4px) min(0.192vw, 2.4px) 0vw,
+						black min(0.2vw, 2.5px) min(0.2vw, 2.5px) 0vw,
+						black min(0.208vw, 2.6px) min(0.208vw, 2.6px) 0vw,
+						black min(0.216vw, 2.7px) min(0.216vw, 2.7px) 0vw,
+						black min(0.224vw, 2.8px) min(0.224vw, 2.8px) 0vw,
+						black min(0.232vw, 2.9px) min(0.232vw, 2.9px) 0vw,
+						black min(0.24vw, 3px) min(0.24vw, 3px) 0vw,
+						black min(0.248vw, 3.1px) min(0.248vw, 3.1px) 0vw,
+						black min(0.256vw, 3.2px) min(0.256vw, 3.2px) 0vw,
+						black min(0.264vw, 3.3px) min(0.264vw, 3.3px) 0vw,
+						black min(0.272vw, 3.4px) min(0.272vw, 3.4px) 0vw,
+						black min(0.28vw, 3.5px) min(0.28vw, 3.5px) 0vw,
+						black min(0.288vw, 3.6px) min(0.288vw, 3.6px) 0vw,
+						black min(0.296vw, 3.7px) min(0.296vw, 3.7px) 0vw;
+				}
 			}
-		}
-		.category-box {
+			.clue-box.dd {
+				background-image: none;
+				background-color: var(--yellow);
+				color: var(--blue);
+				.clue-value {
+					text-shadow: none !important;
+				}
+			}
+			.category-box {
+				.category-div {
+					font-size: min(1.76vw, 22px);
+					line-height: min(1.91vw, 24px);
+					letter-spacing: min(0.059vw, 0.7px);
+				}
+				.category-div.long-cat {
+					font-size: min(1.408vw, 17.6px);
+					line-height: min(1.525vw, 19.1px);
+					letter-spacing: min(0.047vw, 0.586px);
+				}
+			}
 			.category-div {
-				font-size: min(1.44vw, 18px);
+				font-size: min(9.6vw, 120px);
+				line-height: min(10.4vw, 130px);
+				letter-spacing: min(0.32vw, 4px);
 			}
-		}
-		.category-div {
-			font-size: min(9.6vw, 120px);
 		}
 	}
 }
@@ -191,7 +209,7 @@ body {
 }
 
 .control-container {
-	width: 20%;
+	width: calc(20% - 20px);
 	padding: 1%;
 	display: flex;
 	flex-direction: column;
@@ -207,5 +225,6 @@ body {
 }
 
 .join-code {
-	font-size: 2rem;
+	font-size: 3rem;
+	letter-spacing: 0.4rem;
 }
