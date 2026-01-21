@@ -19,6 +19,13 @@
 		url(./Korinna.woff2) format('woff2'),
 		url(./Korinna.woff) format('woff');
 }
+
+@font-face {
+	font-family: 'Korinna';
+	font-weight: 400;
+	src: url(./korinna_bold.ttf);
+}
+
 @font-face {
 	font-family: 'Swiss 911 Compressed';
 	font-weight: 400;
@@ -82,12 +89,10 @@ body.dark {
 
 .category-display {
 	font-family: 'Swiss 911', sans-serif;
-	text-shadow: 2px 2px #000;
 }
 
 .clue-display {
 	font-family: 'Korinna Regular BT', serif;
-	text-shadow: 2px 2px #000;
 }
 
 .response-display {

@@ -59,8 +59,8 @@
 	.board-display-container {
 		/* width: min(600px, 100%, 84vh);
 		height: min(450px, 75vw, 63%); */
-		width: min(800px, 100%, 84vh);
-		height: min(465.07px, 58.13vw, 48.83%);
+		width: min(1000px, 100%);
+		height: min(581.38px, 58.13vw);
 		position: relative;
 		text-shadow: 2px 2px #000;
 
@@ -75,7 +75,8 @@
 			transform: translate(-50%, -50%);
 			display: flex;
 			border: 2px solid var(--white);
-			background-color: var(--blue);
+			background-image: url('/img/clue_bg_blue.png');
+			background-size: cover;
 			font-family: 'Swiss 911', sans-serif;
 			.category-text {
 				margin: auto;
@@ -87,7 +88,7 @@
 		.category-scroll {
 			.category-box {
 				.category-div {
-					font-size: min(72px, 12vw, 10vh);
+					font-size: min(96px, 12vw);
 				}
 			}
 		}
@@ -97,7 +98,8 @@
 			height: 100%;
 			.clue-box,
 			.category-box {
-				background-color: var(--blue);
+				background-image: url('/img/clue_bg_blue.png');
+				background-size: cover;
 				color: var(--white);
 				border: 1px solid var(--white);
 			}
@@ -109,19 +111,55 @@
 				padding: 5% 10%;
 				color: var(--yellow);
 				cursor: pointer;
-
 				.clue-value {
 					margin: auto;
-					font-size: min(39px, 5vw) !important;
-					letter-spacing: min(2px, 0.35vw);
-					text-shadow: min(0.7vw, 4.3px) min(0.7vw, 4.3px) #000;
+					font-size: min(5vw, 50px);
+					letter-spacing: min(0.25vw, 2.5px);
+					text-shadow:
+						black min(0vw, 0px) min(0vw, 0px) 0vw,
+						black min(0.01vw, 0.1px) min(0.01vw, 0.1px) 0vw,
+						black min(0.02vw, 0.2px) min(0.02vw, 0.2px) 0vw,
+						black min(0.03vw, 0.3px) min(0.03vw, 0.3px) 0vw,
+						black min(0.04vw, 0.4px) min(0.04vw, 0.4px) 0vw,
+						black min(0.05vw, 0.5px) min(0.05vw, 0.5px) 0vw,
+						black min(0.06vw, 0.6px) min(0.06vw, 0.6px) 0vw,
+						black min(0.07vw, 0.7px) min(0.07vw, 0.7px) 0vw,
+						black min(0.08vw, 0.8px) min(0.08vw, 0.8px) 0vw,
+						black min(0.09vw, 0.9px) min(0.09vw, 0.9px) 0vw,
+						black min(0.1vw, 1px) min(0.1vw, 1px) 0vw,
+						black min(0.11vw, 1.1px) min(0.11vw, 1.1px) 0vw,
+						black min(0.12vw, 1.2px) min(0.12vw, 1.2px) 0vw,
+						black min(0.13vw, 1.3px) min(0.13vw, 1.3px) 0vw,
+						black min(0.14vw, 1.4px) min(0.14vw, 1.4px) 0vw,
+						black min(0.15vw, 1.5px) min(0.15vw, 1.5px) 0vw,
+						black min(0.16vw, 1.6px) min(0.16vw, 1.6px) 0vw,
+						black min(0.17vw, 1.7px) min(0.17vw, 1.7px) 0vw,
+						black min(0.18vw, 1.8px) min(0.18vw, 1.8px) 0vw,
+						black min(0.19vw, 1.9px) min(0.19vw, 1.9px) 0vw,
+						black min(0.2vw, 2px) min(0.2vw, 2px) 0vw,
+						black min(0.21vw, 2.1px) min(0.21vw, 2.1px) 0vw,
+						black min(0.22vw, 2.2px) min(0.22vw, 2.2px) 0vw,
+						black min(0.23vw, 2.3px) min(0.23vw, 2.3px) 0vw,
+						black min(0.24vw, 2.4px) min(0.24vw, 2.4px) 0vw,
+						black min(0.25vw, 2.5px) min(0.25vw, 2.5px) 0vw,
+						black min(0.26vw, 2.6px) min(0.26vw, 2.6px) 0vw,
+						black min(0.27vw, 2.7px) min(0.27vw, 2.7px) 0vw,
+						black min(0.28vw, 2.8px) min(0.28vw, 2.8px) 0vw,
+						black min(0.29vw, 2.9px) min(0.29vw, 2.9px) 0vw,
+						black min(0.3vw, 3px) min(0.3vw, 3px) 0vw,
+						black min(0.31vw, 3.1px) min(0.31vw, 3.1px) 0vw,
+						black min(0.32vw, 3.2px) min(0.32vw, 3.2px) 0vw,
+						black min(0.33vw, 3.3px) min(0.33vw, 3.3px) 0vw,
+						black min(0.34vw, 3.4px) min(0.34vw, 3.4px) 0vw,
+						black min(0.35vw, 3.5px) min(0.35vw, 3.5px) 0vw,
+						black min(0.36vw, 3.6px) min(0.36vw, 3.6px) 0vw,
+						black min(0.37vw, 3.7px) min(0.37vw, 3.7px) 0vw;
 				}
 			}
 			.category-box {
 				display: flex;
 				flex-direction: column;
 				padding: 0 5%;
-				font-size: min(15px, 2.5vw) !important;
 
 				.category-div {
 					font-family: 'Swiss 911', sans-serif;
@@ -143,7 +181,6 @@
 				position: absolute;
 				display: none;
 				background-image: url('/img/dd.jpg');
-				background-color: var(--blue);
 				background-repeat: no-repeat;
 				background-size: contain;
 				background-position: center;
@@ -158,40 +195,24 @@
 		}
 	}
 
-	/*when the window is at least 600px wide, we do the font size by*/
-
-	/* wider aspect ratio*/
-	@media (min-aspect-ratio: 0.89) {
-		.category-display,
-		.value-display {
-			font-size: min(24px, 4vw) !important;
-		}
-		.clue-display {
-			font-size: min(26px, 4.6vw) !important;
-		}
-		.category-large {
-			font-size: min(80px, 13.3vw) !important;
-		}
-		.category-box {
-			font-size: min(15px, 2.5vw) !important;
-		}
+	.category-display,
+	.value-display {
+		font-size: min(36px, 3.6vw) !important;
 	}
-
-	@media (max-aspect-ratio: 0.89) {
-		.category-display,
-		.value-display {
-			font-size: min(24px, 3vw) !important;
-		}
-		.clue-display {
-			font-size: min(21px, 3.625vw) !important;
-		}
-		.category-large {
-			font-size: min(80px, 10.8vw) !important;
-		}
-
-		.category-box {
-			font-size: min(12px, 1vw) !important;
-		}
+	.clue-display {
+		font-family: 'Korinna', 'Korinna Regular BT', sans-serif;
+		font-size: min(26px, 4.6vw) !important;
+		letter-spacing: min(0.08px, 0.15vw);
+		/* line-height: min(30.3px, 5.37vw); */
+		text-align: center;
+		padding: 0 12%;
+		white-space: pre-line;
+	}
+	.category-large {
+		font-size: min(108px, 10.8vw) !important;
+	}
+	.category-box {
+		font-size: min(18px, 1.8vw) !important;
 	}
 
 	.buzzer-container {
@@ -200,6 +221,7 @@
 			background-color: var(--lt-blue);
 			color: white;
 			text-wrap: wrap;
+			height: min(max(100%, 5em), 5em);
 		}
 		.btn-buzzer.armed {
 			background-color: white;

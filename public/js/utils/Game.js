@@ -1094,7 +1094,9 @@ class Game {
 				? 'share join code or have players join locally'
 				: 'enter player names on main screen'
 		}, test the buzzers, then press "advance" when ready.${
-			this.isRemote ? `<br><br>Join code: ${this.joinCode.toUpperCase()}` : ''
+			this.isRemote
+				? `<br><br>Join code: <br><span class="join-code">${this.joinCode.toUpperCase()}</span>`
+				: ''
 		}`;
 		this.gameData = [];
 		this.gameState = {

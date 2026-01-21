@@ -46,13 +46,13 @@
 .game-container[data-round='1'],
 .board-display-container[data-round='1'] {
 	.category-hidden {
-		background-image: url('/img/cat_header_1.jpg');
+		background-image: url('/img/cat_header_1.jpg') !important;
 	}
 }
 .game-container[data-round='2'],
 .board-display-container[data-round='2'] {
 	.category-hidden {
-		background-image: url('/img/cat_header_2.jpg');
+		background-image: url('/img/cat_header_2.jpg') !important;
 	}
 }
 
@@ -79,35 +79,62 @@
 
 		.clue-box,
 		.category-box {
-			background-color: var(--blue);
 			color: var(--white);
 			border: 1px solid var(--white);
 		}
 
 		.clue-box {
+			background-image: url('/img/clue_bg_blue.png');
+			background-size: cover;
 			font-family: 'Swiss 911 Compressed', serif;
 			text-align: center;
 			display: flex;
 			padding: 5% 10%;
 			color: var(--yellow);
 			cursor: pointer;
-
+			/*width of .game-container is min(80%,1000px)*/
 			.clue-value {
 				margin: auto;
-			}
-			@media (max-aspect-ratio: 0.89) {
-				.clue-value {
-					font-size: 4.8vw;
-					letter-spacing: 0.27vw;
-					text-shadow: 0.5vw 0.5vw #000;
-				}
-			}
-			@media (aspect-ratio > 0.89) {
-				.clue-value {
-					font-size: 4.2vh;
-					letter-spacing: 0.25vh;
-					text-shadow: 0.5vh 0.5vh #000;
-				}
+				font-size: min(4.8vw, 60px);
+				letter-spacing: min(0.27vw, 3.375px);
+				text-shadow:
+					black 0vw 0vw 0vw,
+					black 0.01vw 0.01vw 0vw,
+					black 0.02vw 0.02vw 0vw,
+					black 0.03vw 0.03vw 0vw,
+					black 0.04vw 0.04vw 0vw,
+					black 0.05vw 0.05vw 0vw,
+					black 0.06vw 0.06vw 0vw,
+					black 0.07vw 0.07vw 0vw,
+					black 0.08vw 0.08vw 0vw,
+					black 0.09vw 0.09vw 0vw,
+					black 0.1vw 0.1vw 0vw,
+					black 0.11vw 0.11vw 0vw,
+					black 0.12vw 0.12vw 0vw,
+					black 0.13vw 0.13vw 0vw,
+					black 0.14vw 0.14vw 0vw,
+					black 0.15vw 0.15vw 0vw,
+					black 0.16vw 0.16vw 0vw,
+					black 0.17vw 0.17vw 0vw,
+					black 0.18vw 0.18vw 0vw,
+					black 0.19vw 0.19vw 0vw,
+					black 0.2vw 0.2vw 0vw,
+					black 0.21vw 0.21vw 0vw,
+					black 0.22vw 0.22vw 0vw,
+					black 0.23vw 0.23vw 0vw,
+					black 0.24vw 0.24vw 0vw,
+					black 0.25vw 0.25vw 0vw,
+					black 0.26vw 0.26vw 0vw,
+					black 0.27vw 0.27vw 0vw,
+					black 0.28vw 0.28vw 0vw,
+					black 0.29vw 0.29vw 0vw,
+					black 0.3vw 0.3vw 0vw,
+					black 0.31vw 0.31vw 0vw,
+					black 0.32vw 0.32vw 0vw,
+					black 0.33vw 0.33vw 0vw,
+					black 0.34vw 0.34vw 0vw,
+					black 0.35vw 0.35vw 0vw,
+					black 0.36vw 0.36vw 0vw;
 			}
 		}
 
@@ -116,6 +143,8 @@
 		}
 
 		.category-box {
+			background-color: var(--blue);
+			background-image: url('/img/clue_bg_blue.png');
 			display: flex;
 			flex-direction: column;
 			padding: 0 5%;
@@ -126,20 +155,11 @@
 				margin: auto;
 				text-align: center;
 				text-transform: uppercase;
+				font-size: min(2.2vh, 2.2vw);
 			}
 			.comment-div {
 				font-family: 'Korinna Regular BT', serif;
 				text-transform: uppercase;
-			}
-			@media (max-aspect-ratio: 0.89) {
-				.category-div {
-					font-size: 2.2vw;
-				}
-			}
-			@media (aspect-ratio > 0.89) {
-				.category-div {
-					font-size: 2vh;
-				}
 			}
 		}
 
@@ -164,18 +184,21 @@
 		}
 	}
 }
+
+.live-clue-display > div {
+	color: white;
+	background-image: url('/img/clue_bg_blue.png');
+	background-size: cover;
+	text-align: center;
+	text-transform: uppercase;
+	display: flex;
+}
+
 .live-clue-display {
 	text-shadow: 2px 2px #000;
 
-	div {
-		color: white;
-		background-color: var(--blue);
-		text-align: center;
-		text-transform: uppercase;
-		display: flex;
-	}
-
 	.side-light {
+		background-image: none;
 		background-color: var(--dk-gray);
 		grid-row: 1/7;
 		display: flex;
@@ -208,31 +231,135 @@
 			color: var(--yellow);
 		}
 	}
+
 	.clue-display {
 		grid-row: 3/7;
 		grid-column: 2/6;
 		padding: 5%;
 		border: 1px solid white;
-
-		font-family: 'Korinna Regular BT', serif;
-
+		font-family: 'Korinna', 'Korinna Regular BT', sans-serif;
+		font-size: min(26px, 4.6vw) !important;
+		text-shadow:
+			black min(0vw, 0px) min(0vw, 0px) 0vw,
+			black min(0.01vw, 0.057666666666666665px)
+				min(0.01vw, 0.057666666666666665px) 0vw,
+			black min(0.02vw, 0.11533333333333333px)
+				min(0.02vw, 0.11533333333333333px) 0vw,
+			black min(0.03vw, 0.17300000000000001px)
+				min(0.03vw, 0.17300000000000001px) 0vw,
+			black min(0.04vw, 0.23066666666666666px)
+				min(0.04vw, 0.23066666666666666px) 0vw,
+			black min(0.05vw, 0.28833333333333333px)
+				min(0.05vw, 0.28833333333333333px) 0vw,
+			black min(0.06vw, 0.34600000000000003px)
+				min(0.06vw, 0.34600000000000003px) 0vw,
+			black min(0.07vw, 0.4036666666666667px) min(0.07vw, 0.4036666666666667px)
+				0vw,
+			black min(0.08vw, 0.4613333333333333px) min(0.08vw, 0.4613333333333333px)
+				0vw,
+			black min(0.09vw, 0.519px) min(0.09vw, 0.519px) 0vw,
+			black min(0.1vw, 0.5766666666666667px) min(0.1vw, 0.5766666666666667px)
+				0vw,
+			black min(0.11vw, 0.6343333333333333px) min(0.11vw, 0.6343333333333333px)
+				0vw,
+			black min(0.12vw, 0.6920000000000001px) min(0.12vw, 0.6920000000000001px)
+				0vw,
+			black min(0.13vw, 0.7496666666666667px) min(0.13vw, 0.7496666666666667px)
+				0vw,
+			black min(0.14vw, 0.8073333333333333px) min(0.14vw, 0.8073333333333333px)
+				0vw,
+			black min(0.15vw, 0.865px) min(0.15vw, 0.865px) 0vw,
+			black min(0.16vw, 0.9226666666666666px) min(0.16vw, 0.9226666666666666px)
+				0vw,
+			black min(0.17vw, 0.9803333333333333px) min(0.17vw, 0.9803333333333333px)
+				0vw,
+			black min(0.18vw, 1.038px) min(0.18vw, 1.038px) 0vw,
+			black min(0.19vw, 1.0956666666666666px) min(0.19vw, 1.0956666666666666px)
+				0vw,
+			black min(0.2vw, 1.1533333333333333px) min(0.2vw, 1.1533333333333333px)
+				0vw,
+			black min(0.21vw, 1.2109999999999999px) min(0.21vw, 1.2109999999999999px)
+				0vw,
+			black min(0.22vw, 1.2686666666666666px) min(0.22vw, 1.2686666666666666px)
+				0vw,
+			black min(0.23vw, 1.3263333333333334px) min(0.23vw, 1.3263333333333334px)
+				0vw,
+			black min(0.24vw, 1.3840000000000001px) min(0.24vw, 1.3840000000000001px)
+				0vw,
+			black min(0.25vw, 1.4416666666666667px) min(0.25vw, 1.4416666666666667px)
+				0vw,
+			black min(0.26vw, 1.4993333333333334px) min(0.26vw, 1.4993333333333334px)
+				0vw,
+			black min(0.27vw, 1.557px) min(0.27vw, 1.557px) 0vw,
+			black min(0.28vw, 1.6146666666666667px) min(0.28vw, 1.6146666666666667px)
+				0vw,
+			black min(0.29vw, 1.6723333333333332px) min(0.29vw, 1.6723333333333332px)
+				0vw,
+			black min(0.3vw, 1.73px) min(0.3vw, 1.73px) 0vw,
+			black min(0.31vw, 1.7876666666666667px) min(0.31vw, 1.7876666666666667px)
+				0vw,
+			black min(0.32vw, 1.8453333333333333px) min(0.32vw, 1.8453333333333333px)
+				0vw,
+			black min(0.33vw, 1.903px) min(0.33vw, 1.903px) 0vw,
+			black min(0.34vw, 1.9606666666666666px) min(0.34vw, 1.9606666666666666px)
+				0vw,
+			black min(0.35vw, 2.0183333333333335px) min(0.35vw, 2.0183333333333335px)
+				0vw,
+			black min(0.36vw, 2.076px) min(0.36vw, 2.076px) 0vw,
+			black min(0.37vw, 2.1336666666666666px) min(0.37vw, 2.1336666666666666px)
+				0vw,
+			black min(0.38vw, 2.191333333333333px) min(0.38vw, 2.191333333333333px)
+				0vw,
+			black min(0.39vw, 2.249px) min(0.39vw, 2.249px) 0vw,
+			black min(0.4vw, 2.3066666666666666px) min(0.4vw, 2.3066666666666666px)
+				0vw,
+			black min(0.41vw, 2.364333333333333px) min(0.41vw, 2.364333333333333px)
+				0vw,
+			black min(0.42vw, 2.4219999999999997px) min(0.42vw, 2.4219999999999997px)
+				0vw,
+			black min(0.43vw, 2.4796666666666667px) min(0.43vw, 2.4796666666666667px)
+				0vw,
+			black min(0.44vw, 2.537333333333333px) min(0.44vw, 2.537333333333333px)
+				0vw,
+			black min(0.45vw, 2.5949999999999998px) min(0.45vw, 2.5949999999999998px)
+				0vw,
+			black min(0.46vw, 2.6526666666666667px) min(0.46vw, 2.6526666666666667px)
+				0vw,
+			black min(0.47vw, 2.7103333333333333px) min(0.47vw, 2.7103333333333333px)
+				0vw,
+			black min(0.48vw, 2.7680000000000002px) min(0.48vw, 2.7680000000000002px)
+				0vw,
+			black min(0.49vw, 2.8256666666666668px) min(0.49vw, 2.8256666666666668px)
+				0vw,
+			black min(0.5vw, 2.8833333333333333px) min(0.5vw, 2.8833333333333333px)
+				0vw,
+			black min(0.51vw, 2.941px) min(0.51vw, 2.941px) 0vw,
+			black min(0.52vw, 2.998666666666667px) min(0.52vw, 2.998666666666667px)
+				0vw,
+			black min(0.53vw, 3.0563333333333333px) min(0.53vw, 3.0563333333333333px)
+				0vw,
+			black min(0.54vw, 3.114px) min(0.54vw, 3.114px) 0vw,
+			black min(0.55vw, 3.1716666666666664px) min(0.55vw, 3.1716666666666664px)
+				0vw,
+			black min(0.56vw, 3.2293333333333334px) min(0.56vw, 3.2293333333333334px)
+				0vw,
+			black min(0.57vw, 3.287px) min(0.57vw, 3.287px) 0vw,
+			black min(0.58vw, 3.3446666666666665px) min(0.58vw, 3.3446666666666665px)
+				0vw,
+			black min(0.59vw, 3.402333333333333px) min(0.59vw, 3.402333333333333px)
+				0vw,
+			black min(0.6vw, 3.46px) min(0.6vw, 3.46px) 0vw;
+		letter-spacing: min(0.08px, 0.15vw);
+		/* line-height: min(30.3px, 5.37vw); */
+		text-align: center;
+		padding: 0 12%;
+		white-space: pre-line;
 		.clue-value {
 			font-family: 'Swiss 911 Compressed', sans-serif;
 			color: var(--yellow);
+			font-size: min(16vw, 16vh);
+			text-shadow: min(2vw, 2vh) min(2vh, 2vw) #000;
 		}
-		@media (max-aspect-ratio: 0.89) {
-			.clue-value {
-				font-size: 16vw;
-				text-shadow: 2vw 2vw #000;
-			}
-		}
-		@media (aspect-ratio > 0.89) {
-			.clue-value {
-				font-size: 16vh;
-				text-shadow: 2vh 2vh #000;
-			}
-		}
-
 		#clue-image {
 			background-size: contain;
 			background-repeat: no-repeat;
@@ -246,26 +373,12 @@
 		display: none;
 	}
 
-	@media (max-aspect-ratio: 0.89) {
-		.category-display,
-		.value-display {
-			font-size: 5vw;
-		}
-		.clue-display {
-			font-size: 3.8vw;
-		}
+	.category-display,
+	.value-display {
+		font-size: min(5vh, 5vw);
 	}
-	/*
-		viewport is wide enough to fit everything - font size determined by the height of the window
-	*/
-	@media (aspect-ratio > 0.89) {
-		.category-display,
-		.value-display {
-			font-size: 4.5vh;
-		}
-		.clue-display {
-			font-size: 3.42vh;
-		}
+	.clue-display {
+		font-size: min(3.8vh, 3.8vw);
 	}
 }
 
@@ -284,7 +397,7 @@
 
 .category-scroll-container {
 	overflow: hidden;
-	background-color: var(--blue);
+	background-image: url('/img/clue_bg_blue.png');
 }
 .category-scroll {
 	width: 600%;
@@ -301,7 +414,8 @@
 	.category-box {
 		height: 100%;
 		width: 16.667%;
-		background-color: var(--blue);
+		background-image: url('/img/clue_bg_blue.png');
+		background-size: cover;
 		color: white;
 		/* display: flex; */
 		padding: 1%;
@@ -319,7 +433,7 @@
 		}
 
 		.category-div {
-			font-size: min(10.08vh, 12vw);
+			font-size: min(120px, 12vw);
 		}
 	}
 
@@ -390,7 +504,8 @@
 				box-sizing: border-box;
 				.score-display {
 					height: 20%;
-					background-color: var(--blue);
+					background-image: url('/img/clue_bg_blue.png');
+					background-size: cover;
 					font-family: Arial, Helvetica, sans-serif;
 					font-weight: bold;
 					text-align: center;
@@ -463,27 +578,11 @@
 				border-radius: 0 2px 2px 0;
 			}
 
-			/*
-				viewport is tall and narrow, and font size will be determined by the width of the window
-			*/
-			@media (max-aspect-ratio: 0.89) {
-				.name-display {
-					font-size: 2vw;
-				}
-				.score-display {
-					font-size: 2.8vw;
-				}
+			.name-display {
+				font-size: min(2vw, 2vh);
 			}
-			/*
-				viewport is wide enough to fit everything - font size determined by the height of the window
-			*/
-			@media (aspect-ratio > 0.89) {
-				.name-display {
-					font-size: 2vh;
-				}
-				.score-display {
-					font-size: 2.75vh;
-				}
+			.score-display {
+				font-size: min(2.8vh, 2.8vw);
 			}
 
 			.lectern-left::before,
@@ -545,7 +644,8 @@
 	.category-box {
 		height: 100%;
 		width: 100%;
-		background-color: var(--blue);
+		background-image: url('/img/clue_bg_blue.png');
+		background-size: cover;
 		color: var(--white);
 		border: 1px solid var(--white);
 		padding: 5%;
@@ -570,13 +670,14 @@ div.fj-prefix {
 .fj-response-div {
 	width: 100%;
 	height: 100%;
+	background-image: url('/img/clue_bg_blue.png');
+	background-size: cover;
 	.fj-response-display,
 	.fj-wager-display {
 		display: flex;
 		font-family: 'Shadows Into Light Two', cursive;
 		font-weight: 400;
 		font-style: normal;
-		background-color: var(--blue);
 		color: white;
 	}
 	.fj-response-display {
