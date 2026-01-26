@@ -100,12 +100,6 @@ body.dark {
 	font-family: 'Korinna Regular BT', serif;
 }
 
-.response-display {
-	font-family: 'Shadows Into Light Two', cursive;
-	font-weight: 400;
-	font-style: normal;
-}
-
 .no-select {
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none; /* Safari */
@@ -152,7 +146,8 @@ body.dark {
 
 .game-container {
 	width: min(100vh, 100%);
-	padding: 10px;
+	font-size: min(2.4vh, 2.4vw);
+	padding: min(10px, 1vw, 1vh);
 	/* background-color: black; */
 }
 

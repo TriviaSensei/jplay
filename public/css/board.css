@@ -1,0 +1,432 @@
+@keyframes dd-animate {
+	0% {
+		display: block;
+		position: absolute;
+	}
+
+	50%,
+	100% {
+		top: 50%;
+		left: 50%;
+		width: 100%;
+		height: 100%;
+		transform: translate(-50%, -50%) rotateX(360deg);
+	}
+}
+
+@keyframes timer-animate {
+	0% {
+		display: block;
+		height: 100%;
+	}
+	100% {
+		height: 0;
+	}
+}
+
+/*CSS files for player, host, and control panel will specify the base font size for .board-container or .board-display-container 
+- everything else is just specified in EM here*/
+.board-container,
+.board-display-container {
+	.category-scroll-container,
+	.game-board,
+	.live-clue-display {
+		width: 100%;
+		height: 100%;
+	}
+
+	.caps {
+		text-transform: uppercase;
+	}
+
+	.game-board,
+	.live-clue-display,
+	.fj-response-div {
+		display: grid;
+		grid-template-columns: repeat(6, 1fr);
+		grid-template-rows: repeat(6, 1fr);
+		width: 100%;
+		height: 100%;
+	}
+
+	/* .category-hidden div {
+		display: none;
+	} */
+
+	.category-box,
+	.category-display,
+	.clue-box,
+	.value-display,
+	.clue-display,
+	.response-display,
+	.fj-category,
+	.fj-response-div {
+		background-image: url('/img/clue_bg_blue.png');
+		background-size: cover;
+		color: var(--white);
+		border: 1px solid var(--white);
+		display: flex;
+	}
+	.fj-response-div {
+		font-family: 'Shadows Into Light Two', cursive;
+		font-weight: 400;
+		font-style: normal;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.fj-response-display,
+	.fj-wager-display {
+		flex: 1;
+		margin: auto;
+		display: flex;
+		div {
+			margin: auto;
+		}
+	}
+	.fj-response-div .display-inner {
+		font-size: 2.5em;
+	}
+	.fj-wager-display .display-inner:not(:empty)::before {
+		content: '$';
+		margin-right: 0.3em;
+	}
+
+	.category-scroll {
+		.comment-div:not(:empty) + .category-div {
+			font-size: 5em;
+		}
+		.comment-div:empty + .category-div {
+			font-size: 6em;
+		}
+		.category-box > .comment-div:not(:empty) + .category-div.long-cat {
+			font-size: 4em;
+		}
+		.category-box > .comment-div:empty + .category-div.long-cat {
+			font-size: 4.8em;
+		}
+		.comment-div {
+			font-family: 'Korinna Regular BT', serif;
+			text-transform: uppercase;
+		}
+		.comment-div:empty {
+			display: none;
+		}
+	}
+
+	/*
+    Font family, margins, text align, padding percentages, etc. should apply
+    no matter where these divs are located or how big they are
+    */
+	/*
+    clue value - 
+    actual size is set by .clue-box in whatever container this is in
+    small on the board, larger when it flashes for a half second before displaying the clue
+    */
+	.clue-value {
+		margin: auto;
+		text-align: center;
+		letter-spacing: 0.05625em;
+		/*letter spacing is 9/160 times font size*/
+		/*text-shadow is 3/40 of font size, incremented from 0*/
+		text-shadow:
+			black 0em 0em 0,
+			black 0.0025em 0.0025em 0,
+			black 0.005em 0.005em 0,
+			black 0.0075em 0.0075em 0,
+			black 0.01em 0.01em 0,
+			black 0.0125em 0.0125em 0,
+			black 0.015em 0.015em 0,
+			black 0.0175em 0.0175em 0,
+			black 0.02em 0.02em 0,
+			black 0.0225em 0.0225em 0,
+			black 0.025em 0.025em 0,
+			black 0.0275em 0.0275em 0,
+			black 0.03em 0.03em 0,
+			black 0.0325em 0.0325em 0,
+			black 0.035em 0.035em 0,
+			black 0.0375em 0.0375em 0,
+			black 0.04em 0.04em 0,
+			black 0.0425em 0.0425em 0,
+			black 0.045em 0.045em 0,
+			black 0.0475em 0.0475em 0,
+			black 0.05em 0.05em 0,
+			black 0.0525em 0.0525em 0,
+			black 0.055em 0.055em 0,
+			black 0.0575em 0.0575em 0,
+			black 0.06em 0.06em 0,
+			black 0.0625em 0.0625em 0,
+			black 0.065em 0.065em 0,
+			black 0.0675em 0.0675em 0,
+			black 0.07em 0.07em 0,
+			black 0.0725em 0.0725em 0,
+			black 0.075em 0.075em 0;
+	}
+	/*category-div-
+    actual font size set by .category-box in whatever container this is in
+    small on the board, large on the scroll or the preview in the player screen
+    */
+	.category-div {
+		font-family: 'Swiss 911', sans-serif;
+		margin: auto;
+		text-align: center;
+		text-transform: uppercase;
+		/*line height is 110% of font size, 
+        letter spacing should be 1/30 of font size
+        shadow should be 2/75 of the font size
+        */
+		line-height: 1.1em;
+		letter-spacing: 0.033em;
+		text-shadow: black 0.0293em 0.0293em 0.0037em;
+	}
+
+	.game-board {
+		.dd-div {
+			width: 16%;
+			height: 16%;
+			transform: translate(-50%, -50%);
+			position: absolute;
+			display: none;
+			background-image: url('/img/dd.jpg');
+			background-repeat: no-repeat;
+			background-size: contain;
+			background-position: center;
+			z-index: 3;
+		}
+
+		.dd-div.animation {
+			display: block;
+			animation-name: dd-animate;
+			animation-duration: 3s;
+		}
+
+		.category-box {
+			display: flex;
+			flex-direction: column;
+			padding: 0 5%;
+			font-size: 1em;
+		}
+
+		.clue-box {
+			font-family: 'Swiss 911 Compressed', sans-serif;
+			display: flex;
+			padding: 5% 10%;
+			color: var(--yellow);
+			cursor: pointer;
+			font-size: 2em;
+		}
+	}
+
+	.category-scroll-container {
+		overflow: hidden;
+		background-image: url('/img/clue_bg_blue.png');
+	}
+
+	.category-scroll {
+		width: 600%;
+		height: 100%;
+		position: absolute;
+		left: 0;
+		transition: left 0.5s;
+		overflow: hidden;
+		display: flex;
+		flex-direction: row;
+		font-family: 'Swiss 911', sans-serif;
+		text-shadow: 2px 2px #000;
+
+		.category-box {
+			height: 100%;
+			width: 16.667%;
+			background-image: url('/img/clue_bg_blue.png');
+			background-size: cover;
+			color: white;
+			/* display: flex; */
+			padding: 1%;
+			align-content: center;
+			.category-div,
+			.comment-div {
+				width: 100%;
+				margin: auto;
+				text-align: center;
+				text-transform: uppercase;
+			}
+
+			.comment-div {
+				font-family: 'Korinna Regular BT', serif;
+			}
+		}
+
+		.category-box:has(.comment-div:not(:empty)) {
+			.category-div {
+				font-size: min(36px, 6vw);
+			}
+			.comment-div {
+				font-size: min(24px, 4vw);
+			}
+		}
+
+		.category-box.category-hidden {
+			.category-div,
+			.comment-div {
+				display: none;
+			}
+		}
+	}
+
+	.category-box > .category-div.long-cat {
+		font-size: 0.8em;
+		line-height: 0.88em;
+	}
+
+	.live-clue-display {
+		.side-light {
+			background-color: var(--dk-gray);
+			grid-row: 1/7;
+			display: flex;
+			.side-light-inner {
+				display: none;
+				margin: auto;
+				width: 100%;
+			}
+		}
+		.side-light-left {
+			grid-column: 1;
+		}
+		.side-light-right {
+			grid-column: 6;
+		}
+
+		.category-display,
+		.value-display {
+			font-size: 1.333em;
+		}
+
+		.category-display,
+		.value-display {
+			font-family: 'Swiss 911 Compressed', sans-serif;
+			border: 1px solid white;
+			font-size: 2em;
+			letter-spacing: 0.0625em;
+			text-shadow:
+				black 0em 0em 0,
+				black 0.0032em 0.0032em 0,
+				black 0.0064em 0.0064em 0,
+				black 0.0096em 0.0096em 0,
+				black 0.0128em 0.0128em 0,
+				black 0.016em 0.016em 0,
+				black 0.0192em 0.0192em 0,
+				black 0.0224em 0.0224em 0,
+				black 0.0256em 0.0256em 0,
+				black 0.0288em 0.0288em 0,
+				black 0.032em 0.032em 0,
+				black 0.0352em 0.0352em 0,
+				black 0.0384em 0.0384em 0,
+				black 0.0416em 0.0416em 0,
+				black 0.0448em 0.0448em 0,
+				black 0.048em 0.048em 0,
+				black 0.0512em 0.0512em 0,
+				black 0.0544em 0.0544em 0,
+				black 0.0576em 0.0576em 0,
+				black 0.0608em 0.0608em 0,
+				black 0.064em 0.064em 0,
+				black 0.0672em 0.0672em 0,
+				black 0.0704em 0.0704em 0,
+				black 0.0736em 0.0736em 0,
+				black 0.0768em 0.0768em 0,
+				black 0.08em 0.08em 0;
+		}
+		.category-display {
+			grid-row: 1;
+			grid-column: 2/6;
+		}
+		.value-display {
+			grid-row: 2;
+			grid-column: 2/6;
+			color: var(--yellow);
+			.value-text:not(:empty)::before {
+				content: '$';
+				margin-right: 0.1em;
+			}
+			.value-text.dd:not(:empty)::before {
+				content: 'DD $';
+				margin-left: 0.1em;
+			}
+		}
+
+		.clue-display {
+			grid-row: 3/7;
+			grid-column: 2/6;
+			border: 1px solid white;
+			font-family: 'Korinna', 'Korinna Regular BT', sans-serif;
+			text-align: center;
+			padding: 0 12%;
+			white-space: pre-line;
+			font-size: 1.1em;
+			letter-spacing: 0.037em;
+			text-shadow:
+				black 0em 0em 0,
+				black 0.01em 0.01em 0,
+				black 0.02em 0.02em 0,
+				black 0.03em 0.03em 0,
+				black 0.04em 0.04em 0,
+				black 0.05em 0.05em 0,
+				black 0.06em 0.06em 0,
+				black 0.07em 0.07em 0,
+				black 0.08em 0.08em 0,
+				black 0.09em 0.09em 0,
+				black 0.1em 0.1em 0,
+				black 0.11em 0.11em 0,
+				black 0.12em 0.12em 0,
+				black 0.13em 0.13em 0,
+				black 0.14em 0.14em 0,
+				black 0.15em 0.15em 0;
+			.clue-value {
+				font-family: 'Swiss 911 Compressed', sans-serif;
+				color: var(--yellow);
+				font-size: 8em !important;
+				letter-spacing: 0.025em;
+				/*TODO: may have to increment this*/
+			}
+			#clue-image {
+				background-size: contain;
+				background-repeat: no-repeat;
+				background-position: center center;
+				width: 100%;
+				height: 100%;
+			}
+		}
+
+		.response-display {
+			display: none;
+		}
+	}
+}
+
+.game-container[data-round='1'],
+.board-display-container[data-round='1'] {
+	.category-hidden {
+		background-image: url('/img/cat_header_1.jpg') !important;
+	}
+}
+.game-container[data-round='2'],
+.board-display-container[data-round='2'] {
+	.category-hidden {
+		background-image: url('/img/cat_header_2.jpg') !important;
+	}
+}
+
+.game-container[data-round='fj'],
+.board-display-container[data-round='fj'] {
+	.category-hidden {
+		background-image: url('/img/fj.jpg') !important;
+	}
+}
+
+.category-box.category-hidden {
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center;
+	.category-div {
+		display: none;
+	}
+}

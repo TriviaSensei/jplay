@@ -3,9 +3,6 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-}
-
-.player-container {
 	.player-table {
 		height: min(20vh, 4em);
 		font-size: min(7.5vh, 1.5em);
@@ -41,8 +38,12 @@
 			.display-inner.neg {
 				color: red;
 			}
-			.display-inner.neg::before {
-				content: '-';
+			.display-inner:not(:empty)::before {
+				content: '$';
+				margin-right: 0.1em;
+			}
+			.display-inner:not(:empty).neg::before {
+				content: '-$';
 				color: red;
 				margin-right: 0.1em;
 			}
@@ -61,10 +62,10 @@
 	.board-display-container {
 		/* width: min(600px, 100%, 84vh);
 		height: min(450px, 75vw, 63%); */
-		width: min(1000px, 100%);
-		height: min(581.38px, 58.13vw);
+		width: min(1000px, 100%, 80vh);
+		height: min(581.38px, 58.13vw, 46.504vh);
+		font-size: min(24px, 2.4vw, 1.92vh);
 		position: relative;
-		text-shadow: 2px 2px #000;
 
 		.category-large {
 			text-transform: uppercase;
@@ -81,155 +82,14 @@
 			background-size: cover;
 			font-family: 'Swiss 911', sans-serif;
 			padding: 0 5%;
+			font-size: 5em;
 			.category-text {
 				margin: auto;
 				text-align: center;
 				color: var(--white);
 			}
 		}
-
-		.category-scroll {
-			.category-box {
-				.category-div {
-					font-size: min(96px, 12vw);
-					line-height: min(104px, 10.4vw);
-					letter-spacing: min(3.2px, 0.4vw);
-				}
-			}
-		}
-
-		.game-board {
-			width: 100%;
-			height: 100%;
-			.clue-box,
-			.category-box {
-				background-image: url('/img/clue_bg_blue.png');
-				background-size: cover;
-				color: var(--white);
-				border: 1px solid var(--white);
-			}
-
-			.clue-box {
-				font-family: 'Swiss 911 Compressed', serif;
-				text-align: center;
-				display: flex;
-				padding: 5% 10%;
-				color: var(--yellow);
-				cursor: pointer;
-				.clue-value {
-					margin: auto;
-					font-size: min(5vw, 50px);
-					letter-spacing: min(0.25vw, 2.5px);
-					text-shadow:
-						black min(0vw, 0px) min(0vw, 0px) 0vw,
-						black min(0.01vw, 0.1px) min(0.01vw, 0.1px) 0vw,
-						black min(0.02vw, 0.2px) min(0.02vw, 0.2px) 0vw,
-						black min(0.03vw, 0.3px) min(0.03vw, 0.3px) 0vw,
-						black min(0.04vw, 0.4px) min(0.04vw, 0.4px) 0vw,
-						black min(0.05vw, 0.5px) min(0.05vw, 0.5px) 0vw,
-						black min(0.06vw, 0.6px) min(0.06vw, 0.6px) 0vw,
-						black min(0.07vw, 0.7px) min(0.07vw, 0.7px) 0vw,
-						black min(0.08vw, 0.8px) min(0.08vw, 0.8px) 0vw,
-						black min(0.09vw, 0.9px) min(0.09vw, 0.9px) 0vw,
-						black min(0.1vw, 1px) min(0.1vw, 1px) 0vw,
-						black min(0.11vw, 1.1px) min(0.11vw, 1.1px) 0vw,
-						black min(0.12vw, 1.2px) min(0.12vw, 1.2px) 0vw,
-						black min(0.13vw, 1.3px) min(0.13vw, 1.3px) 0vw,
-						black min(0.14vw, 1.4px) min(0.14vw, 1.4px) 0vw,
-						black min(0.15vw, 1.5px) min(0.15vw, 1.5px) 0vw,
-						black min(0.16vw, 1.6px) min(0.16vw, 1.6px) 0vw,
-						black min(0.17vw, 1.7px) min(0.17vw, 1.7px) 0vw,
-						black min(0.18vw, 1.8px) min(0.18vw, 1.8px) 0vw,
-						black min(0.19vw, 1.9px) min(0.19vw, 1.9px) 0vw,
-						black min(0.2vw, 2px) min(0.2vw, 2px) 0vw,
-						black min(0.21vw, 2.1px) min(0.21vw, 2.1px) 0vw,
-						black min(0.22vw, 2.2px) min(0.22vw, 2.2px) 0vw,
-						black min(0.23vw, 2.3px) min(0.23vw, 2.3px) 0vw,
-						black min(0.24vw, 2.4px) min(0.24vw, 2.4px) 0vw,
-						black min(0.25vw, 2.5px) min(0.25vw, 2.5px) 0vw,
-						black min(0.26vw, 2.6px) min(0.26vw, 2.6px) 0vw,
-						black min(0.27vw, 2.7px) min(0.27vw, 2.7px) 0vw,
-						black min(0.28vw, 2.8px) min(0.28vw, 2.8px) 0vw,
-						black min(0.29vw, 2.9px) min(0.29vw, 2.9px) 0vw,
-						black min(0.3vw, 3px) min(0.3vw, 3px) 0vw,
-						black min(0.31vw, 3.1px) min(0.31vw, 3.1px) 0vw,
-						black min(0.32vw, 3.2px) min(0.32vw, 3.2px) 0vw,
-						black min(0.33vw, 3.3px) min(0.33vw, 3.3px) 0vw,
-						black min(0.34vw, 3.4px) min(0.34vw, 3.4px) 0vw,
-						black min(0.35vw, 3.5px) min(0.35vw, 3.5px) 0vw,
-						black min(0.36vw, 3.6px) min(0.36vw, 3.6px) 0vw,
-						black min(0.37vw, 3.7px) min(0.37vw, 3.7px) 0vw;
-				}
-			}
-			.category-box {
-				display: flex;
-				flex-direction: column;
-				padding: 0 5%;
-
-				.category-div {
-					font-family: 'Swiss 911', sans-serif;
-					margin: auto;
-					text-align: center;
-					text-transform: uppercase;
-				}
-
-				.comment-div {
-					font-family: 'Korinna Regular BT', serif;
-					text-transform: uppercase;
-					text-shadow: 2px 2px #000;
-				}
-			}
-
-			.dd-div {
-				width: 16%;
-				height: 16%;
-				transform: translate(-50%, -50%);
-				position: absolute;
-				display: none;
-				background-image: url('/img/dd.jpg');
-				background-repeat: no-repeat;
-				background-size: contain;
-				background-position: center;
-				z-index: 3;
-			}
-
-			.dd-div.animation {
-				display: block;
-				animation-name: dd-animate;
-				animation-duration: 3s;
-			}
-		}
 	}
-
-	.category-display,
-	.value-display {
-		font-size: min(36px, 3.6vw) !important;
-	}
-	.clue-display {
-		font-family: 'Korinna', 'Korinna Regular BT', sans-serif;
-		font-size: min(26px, 4.6vw) !important;
-		letter-spacing: min(0.08px, 0.15vw);
-		/* line-height: min(30.3px, 5.37vw); */
-		text-align: center;
-		padding: 0 12%;
-		white-space: pre-line;
-	}
-	.category-large {
-		font-size: min(108px, 10.8vw) !important;
-		line-height: min(117px, 11.7vw) !important;
-		letter-spacing: min(3.6px, 0.36vw) !important;
-	}
-	.category-box {
-		font-size: min(22px, 2.2vw) !important;
-		line-height: min(24px, 2.4vw) !important;
-		letter-spacing: min(0.8px, 0.8vw) !important;
-	}
-	.category-div.long-cat {
-		font-size: min(17.6px, 17.6vw);
-		line-height: min(19.2px, 19.2vw);
-		letter-spacing: min(0.064vh, 0.064vw);
-	}
-
 	.buzzer-container {
 		width: min(100%, 500px);
 		.btn-buzzer {
@@ -244,17 +104,10 @@
 		}
 	}
 
-	.display-inner {
-		font-size: min(4vw, 24px, 3vh);
-		span.currency {
-			margin-right: min(0.457vw, 2.74px, 0.343vh);
-		}
-	}
-}
-
-.input-row-h button {
-	width: 20%;
-	height: 70%;
-	margin-top: auto;
-	margin-bottom: auto;
+	/* .input-row-h button {
+		width: 20%;
+		height: 70%;
+		margin-top: auto;
+		margin-bottom: auto;
+	} */
 }

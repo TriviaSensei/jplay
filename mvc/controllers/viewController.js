@@ -80,6 +80,10 @@ exports.getTimer = async (req, res, next) => {
 	return res.status(200).render('timer');
 };
 
+exports.getTest = async (req, res, next) => {
+	return res.status(200).render('boardTest');
+};
+
 exports.redirectToIndex = (req, res, next) => {
 	if (req.originalUrl !== '/favicon.ico') return res.redirect(`/`);
 	else

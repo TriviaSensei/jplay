@@ -8,6 +8,10 @@ html
         link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous")
         link(rel='stylesheet' href='/css/styles.css')
         link(rel="stylesheet" href="/css/statWindow.css")
+        link(rel="stylesheet" href="/css/components/game_container/game_container_host.css")
+        link(rel="stylesheet" href="/css/components/game_container/game_container_player.css")
+        link(rel="stylesheet" href="/css/board.css")
+        link(rel="stylesheet" href="/css/lecterns.css")
         block styles
         link(rel='shortcut icon' href='/img/favicon.png')
         meta(charset='UTF-8')
@@ -25,12 +29,9 @@ html
             include components/header
             include components/init_container
         .game-container.d-none
-            link(rel="stylesheet" href="/css/components/game_container/game_container_host.css")
             include components/game_container_host
         .host-panel.d-none
         .player-container.d-none 
-            link(rel="stylesheet" href="/css/components/game_container/game_container_host.css")
-            link(rel="stylesheet" href="/css/components/game_container/game_container_player.css")
             include components/game_container_player
         audio#timeout-sound(preload="auto" data-name="timeout")
             source(src="/media/Jeopardy-time.mp3" type="audio/mpeg")

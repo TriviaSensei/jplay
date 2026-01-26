@@ -335,6 +335,8 @@ class Game {
 		this.updateGameStats(p, { correct });
 	}
 
+	//this only runs on a valid buzz (pregame test or while a clue is live)
+	//not just any press of the buzzer
 	handleBuzz(p) {
 		try {
 			//if the player is locked, don't do anything
@@ -353,7 +355,8 @@ class Game {
 			const curr = this.getCurrentClueStats();
 			if (!curr) return;
 			const alreadyBuzzed = curr.data[p].buzz && curr.data[p].time !== null;
-			if (!alreadyBuzzed) return;
+			if (alreadyBuzzed) return;
+
 			this.updateGameStats(p, {
 				buzz: true,
 				first: curr.data.every((d) => !d.first),
@@ -373,6 +376,7 @@ class Game {
 			...data,
 		};
 
+		console.log(this.getCurrentClueStats());
 		this.updateGameState(-1, { currentBuzz: this.getCurrentClueStats() });
 	}
 

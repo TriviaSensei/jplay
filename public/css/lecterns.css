@@ -1,0 +1,199 @@
+.lecterns {
+	flex: 1;
+	font-size: min(2.4vh, 2.4vw);
+	display: flex;
+	justify-content: space-between;
+	margin-top: 1em;
+	.lectern.control {
+		border-bottom: 4px solid var(--white);
+	}
+	.lectern {
+		width: 31%;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		.timer {
+			margin: 0 auto;
+			width: 55%;
+			display: flex;
+			flex-direction: row;
+			.timer-light {
+				flex: 1;
+				height: 100%;
+				border: 1px solid var(--lt-gray);
+				background-color: #332c42;
+			}
+		}
+		.light {
+			background-image: url('/img/light-bg.png');
+			background-repeat: no-repeat;
+			background-position: 0 0;
+			background-size: 105% 105%;
+		}
+
+		.lectern-body {
+			color: white;
+			flex: 1;
+			display: flex;
+			flex-direction: row;
+			border-top: 3px solid var(--lt-gray);
+			.lectern-center > div {
+				border-top: 1px solid black;
+				box-sizing: border-box;
+			}
+			.lectern-center {
+				width: 55%;
+				display: flex;
+				flex-direction: column;
+				border: 3px solid black;
+				box-sizing: border-box;
+				.score-display {
+					height: 20%;
+					background-image: url('/img/clue_bg_blue.png');
+					background-size: cover;
+					font-family: 'Zurich', Arial, Helvetica, sans-serif;
+					font-weight: bold;
+					text-align: center;
+					letter-spacing: 0;
+				}
+				.score:not(:empty)::before {
+					content: '$';
+					margin-right: 0.1em;
+				}
+				.score.neg {
+					color: red;
+				}
+				.score.neg::before {
+					content: '-$';
+					color: red;
+				}
+				.score.rt {
+					color: white;
+				}
+				.score.rt::before {
+					display: none;
+					content: '';
+				}
+				.score.rt::after {
+					content: 'ms';
+					margin-left: 0.1em;
+				}
+
+				.light-top {
+					height: 13.33%;
+				}
+
+				.light-bottom {
+					flex: 1;
+				}
+				.name-display {
+					background-color: var(--blue);
+					text-align: center;
+				}
+				.name-container {
+					max-width: 100%;
+					overflow-wrap: break-word;
+					cursor: pointer;
+				}
+			}
+			.lectern-right,
+			.lectern-left {
+				position: relative;
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: end;
+				background: linear-gradient(to right, var(--brown-1), var(--brown-2));
+				.lectern-image {
+					border-image: linear-gradient(to left, #fff, #999) 5;
+					border-width: 2px;
+					border-style: solid;
+					height: 67%;
+					width: 90%;
+					background-repeat: no-repeat;
+					background-size: cover;
+				}
+			}
+			.lectern-left > .lectern-image {
+				background-image: url('/img/lectern-left.png');
+			}
+			.lectern-right {
+				.lectern-image {
+					background-image: url('/img/lectern-right.png');
+				}
+				-webkit-transform: scaleX(-1);
+				transform: scaleX(-1);
+			}
+			.lectern-left::before,
+			.lectern-right::before,
+			.lectern-left::after,
+			.lectern-right::after {
+				content: '';
+				width: 90%;
+				height: 2.3%;
+				position: absolute;
+				left: 0%;
+				z-index: 2;
+				background-color: white;
+				border-radius: 0 2px 2px 0;
+			}
+
+			.name-display {
+				font-size: 1em;
+			}
+			.score-display {
+				font-size: 1.25em;
+			}
+
+			.lectern-left::before,
+			.lectern-right::before {
+				top: 10%;
+			}
+			.lectern-left::after,
+			.lectern-right::after {
+				top: 20%;
+			}
+		}
+	}
+	.lectern.lit {
+		.light {
+			background-image: unset;
+			background-color: white;
+		}
+	}
+	.lectern.lit[data-time='4'] {
+		.timer-light {
+			background-color: red;
+		}
+	}
+	.lectern.lit[data-time='3'] {
+		.timer-light[data-time='3'],
+		.timer-light[data-time='2'],
+		.timer-light[data-time='1'],
+		.timer-light[data-time='0'] {
+			background-color: red;
+		}
+	}
+	.lectern.lit[data-time='2'] {
+		.timer-light[data-time='2'],
+		.timer-light[data-time='1'],
+		.timer-light[data-time='0'] {
+			background-color: red;
+		}
+	}
+	.lectern.lit[data-time='1'] {
+		.timer-light[data-time='1'],
+		.timer-light[data-time='0'] {
+			background-color: red;
+		}
+	}
+	.lectern.lit[data-time='0'] {
+		.timer-light[data-time='0'] {
+			background-color: red;
+		}
+	}
+	.edit-player-button {
+		font-size: 1em;
+		padding: 1%;
+	}
+}

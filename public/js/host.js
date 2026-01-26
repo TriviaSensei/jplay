@@ -425,7 +425,7 @@ else {
 		const status =
 			state.state === 'waitingDD'
 				? `Waiting for Daily Double wager from ${state.players[index].name}`
-				: `${cluesLeft} clues left. ${state.players[index].name} to select a clue`;
+				: `${cluesLeft} clue${cluesLeft === 1 ? '' : 's'} left. ${state.players[index].name} to select a clue`;
 		if (state.isRemote) {
 			socket.emit(
 				'edit-game-data',
@@ -816,7 +816,7 @@ const moveBoard = () => {
 	const elements = getElementArray(
 		document,
 		// '.game-container > .ratio.ratio-4x3 > div'
-		'.game-container > .ratio.screen-ratio > div',
+		'.game-container > .board-container.ratio.screen-ratio > div',
 	);
 	const destination = document.querySelector(
 		// '.board-display-container > .ratio.ratio-4x3',
@@ -1405,12 +1405,18 @@ document.addEventListener('DOMContentLoaded', () => {
 			liveClueData = liveCategory.clues[row];
 
 			//if the DD wager is set, show it (otherwise, the value of the clue)
-			liveValue.innerHTML =
+			if (
 				state.state === 'showDD' ||
 				state.state === 'DDLive' ||
 				state.state === 'DDTimedOut'
-					? `DD: $${state.wager}`
-					: `$${liveClueData.value}`;
+			) {
+				liveValue.classList.add('dd');
+				liveValue.innerHTML = state.wager;
+			} else {
+				liveValue.classList.remove('dd');
+				liveValue.innerHTML = liveClueData.value;
+			}
+
 			//display the category
 			liveClueCategory.innerHTML = liveCategory.category;
 
@@ -1440,6 +1446,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			//show the clue text in the key, or if there's no image
 			else {
 				liveClueText.classList.remove('d-none');
+				//if the clue is specifically marked as not caps, remove the all caps class
+				if (liveClueData.caps === false) liveClueText.classList.remove('caps');
+				//otherwise add it
+				else liveClueText.classList.add('caps');
+
 				liveClueImage.classList.add('d-none');
 				liveClueText.innerHTML = liveClueData.text;
 			}
@@ -1456,8 +1467,13 @@ document.addEventListener('DOMContentLoaded', () => {
 					setTimeout(() => cb.classList.remove('category-hidden'), 500);
 					const cd = cb.querySelector('.category-div');
 					const cc = cb.querySelector('.comment-div');
+					const txt = getCategory(i)?.category;
+					if (txt.trim().length >= 30) cd.classList.add('long-cat');
+					else cd.classList.remove('long-cat');
+
 					cd.innerHTML = getCategory(i)?.category || '';
 					if (isKey && cc) cc.innerHTML = getCategory(i)?.comments || '';
+					else if (!isKey && cc) cc.innerHTML = '';
 				}
 			});
 			categoryScrollInner.style.left = `${-100 * state.categoryShown}%`;
@@ -1793,6 +1809,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		sh.addWatcher(sd, (e) => {
 			if (!e.detail) return;
 			if (isKey && e.detail.state === 'buzz') {
+				console.log(e.detail);
 				const bz = e.detail.currentBuzz;
 				if (
 					bz.data.length >= i + 1 &&
@@ -1800,11 +1817,12 @@ document.addEventListener('DOMContentLoaded', () => {
 					bz.data[i].time !== null &&
 					!isNaN(bz.data[i].time)
 				) {
-					e.target.classList.remove('neg');
-					e.target.innerHTML = `${bz.data[i].time} ms`;
+					e.target.classList.add('rt');
+					e.target.innerHTML = `${bz.data[i].time}`;
 					return;
 				}
 			}
+			e.target.classList.remove('rt');
 			const player = e.detail.players[i];
 			if (!player || !player.name) {
 				e.target.innerHTML = '';
@@ -1817,7 +1835,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			else e.target.classList.add('neg');
 
 			const str = Math.abs(score).toLocaleString('en');
-			e.target.innerHTML = `<span class="currency">$</span>${str}`;
+			e.target.innerHTML = str;
 		});
 	});
 
@@ -2399,9 +2417,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					else scoreDisp.classList.remove('neg');
 
 					scoreDisp.innerHTML =
-						name === ''
-							? ''
-							: `<span class="currency">$</span>${Math.abs(score).toLocaleString('en')}`;
+						name === '' ? '' : Math.abs(score).toLocaleString('en');
 
 					if (state.control === ind) l.classList.add('control');
 					else l.classList.remove('control');
