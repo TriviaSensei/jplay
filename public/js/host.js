@@ -1358,11 +1358,13 @@ document.addEventListener('DOMContentLoaded', () => {
 	//main screen display as function of state
 	sh.addWatcher(null, (state) => {
 		if (!state) return;
+		const maxCategoryLength = 30;
+
 		if (state.state === 'waitingDD') {
 			//waiting for a DD wager
 			showView(gameBoard);
 			//play the sound
-			if (!isKey && (isHost() || isSpectator()) && ddSound && state.playSound) {
+			if (!isKey && ddSound && state.playSound) {
 				ddSound.play();
 			} else if (isKey) {
 				//set up and show the dd wager modal
@@ -1418,6 +1420,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 
 			//display the category
+			if (liveCategory.category.trim().length >= maxCategoryLength)
+				liveClueCategory.classList.add('long-cat');
+			else liveClueCategory.classList.remove('long-cat');
+
 			liveClueCategory.innerHTML = liveCategory.category;
 
 			//display the response if we're in the key
@@ -1468,9 +1474,9 @@ document.addEventListener('DOMContentLoaded', () => {
 					const cd = cb.querySelector('.category-div');
 					const cc = cb.querySelector('.comment-div');
 					const txt = getCategory(i)?.category;
-					if (txt.trim().length >= 30) cd.classList.add('long-cat');
+					if (txt.trim().length >= maxCategoryLength)
+						cd.classList.add('long-cat');
 					else cd.classList.remove('long-cat');
-
 					cd.innerHTML = getCategory(i)?.category || '';
 					if (isKey && cc) cc.innerHTML = getCategory(i)?.comments || '';
 					else if (!isKey && cc) cc.innerHTML = '';
@@ -1790,11 +1796,11 @@ document.addEventListener('DOMContentLoaded', () => {
 						: null;
 
 		if (tl === null) return e.target.classList.remove('live');
-
+		console.log(tl);
 		const timeLimit = tl / 1000;
 
 		const style = `animation-duration:${timeLimit}s`;
-
+		console.log(sideLights);
 		sideLights.forEach((s) => {
 			const inner = s.querySelector('.side-light-inner');
 			inner.setAttribute('style', style);
@@ -1809,7 +1815,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		sh.addWatcher(sd, (e) => {
 			if (!e.detail) return;
 			if (isKey && e.detail.state === 'buzz') {
-				console.log(e.detail);
 				const bz = e.detail.currentBuzz;
 				if (
 					bz.data.length >= i + 1 &&

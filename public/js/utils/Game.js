@@ -376,7 +376,6 @@ class Game {
 			...data,
 		};
 
-		console.log(this.getCurrentClueStats());
 		this.updateGameState(-1, { currentBuzz: this.getCurrentClueStats() });
 	}
 
@@ -1025,7 +1024,8 @@ class Game {
 
 	constructor(board, host, io, socket, stateHandler, environment) {
 		this.id = randomString(20, chars);
-		if (io) this.refreshJoinCode();
+		if (process.env.NODE_ENV === 'development') this.joinCode = 'A';
+		else if (io) this.refreshJoinCode();
 		// this.joinCode = 'A';
 		this.io = io;
 		this.socket = socket;

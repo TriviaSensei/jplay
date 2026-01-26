@@ -6,6 +6,14 @@ body {
 
 .game-container {
 	width: min(1000px, 100vh, 80%);
+	.clue-box.dd {
+		background-image: none;
+		background-color: var(--yellow);
+		color: var(--blue);
+		.clue-value {
+			text-shadow: none;
+		}
+	}
 }
 
 #fj-wager-modal {
