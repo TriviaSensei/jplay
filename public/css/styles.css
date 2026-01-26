@@ -264,8 +264,8 @@ input[type='radio']:disabled + label {
 
 #play-tab-pane {
 	input[type='text'] {
-		height: 2em;
-		font-size: 1.5em;
-		letter-spacing: 0.15em;
+		height: 1.6em;
+		font-size: 1.2em;
+		letter-spacing: 0.12em;
 	}
 }
