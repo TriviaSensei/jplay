@@ -12,10 +12,17 @@
 .game-container {
 	width: min(100vh, 100vw);
 	height: min(100vh, 100vw);
+	padding-top: 2%;
 	font-size: min(2.4vh, 2.4vw);
+	position: relative;
+	img.jbg {
+		position: absolute;
+		z-index: 0;
+		width: 143%;
+		transform: translate(-15.75%, -6%);
+	}
 }
 
 .fj-prefix {
 	text-wrap: nowrap;
-	margin-right: 1em;
 }

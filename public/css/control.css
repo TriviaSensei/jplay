@@ -14,6 +14,27 @@ body {
 			text-shadow: none;
 		}
 	}
+	.live-clue-display {
+		.clue-display {
+			grid-row: 3/6;
+			font-size: 1em;
+		}
+		.response-display {
+			font-family: 'Korinna', 'Korinna Regular BT', serif;
+			display: flex;
+			grid-row: 6/7;
+			grid-column: 2/6;
+			.response-text {
+				text-align: center;
+			}
+		}
+		.clue-display:has(.clue-value-flash:not(.d-none)) {
+			grid-row: 3/7;
+		}
+		.clue-display:has(.clue-value-flash:not(.d-none)) + .response-display {
+			display: none;
+		}
+	}
 }
 
 #fj-wager-modal {

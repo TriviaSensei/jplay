@@ -64,7 +64,8 @@ body {
 }
 
 body.bg-jep {
-	background-image: url(../img/bg.jpg);
+	/* background-image: url(../img/bg.jpg); */
+	background-color: black;
 	background-size: cover;
 	background-repeat: no-repeat;
 }

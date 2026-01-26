@@ -1427,13 +1427,17 @@ document.addEventListener('DOMContentLoaded', () => {
 			liveClueCategory.innerHTML = liveCategory.category;
 
 			//display the response if we're in the key
-			if (isKey && liveResponse) liveResponse.innerHTML = liveClueData.response;
+			if (isKey && liveResponse) {
+				if (liveClueData.caps === false) liveResponse.classList.add('caps');
+				else liveResponse.classList.remove('caps');
+				liveResponse.innerHTML = liveClueData.response;
+			}
 
 			//if we're in the first 500 ms, flash the clue value and we're done
 			if (state.state === 'showClueValue') {
 				liveClueText.classList.add('d-none');
 				liveClueImage.classList.add('d-none');
-				liveClueValue.innerHTML = `$${liveClueData.value}`;
+				liveClueValue.innerHTML = liveClueData.value;
 				liveClueValue.classList.remove('d-none');
 				return;
 			}
@@ -1512,8 +1516,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (catInner) catInner.classList.remove('category-hidden');
 			else return;
 			const catText = catInner.querySelector('.category-div');
-			if (catText)
-				catText.innerHTML = state.board.slice(-1).pop().category.toUpperCase();
+			if (catText) {
+				const cat = state.board.slice(-1).pop().category.trim();
+				if (cat.length >= maxCategoryLength) catInner.classList.add('long-cat');
+				else catInner.classList.remove('long-cat');
+				catText.innerHTML = cat.toUpperCase();
+			}
 			if (state.playSound && fjSound) fjSound.play();
 			if (isKey) {
 				const populateLabels = (lbl) => {
@@ -1709,7 +1717,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			) {
 				e.target.innerHTML = '';
 				return;
-			} else e.target.innerHTML = `$${clue.value}`;
+			} else e.target.innerHTML = clue.value;
 		});
 	});
 
@@ -1817,6 +1825,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (isKey && e.detail.state === 'buzz') {
 				const bz = e.detail.currentBuzz;
 				if (
+					bz?.data &&
 					bz.data.length >= i + 1 &&
 					bz.data[i].buzz &&
 					bz.data[i].time !== null &&

@@ -1,4 +1,4 @@
-const testClues = 2;
+const testClues = 1;
 const ddDistribution = [
 	[5, 756, 2491, 3636, 3112],
 	[2, 99, 286, 382, 231],
@@ -1024,12 +1024,14 @@ class Game {
 
 	constructor(board, host, io, socket, stateHandler, environment) {
 		this.id = randomString(20, chars);
-		if (process.env.NODE_ENV === 'development') this.joinCode = 'A';
-		else if (io) this.refreshJoinCode();
+
 		// this.joinCode = 'A';
 		this.io = io;
 		this.socket = socket;
 		this.environment = environment;
+		if (this.environment === 'development') this.joinCode = 'A';
+		else if (io) this.refreshJoinCode();
+
 		if (this.environment === 'production') cluesPerRound = 30;
 		else cluesPerRound = testClues;
 		if (this.socket) {
