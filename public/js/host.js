@@ -1425,11 +1425,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			else liveClueCategory.classList.remove('long-cat');
 
 			liveClueCategory.innerHTML = liveCategory.category;
+			if (liveCategory.caps === false)
+				liveClueCategory.classList.remove('caps');
+			else liveClueCategory.classList.add('caps');
 
 			//display the response if we're in the key
 			if (isKey && liveResponse) {
-				if (liveClueData.caps === false) liveResponse.classList.add('caps');
-				else liveResponse.classList.remove('caps');
+				if (liveClueData.caps === false) liveResponse.classList.remove('caps');
+				else liveResponse.classList.add('caps');
 				liveResponse.innerHTML = liveClueData.response;
 			}
 
@@ -1604,8 +1607,18 @@ document.addEventListener('DOMContentLoaded', () => {
 			liveClueImage.classList.add('d-none');
 			liveClueText.innerHTML = fj.text;
 			liveValue.innerHTML = ``;
+
+			if (fj.category.trim().length >= maxCategoryLength)
+				liveClueCategory.classList.add('long-cat');
+			else liveClueCategory.classList.remove('long-cat');
+			liveClueCategory.classList.add('caps');
+
 			liveClueCategory.innerHTML = fj.category;
-			if (isKey && liveResponse) liveResponse.innerHTML = fj.response;
+			if (isKey && liveResponse) {
+				liveResponse.innerHTML = fj.response;
+				if (fj.caps === false) liveResponse.classList.remove('caps');
+				else liveResponse.classList.add('caps');
+			}
 		} else if (state.state === 'FJLive') {
 			showView(liveClue);
 			if (state.playSound && thinkMusic && (isHost() || isPlayer()))
@@ -1688,7 +1701,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			const ind = state.fjOrder[p];
 			const player = state.players[ind];
 
-			e.target.innerHTML = `$${player.finalWager}`;
+			e.target.innerHTML = `${player.finalWager}`;
 			e.target.classList.add('animate');
 			setTimeout(() => {
 				e.target.classList.add('revealed');

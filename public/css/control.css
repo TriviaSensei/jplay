@@ -26,6 +26,23 @@ body {
 			grid-column: 2/6;
 			.response-text {
 				text-align: center;
+				text-shadow:
+					black 0em 0em 0,
+					black 0.01em 0.01em 0,
+					black 0.02em 0.02em 0,
+					black 0.03em 0.03em 0,
+					black 0.04em 0.04em 0,
+					black 0.05em 0.05em 0,
+					black 0.06em 0.06em 0,
+					black 0.07em 0.07em 0,
+					black 0.08em 0.08em 0,
+					black 0.09em 0.09em 0,
+					black 0.1em 0.1em 0,
+					black 0.11em 0.11em 0,
+					black 0.12em 0.12em 0,
+					black 0.13em 0.13em 0,
+					black 0.14em 0.14em 0,
+					black 0.15em 0.15em 0;
 			}
 		}
 		.clue-display:has(.clue-value-flash:not(.d-none)) {
