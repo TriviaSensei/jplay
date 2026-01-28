@@ -1,9 +1,15 @@
 link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
 .input-row-h
-    input#load-file(type="file" accept=".json")
-    button#load-data.btn.btn-secondary.f-1.me-2
-        label.w-100.h-100(for="load-file") Load
-    button#save-data.btn.btn-primary.f-1 Download .json
+    .input-row-h.f-1
+        .input-container.f-1(style="border:none;")
+            input#load-file(type="file" accept=".json")
+            label#load-data.btn.btn-secondary.d-flex(for="load-file") 
+                .m-auto Load
+    .input-row-h.f-1
+        .input-label Download 
+        .input-container
+            button#save-data-csv.btn.btn-primary.f-1.me-1 CSV
+            button#save-data.btn.btn-primary.f-1 JSON
 .input-row-v 
     .input-label Game Metadata
     .input-container

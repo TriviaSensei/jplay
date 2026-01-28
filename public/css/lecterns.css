@@ -143,6 +143,9 @@
 			}
 			.score-display {
 				font-size: 1.25em;
+				.score {
+					font-size: 1em;
+				}
 			}
 
 			.lectern-left::before,

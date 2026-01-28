@@ -1358,7 +1358,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	//main screen display as function of state
 	sh.addWatcher(null, (state) => {
 		if (!state) return;
-		const maxCategoryLength = 30;
+		const maxCategoryLength = 25;
 
 		if (state.state === 'waitingDD') {
 			//waiting for a DD wager

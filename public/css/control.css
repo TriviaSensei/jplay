@@ -6,6 +6,7 @@ body {
 
 .game-container {
 	width: min(1000px, 100vh, 80%);
+	font-size: min(24px, 2.4vh, 1.92vw);
 	.clue-box.dd {
 		background-image: none;
 		background-color: var(--yellow);
@@ -51,6 +52,16 @@ body {
 		.clue-display:has(.clue-value-flash:not(.d-none)) + .response-display {
 			display: none;
 		}
+	}
+	.lecterns {
+		.lectern {
+			.score-display {
+				font-size: 0.9em;
+			}
+		}
+	}
+	.score-display {
+		font-size: 0.9em;
 	}
 }
 
