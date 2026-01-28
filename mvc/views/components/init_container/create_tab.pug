@@ -1,15 +1,16 @@
 link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
 .input-row-h
+    .input-row-h.f-1.me-1
+        input#load-file(type="file" accept=".json")
+        label#load-data.btn.btn-secondary.d-flex.w-100(for="load-file") 
+            .m-auto Load
+    //- .input-row-h.f-1
+    //-     .input-label Download 
+    //-     .input-container
+    //-         button#save-data-csv.btn.btn-primary.f-1.me-1 CSV
+    //-         button#save-data.btn.btn-primary.f-1 JSON
     .input-row-h.f-1
-        .input-container.f-1(style="border:none;")
-            input#load-file(type="file" accept=".json")
-            label#load-data.btn.btn-secondary.d-flex(for="load-file") 
-                .m-auto Load
-    .input-row-h.f-1
-        .input-label Download 
-        .input-container
-            button#save-data-csv.btn.btn-primary.f-1.me-1 CSV
-            button#save-data.btn.btn-primary.f-1 JSON
+        button#save-data.btn.btn-primary.f-1 Download .JSON
 .input-row-v 
     .input-label Game Metadata
     .input-container
