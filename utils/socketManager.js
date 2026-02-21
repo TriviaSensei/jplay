@@ -1,7 +1,7 @@
 const { v4: uuidV4 } = require('uuid');
 const pingInterval = 200;
 const pingTimeout = 60000;
-const gameTimeout = 300000;
+const gameTimeout = 60 * 60 * 1000;
 const Game = require('../public/js/utils/Game');
 
 const catchSocketErr = (fn) => {
