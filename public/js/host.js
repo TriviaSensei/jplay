@@ -1499,7 +1499,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			hidePanel(liveClueValue);
 
 			let link = null;
-			if (liveClueData.videoLink && state.showVideo) {
+			//should we show the video? only do so if there's a link, we are
+			if (
+				liveClueData.videoLink &&
+				state.showVideo &&
+				['showDD', 'DDLive', 'showClue', 'clueLive'].includes(state.state)
+			) {
 				const linkData = getEmbeddedLink(
 					liveClueData.videoLink,
 					liveClueData.videoStart || 0,
@@ -1508,9 +1513,9 @@ document.addEventListener('DOMContentLoaded', () => {
 					liveClueData.video,
 				);
 				if (linkData.status === 'success') link = linkData.link;
-			} else if (!state.showVideo) liveClueVideoEmbed.setAttribute('src', '');
+			}
 
-			//if there's a video link
+			//if there's a video link that should be shown
 			if (link && !isKey) {
 				//hide the image
 				hidePanel(liveClueImage);

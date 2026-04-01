@@ -31,7 +31,7 @@ const clueTime = 3500;
 const ddTime = 10000;
 const FJTime = 31000;
 const showClueDelay = 500;
-const egg = 0.2;
+const egg = 0.05;
 
 let cluesPerRound;
 
@@ -716,6 +716,7 @@ class Game {
 		clueTimedOut: {
 			data: {
 				status: 'Clue timed out. Press "advance" to continue.',
+				showVideo: false,
 			},
 			host: () => {
 				const state = this.gameState;
@@ -741,6 +742,7 @@ class Game {
 			//can only come from clueLive - buzzer is disarmed
 			data: {
 				buzzerArmed: false,
+				showVideo: false,
 			},
 			player: (p) => {
 				//if this player is not the buzzed in player, update their stats
