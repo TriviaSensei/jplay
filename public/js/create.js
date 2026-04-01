@@ -304,7 +304,7 @@ const populateSelectedClue = () => {
 	if (sc.data.image) showImagePreview(sc.data.image);
 	else hideImagePreview();
 
-	videoLink.value = sc.data.videoLink;
+	videoLink.value = sc.data.videoLink || '';
 	videoTimestamps[0].value = sc.data.videoStart || null;
 	videoTimestamps[1].value = sc.data.videoEnd || null;
 	audioOn.checked = sc.data.audio;
