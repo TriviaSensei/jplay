@@ -31,7 +31,7 @@ const clueTime = 3500;
 const ddTime = 10000;
 const FJTime = 31000;
 const showClueDelay = 500;
-const egg = 1;
+const egg = 0.2;
 
 let cluesPerRound;
 
