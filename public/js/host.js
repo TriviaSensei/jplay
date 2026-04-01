@@ -3,7 +3,7 @@ import { showMessage } from './utils/messages.js';
 import { handleRequest } from './utils/requestHandler.js';
 import { withTimeout } from './utils/socketTimeout.js';
 import { createElement } from './utils/createElementFromSelector.js';
-
+import { getEmbeddedLink } from './utils/videoEmbed.js';
 const createButton = document.querySelector('#create-game');
 const fileUpload = document.querySelector('#game-file');
 let socket;
@@ -112,7 +112,7 @@ const pi = document.querySelector('#player-index');
 const playerName = document.querySelector('#set-player-name');
 const setKeyButton = document.querySelector('#set-button');
 const buzzerKey = document.querySelector('#current-key');
-const startGameModal = isKey ? null : new bootstrap.Modal('#start-game-modal');
+const startGameModal = new bootstrap.Modal('#start-game-modal');
 const cancelGame = document.querySelector('#confirm-cancel');
 const joinGameButton = document.querySelector('#join-game');
 const spectateGame = document.querySelector('#spectate-game');
@@ -125,10 +125,14 @@ const endGameMessage = egm?.querySelector('#end-game-result');
 const ackEndGame = egm?.querySelector('#end-game-ok');
 const endGameModal = egm ? new bootstrap.Modal(egm) : null;
 const confirmStartGame = document.querySelector('#confirm-start');
+const cancelStartGame = document.querySelector('#cancel-start');
 
 const gameBoard = gameContainer.querySelector('.game-board');
 const gameHeaders = getElementArray(gameBoard, '.category-box');
 
+const populateSounds = [1, 2].map((n) =>
+	document.querySelector(`#board-fill-${n}-sound`),
+);
 const categoryScroll = gameContainer.querySelector(
 	'.category-scroll-container',
 );
@@ -148,6 +152,8 @@ const ddDiv = document.querySelector('.dd-div');
 const sideLights = getElementArray(liveClue, '.side-light');
 const liveClueText = liveClue.querySelector('.clue-text');
 const liveClueImage = liveClue.querySelector('#clue-image');
+const liveClueVideo = liveClue.querySelector('#clue-video');
+const liveClueVideoEmbed = liveClue.querySelector('#clue-video-embed');
 const liveClueValue = liveClue.querySelector('.clue-value-flash');
 
 const liveClueCategory = liveClue.querySelector('.category-text');
@@ -360,10 +366,11 @@ if (fjprm) {
 let thinkMusic = document.querySelector('#think-sound');
 
 const hidePanel = (tgt) => {
-	if (!tgt) return;
-	tgt.classList.add('d-none');
+	if (tgt) tgt.classList.add('d-none');
 };
-const showPanel = (tgt) => (tgt ? tgt.classList.remove('d-none') : null);
+const showPanel = (tgt) => {
+	if (tgt) tgt.classList.remove('d-none');
+};
 
 const getPlayerIndex = () => {
 	return Number(pi.getAttribute('value'));
@@ -592,16 +599,37 @@ const handleKeyPress = async (e) => {
 		return openKey();
 
 	//player input (remote game only)
+	let listener = false;
 	if (
 		state.isRemote &&
 		isPlayer() &&
 		['enter', 'return', ' '].includes(e.key.toLowerCase())
 	) {
+		const buzzerButton = document.querySelector('#buzzer');
+
+		//handle early buzz
+		if (state.state === 'showClue') {
+			const handleKeyUp = (evt) => {
+				if (evt.key.toLowerCase() === e.key.toLowerCase()) {
+					document.removeEventListener('keyup', handleKeyUp);
+					buzzerButton.classList.remove('early');
+					listener = false;
+				}
+			};
+			if (!listener) {
+				listener = true;
+				document.addEventListener('keyup', handleKeyUp);
+				buzzerButton.classList.add('early');
+			}
+		}
 		return socket.emit(
 			'buzz',
 			withTimeout(
 				(data) => {
-					if (data.status !== 'OK') showMessage('error', data.message);
+					if (data?.message) showMessage('error', data.message);
+					if (data.status === 'OK') {
+						buzzerButton.classList.remove('early');
+					}
 				},
 				() => {
 					showMessage('error', 'Buzz timed out');
@@ -650,17 +678,18 @@ const handleKeyPress = async (e) => {
 		return;
 	}
 	//game is not active, host key pressed to start game
-	else if (
-		!state?.active &&
-		state?.host?.keys?.includes(e.key.toLowerCase()) &&
-		state?.buzzedIn === -1
-	) {
-		if (isHost() && state.players.some((p) => p.name || p.nameData.length > 0))
-			startGameModal.show();
-		else if (!isHost()) return;
-		else
-			return showMessage('error', 'You must have at least one active player');
-	}
+	// else if (
+	// 	!state?.active &&
+	// 	state?.host?.keys?.includes(e.key.toLowerCase()) &&
+	// 	state?.buzzedIn === -1
+	// ) {
+	// 	//host window (not the control panel)
+	// 	if (isHost() && state.players.some((p) => p.name || p.nameData.length > 0))
+	// 		startGameModal.show();
+	// 	else if (!isHost()) return;
+	// 	else
+	// 		return showMessage('error', 'You must have at least one active player');
+	// }
 	//host key pressed
 	else if ([...state.host.keys, 'c', 'x', 'k'].includes(e.key.toLowerCase())) {
 		if (uid !== state.host.uid) return;
@@ -698,6 +727,16 @@ const sendKey = (e) => {
 	if (!window.opener) return;
 	const evt = new CustomEvent('receive-key', { detail: { key: e.key } });
 	window.opener.document.dispatchEvent(evt);
+	//show start game modal if necessary in key window
+	const state = sh.getState();
+	if (
+		!state?.active &&
+		state?.host?.keys?.includes(e.key.toLowerCase()) &&
+		state?.buzzedIn === -1
+	) {
+		if (isKey && state.players.some((p) => p.name || p.nameData.length > 0))
+			startGameModal.show();
+	}
 };
 
 let emitEvent;
@@ -833,14 +872,14 @@ const moveBoard = () => {
 
 		const txt = categoryLarge.querySelector('.category-text');
 		txt.innerHTML = inner.innerHTML;
-		categoryLarge.classList.remove('d-none');
+		showPanel(categoryLarge);
 		catLarge.setState(true);
 	};
 
 	const hideCategory = () => {
 		const st = catLarge.getState();
 		if (st) {
-			categoryLarge.classList.add('d-none');
+			showPanel(categoryLarge);
 			catLarge.setState(false);
 		}
 	};
@@ -1153,14 +1192,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		sh.addWatcher(b, (e) => {
 			if (!e.detail) return;
 			if (isKey || e.detail.state !== 'pregame' || !isHost())
-				e.target.classList.add('d-none');
-			else e.target.classList.remove('d-none');
+				hidePanel(e.target);
+			else showPanel(e.target);
 
 			const ep = e.target.closest('.edit-player');
 			const player = e.detail.players[i];
-			if (ep && (player?.name || player?.nameData.length > 0))
-				ep?.classList.add('d-none');
-			else ep?.classList.remove('d-none');
+			if (ep && (player?.name || player?.nameData.length > 0)) hidePanel(ep);
+			else if (ep) showPanel(ep);
 		});
 	});
 	nameDisplays.forEach((nd, i) => {
@@ -1173,9 +1211,9 @@ document.addEventListener('DOMContentLoaded', () => {
 				(!e.detail.players[i]?.nameData ||
 					e.detail.players[i].nameData.length === 0)
 			) {
-				e.target.classList.remove('d-none');
+				showPanel(e.target);
 				e.target.innerHTML = e.detail.players[i].name;
-			} else e.target.classList.add('d-none');
+			} else hidePanel(e.target);
 		});
 	});
 
@@ -1190,7 +1228,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (!player) return;
 			const nameData = player.nameData;
 			if (!nameData || nameData.length === 0) {
-				e.target.classList.add('d-none');
+				hidePanel(e.target);
 				return;
 			}
 			nameData.forEach((nd) => {
@@ -1201,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				np.setAttribute('d', nd);
 				path.appendChild(np);
 			});
-			e.target.classList.remove('d-none');
+			showPanel(e.target);
 		});
 	});
 
@@ -1308,11 +1346,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			playerSettingsModal.hide();
 		});
 
-	if (!isKey) {
+	if (isKey || isHost()) {
 		confirmStartGame.addEventListener('click', () => {
 			sendGameInput('start');
 			startGameModal.hide();
 		});
+	}
+
+	if (!isKey) {
 		sh.addWatcher(buzzerKey, (e) => {
 			const ind = getPlayerIndex();
 			if (isNaN(ind) && !e.detail) return;
@@ -1330,6 +1371,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			e.target.innerHTML = key;
 		});
 	}
+	cancelStartGame.addEventListener('click', (e) => {
+		const modalShowing = document.querySelector('#start-game-modal.modal.show');
+		if (!modalShowing) return;
+		if (isKey) sendKey({ key: 'Escape' });
+		startGameModal.hide();
+	});
 
 	const getCategory = (cat) => {
 		const state = sh.getState();
@@ -1342,16 +1389,17 @@ document.addEventListener('DOMContentLoaded', () => {
 	const getClue = (cat, row) => {
 		const state = sh.getState();
 		if (!state) return null;
-		else if (Array.isArray(state.board[state.round]))
-			return state.board[state.round][cat].clues[row];
-		else if (state.round === state.board.length - 1)
-			return state.board[state.round];
+
+		const round = state.round || 0;
+		if (Array.isArray(state.board[round]))
+			return state.board[round][cat].clues[row];
+		else if (round === state.board.length - 1) return state.board[round];
 	};
 
 	const showView = (div) => {
 		views.forEach((v) => {
-			if (v === div) v.classList.remove('d-none');
-			else v.classList.add('d-none');
+			if (v === div) showPanel(v);
+			else hidePanel(v);
 		});
 	};
 
@@ -1359,6 +1407,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	sh.addWatcher(null, (state) => {
 		if (!state) return;
 		const maxCategoryLength = 25;
+
+		if (state.active) startGameModal.hide();
 
 		if (state.state === 'waitingDD') {
 			//waiting for a DD wager
@@ -1438,33 +1488,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			//if we're in the first 500 ms, flash the clue value and we're done
 			if (state.state === 'showClueValue') {
-				liveClueText.classList.add('d-none');
-				liveClueImage.classList.add('d-none');
+				hidePanel(liveClueText);
+				hidePanel(liveClueImage);
+
 				liveClueValue.innerHTML = liveClueData.value;
-				liveClueValue.classList.remove('d-none');
+				showPanel(liveClueValue);
 				return;
 			}
 			//otherwise, disappear the large live clue value
-			liveClueValue.classList.add('d-none');
+			hidePanel(liveClueValue);
 
+			let link = null;
+			if (liveClueData.videoLink && state.showVideo) {
+				const linkData = getEmbeddedLink(
+					liveClueData.videoLink,
+					liveClueData.videoStart || 0,
+					liveClueData.videoEnd || 0,
+					liveClueData.audio,
+					liveClueData.video,
+				);
+				if (linkData.status === 'success') link = linkData.link;
+			} else if (!state.showVideo) liveClueVideoEmbed.setAttribute('src', '');
+
+			//if there's a video link
+			if (link && !isKey) {
+				//hide the image
+				hidePanel(liveClueImage);
+				//if we're showing video
+				if (liveClueData.video) {
+					//disappear the live clue text
+					hidePanel(liveClueText);
+					showPanel(liveClueVideo);
+				} else //no video - just audio. show the clue text
+				{
+					showPanel(liveClueText);
+					hidePanel(liveClueVideo);
+				}
+				//populate the video
+				liveClueVideoEmbed.setAttribute('src', link);
+			}
 			//if there's an image and it's not the key, show the image
-			if (liveClueData.image && !isKey) {
-				liveClueText.classList.add('d-none');
-				liveClueImage.classList.remove('d-none');
+			else if (liveClueData.image && !isKey) {
+				hidePanel(liveClueVideo);
+				liveClueVideoEmbed.setAttribute('src', '');
+				hidePanel(liveClueText);
+				showPanel(liveClueImage);
 				liveClueImage.setAttribute(
 					'style',
 					`background-image:url("${liveClueData.image}")`,
 				);
 			}
-			//show the clue text in the key, or if there's no image
+			//show the clue text in the key, or if there's no image or video
 			else {
-				liveClueText.classList.remove('d-none');
+				showPanel(liveClueText);
 				//if the clue is specifically marked as not caps, remove the all caps class
 				if (liveClueData.caps === false) liveClueText.classList.remove('caps');
 				//otherwise add it
 				else liveClueText.classList.add('caps');
-
-				liveClueImage.classList.add('d-none');
+				hidePanel(liveClueImage);
+				hidePanel(liveClueVideo);
+				liveClueVideoEmbed.setAttribute('src', '');
 				liveClueText.innerHTML = liveClueData.text;
 			}
 
@@ -1530,7 +1613,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				const populateLabels = (lbl) => {
 					const ind = Number(lbl.getAttribute('data-index'));
 					if (isNaN(ind) || !state.players[ind].name) {
-						lbl.classList.add('d-none');
+						hidePanel(lbl);
 					} else lbl.innerHTML = state.players[ind].name;
 				};
 				fjWagerLabels.forEach(populateLabels);
@@ -1603,8 +1686,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (fjPlayerWagerModal) fjPlayerWagerModal.hide();
 			showView(liveClue);
 			const fj = state.board.slice(-1).pop();
-			liveClueText.classList.remove('d-none');
-			liveClueImage.classList.add('d-none');
+			showPanel(liveClueText);
+			hidePanel(liveClueImage);
 			liveClueText.innerHTML = fj.text;
 			liveValue.innerHTML = ``;
 
@@ -1710,6 +1793,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
+	const popState = new StateHandler(0);
+	const advanceStage = (n) => {
+		popState.setState((prev) => prev + n);
+	};
+	popState.addWatcher(null, (state) => console.log(state));
+	//handle the board population
 	const getCatRow = (cb) => {
 		const cat = Number(cb.getAttribute('data-category'));
 		const row = Number(cb.getAttribute('data-row'));
@@ -1718,20 +1807,49 @@ document.addEventListener('DOMContentLoaded', () => {
 	clueValues.forEach((cb) => {
 		const [cat, row] = getCatRow(cb);
 		if (isNaN(cat) || isNaN(row)) return;
+
 		sh.addWatcher(cb, (e) => {
 			const state = e.detail;
 			if (!state) return;
+			else if (state.round < 0) return;
 			const clue = getClue(cat, row);
-			if (
-				!clue ||
-				state.round >= state.board.length - 1 ||
-				state.round < 0 ||
-				clue.selected
-			) {
+			if (!clue || state.round >= state.board.length - 1 || clue.selected) {
 				e.target.innerHTML = '';
 				return;
 			} else e.target.innerHTML = clue.value;
 		});
+		popState.addWatcher(cb, (e) => {
+			const s0 = sh.getState();
+			if (s0.round >= 0 || s0.state !== 'boardPopulate') return;
+			const clue = s0.board[0][cat].clues[row];
+			const order = s0.order;
+
+			const n = cat * 5 + row;
+			const n2 = order[n].order;
+			if (n2 < e.detail) {
+				e.target.innerHTML = clue.value;
+			} else e.target.innerHTML = '';
+		});
+	});
+	sh.addWatcher(null, (state) => {
+		if (state.state !== 'boardPopulate') return;
+		if (!isKey) {
+			if (state.easterEgg) populateSounds[1].play();
+			else populateSounds[0].play();
+		}
+		const delay = 250;
+		const inc = state.easterEgg ? 1 : 5;
+		const interval = state.easterEgg ? 133 : 400;
+		const n = state.easterEgg ? 30 : 6;
+
+		for (var i = 0; i < n; i++) {
+			setTimeout(
+				() => {
+					advanceStage(inc);
+				},
+				delay + i * interval,
+			);
+		}
 	});
 
 	let timerTimeout = null;
@@ -1817,11 +1935,9 @@ document.addEventListener('DOMContentLoaded', () => {
 						: null;
 
 		if (tl === null) return e.target.classList.remove('live');
-		console.log(tl);
 		const timeLimit = tl / 1000;
 
 		const style = `animation-duration:${timeLimit}s`;
-		console.log(sideLights);
 		sideLights.forEach((s) => {
 			const inner = s.querySelector('.side-light-inner');
 			inner.setAttribute('style', style);
@@ -2207,11 +2323,11 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 		sh.addWatcher(openModalPanel, (e) => {
 			if (e.detail.modal) {
-				e.target.classList.remove('d-none');
+				showPanel(e.target);
 				openModal.innerHTML = e.detail.modalDescription;
 				openModal.setAttribute('data-bs-target', `#${e.detail.modal}`);
 			} else {
-				e.target.classList.add('d-none');
+				hidePanel(e.target);
 			}
 		});
 		const sendInputFromKey = (e) => {
@@ -2223,6 +2339,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		[advanceButton, correctButton, incorrectButton].forEach((b) =>
 			b.addEventListener('click', sendInputFromKey),
 		);
+		advanceButton.addEventListener('click', (e) => {
+			const state = sh.getState();
+			if (!state.active && state.state === 'pregame') {
+				if (state.players.some((p) => p.name || p.nameData.length > 0))
+					startGameModal.show();
+				else return showMessage('error', 'You must have at least one player ');
+			}
+		});
 
 		randomizeButton.addEventListener('click', () => {
 			const state = sh.getState();
@@ -2261,8 +2385,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			b.addEventListener('click', handleMovePlayer);
 		});
 		sh.addWatcher(movePlayerPanel, (e) => {
-			if (e.detail.state !== 'pregame') e.target.classList.add('d-none');
-			else e.target.classList.remove('d-none');
+			if (e.detail.state !== 'pregame') hidePanel(e.target);
+			else showPanel(e.target);
 		});
 		sh.addWatcher(randomizeButton, (e) => {
 			e.target.disabled =
@@ -2408,17 +2532,21 @@ document.addEventListener('DOMContentLoaded', () => {
 						buzzer.removeAttribute('data-bs-content');
 					}, 1500);
 				}
+
+				//if the clue is live, arm the buzzer
 				if (
 					state.state === 'clueLive' ||
 					(state.state === 'pregame' && state.buzzedIn === -1)
 				) {
 					buzzer.classList.add('armed');
-				} else buzzer.classList.remove('armed');
-
-				//buzzer displays name on buzz-in, otherwise "buzz"
-				if (state.buzzedIn === -1 || !state.players[state.buzzedIn]?.name)
-					buzzer.innerHTML = 'Buzz';
-				else buzzer.innerHTML = state.players[state.buzzedIn].name;
+				} else {
+					//buzzer is not armed
+					buzzer.classList.remove('armed');
+					//buzzer displays name on buzz-in, otherwise "buzz"
+					if (state.buzzedIn !== -1 && !state.players[state.buzzedIn]?.name)
+						buzzer.innerHTML = state.players[state.buzzedIn].name;
+					else buzzer.innerHTML = '';
+				}
 
 				const lecterns = getElementArray(
 					playerContainer,

@@ -64,7 +64,7 @@ link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
         .input-label Clue Text (max 175 chars)
         .input-container.flex-column-reverse
             .input-row.d-flex.flex-row.all-caps-container
-                input(type="checkbox" id="all-caps-clue")
+                input#all-caps-clue(type="checkbox")
                 label(for="all-caps-clue") Clue in all caps
             .ratio.ratio-4x3.mb-2.clue-text-container
                 div.p-4.clue-text-container
@@ -73,11 +73,36 @@ link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
         .input-label Picture URL (optional; for picture clues only)
         .input-container
             input#picture-url.w-100(type="text" placeholder="Picture URL")
-        .input-container.preview-container.d-none
+        .input-container.image-preview-container.d-none
             .d-flex.flex-column
                 .w-100.d-flex.flex-column
                     img#picture-preview.mb-1
                     button#clear-image.btn.btn-sm.btn-primary Clear
+    .input-row-v.no-fj
+        .input-label Video URL (optional; for audio/video clues only)
+        .input-container.flex-column
+            p.video-warning Note: Youtube has disabled hiding the title of the video, so players may be able to see it when the video plays. If this is an issue, try uploading the video to your own channel as an unlisted video.
+            input#video-url.w-100.mb-1(type="text" placeholder="YouTube video URL")
+            #video-settings.d-flex.flex-column.mb-1
+                .d-flex.flex-row.mb-1
+                    .f-1.me-5.d-flex.flex-row 
+                        label.me-1(for="video-start") Start:
+                        input#video-start.me-1(type="number" min="0")
+                        span sec
+                    .f-1.d-flex.flex-row 
+                        label.me-1(for="video-end") End:
+                        input#video-end.me-1(type="number" min="0")
+                        span sec
+                .d-flex.flex-row
+                    input#audio-on.me-2(type="checkbox" checked)
+                    label.me-4(for="audio-on") Audio
+                    input#video-on(type="checkbox" checked)
+                    label(for='video-on') Video
+            .video-preview-container.d-none
+                .w-100.d-flex.flex-column
+                    .ratio.screen-ratio.mb-1
+                        iframe#clue-video-embed.mb-1(frameborder="0" src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" title="")
+                    button#clear-video.btn.btn-sm.btn-primary Clear
     .input-row-v 
         .input-label Correct Response
         .input-container 

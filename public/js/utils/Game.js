@@ -31,6 +31,7 @@ const clueTime = 3500;
 const ddTime = 10000;
 const FJTime = 31000;
 const showClueDelay = 500;
+const egg = 1;
 
 let cluesPerRound;
 
@@ -340,7 +341,14 @@ class Game {
 	handleBuzz(p) {
 		try {
 			//if the player is locked, don't do anything
-			if (this.gameState.players[p].isLocked()) return;
+			if (this.gameState.players[p].isLocked())
+				return {
+					status: 'lock',
+				};
+			else if (this.gameState.buzzedIn !== -1)
+				return {
+					status: 'late',
+				};
 
 			//stop the clue timeout, set the game state
 			this.stopClueTimer();
@@ -352,10 +360,11 @@ class Game {
 				currentTime: now,
 				status: `${this.gameState.players[p].name} buzzed in`,
 			});
+			const status = { status: 'OK' };
 			const curr = this.getCurrentClueStats();
-			if (!curr) return;
+			if (!curr) return status;
 			const alreadyBuzzed = curr.data[p].buzz && curr.data[p].time !== null;
-			if (alreadyBuzzed) return;
+			if (alreadyBuzzed) return status;
 
 			this.updateGameStats(p, {
 				buzz: true,
@@ -363,7 +372,8 @@ class Game {
 				time: Date.now() - this.gameState.buzzerTime,
 			});
 		} catch (err) {
-			return console.log(err);
+			console.log(err);
+			return null;
 		}
 	}
 
@@ -435,24 +445,55 @@ class Game {
 					this.gameState.players.length > 0 &&
 					this.gameState.players.some((p) => p.getName() !== '')
 				) {
-					const data = {
-						state: 'boardIntro',
-						round: 0,
-						categoryShown: -2,
-						status: 'Board intro - press advance to display next category',
-					};
-					this.setGameState(data);
-					// this.gameState.active = true;
-					// this.gameState.state = 'betweenRounds';
-					// this.gameState.round = 2;
-					// this.gameState.players.forEach((p, i) => {
-					// 	if (p.name) p.score = (i + 1) * 200;
-					// });
-					this.updateGameState(null, data);
+					const n = Math.random();
+					const easterEgg = n < egg;
+					const order = new Array(30)
+						.fill(0)
+						.map((n, i) => {
+							return {
+								order: Math.random(),
+								cat: Math.floor(i / 5),
+								row: i % 5,
+							};
+						})
+						.sort((a, b) => a.order - b.order)
+						.map((el, i) => {
+							return { cat: el.cat, row: el.row, order: i };
+						})
+						.sort((a, b) => {
+							if (a.cat === b.cat) return a.row - b.row;
+							return a.cat - b.cat;
+						});
+					this.setGameState({
+						state: 'boardPopulate',
+						playSound: true,
+						easterEgg,
+						order,
+					});
+
+					setTimeout(
+						() => {
+							const data = {
+								state: 'boardIntro',
+								round: 0,
+								categoryShown: -2,
+								status: 'Board intro - press advance to display next category',
+							};
+							this.setGameState(data);
+							// this.gameState.active = true;
+							// this.gameState.state = 'betweenRounds';
+							// this.gameState.round = 2;
+							// this.gameState.players.forEach((p, i) => {
+							// 	if (p.name) p.score = (i + 1) * 200;
+							// });
+							this.updateGameState(null, data);
+						},
+						easterEgg ? 4500 : 3000,
+					);
 				} else throw new Error('You must have at least one player.');
 			},
 			player: (p) => {
-				if (this.gameState.buzzedIn === -1) this.handleBuzz(p);
+				return this.handleBuzz(p);
 				// this.setGameState({
 				// 	buzzedIn: p,
 				// });
@@ -469,6 +510,9 @@ class Game {
 			movePlayer: (player, direction) => {
 				this.movePlayer(player, direction);
 			},
+		},
+		boardPopulate: {
+			data: {},
 		},
 		//boardIntro: fill board, show categories
 		boardIntro: {
@@ -514,6 +558,7 @@ class Game {
 		select: {
 			data: {
 				buzzerArmed: false,
+				showVideo: false,
 				buzzedIn: -1,
 				buzzTime: null,
 				wager: -1,
@@ -593,16 +638,26 @@ class Game {
 			host: () => {
 				//if the clue hasn't timed out, set it live on host input
 				if (!this.gameState.timeout) {
-					this.setGameState({
-						state: 'clueLive',
-						buzzerTime: Date.now(),
-					});
-					this.startClueTimer(clueTime, {
-						buzzerArmed: false,
-						buzzedIn: -1,
-						state: 'clueTimedOut',
-						status: 'Clue timed out. Press advance to continue.',
-					});
+					const [cat, row] = this.gameState.selectedClue;
+					if (cat === -1 || row === -1) return;
+					const liveClueData =
+						this.gameState.board[this.gameState.round][cat].clues[row];
+					if (liveClueData.videoLink && !this.gameState.showVideo) {
+						this.setGameState({
+							showVideo: true,
+						});
+					} else {
+						this.setGameState({
+							state: 'clueLive',
+							buzzerTime: Date.now(),
+						});
+						this.startClueTimer(clueTime, {
+							buzzerArmed: false,
+							buzzedIn: -1,
+							state: 'clueTimedOut',
+							status: 'Clue timed out. Press advance to continue.',
+						});
+					}
 				}
 				//go back to select screen or between rounds if the clue is timed out
 				else {
@@ -630,11 +685,14 @@ class Game {
 			player: (p) => {
 				try {
 					//if the clue is already timed out, do nothing
-					if (this.gameState.timeout) return;
+					if (this.gameState.timeout) return { status: 'late' };
 					//if the clue is not yet started, lock them out for a period
 					this.lockPlayer(p, true);
 					this.updateGameState(p, { players: this.gameState.players });
 					this.updateGameStats(p, { buzz: true, early: true });
+					return {
+						status: 'early',
+					};
 				} catch (err) {
 					return console.log(err);
 				}
@@ -651,7 +709,7 @@ class Game {
 				status: 'Waiting for buzz',
 			},
 			player: (p) => {
-				this.handleBuzz(p);
+				return this.handleBuzz(p);
 			},
 		},
 		//clue timed out
@@ -701,6 +759,10 @@ class Game {
 						this.updateGameStats(p, { buzz: true, time: elapsed });
 					}
 				}
+				//indicate that someone is already buzzed in
+				return {
+					status: 'late',
+				};
 			},
 			correct: this.handleResponse(true),
 			incorrect: this.handleResponse(false),
@@ -730,17 +792,27 @@ class Game {
 		//showDD: DD being read, no timer, no buzzers
 		showDD: {
 			data: {
-				status: `Reading Daily Double clue - press advance to start timer`,
+				status: `Reading Daily Double clue - press advance to continue`,
 			},
 			host: () => {
-				this.setGameState({
-					state: 'DDLive',
-				});
-				this.startClueTimer(ddTime, {
-					state: 'DDTimedOut',
-					timeout: true,
-					playSound: true,
-				});
+				const [cat, row] = this.gameState.selectedClue;
+				if (cat === -1 || row === -1) return;
+				const liveClueData =
+					this.gameState.board[this.gameState.round][cat].clues[row];
+				if (liveClueData.videoLink && !this.gameState.showVideo) {
+					this.setGameState({
+						showVideo: true,
+					});
+				} else {
+					this.setGameState({
+						state: 'DDLive',
+					});
+					this.startClueTimer(ddTime, {
+						state: 'DDTimedOut',
+						timeout: true,
+						playSound: true,
+					});
+				}
 			},
 		},
 		//DDLive: DD is live, buzzers not active
@@ -777,6 +849,7 @@ class Game {
 				buzzedIn: -1,
 				selectedClue: [-1, -1],
 				timeout: false,
+				showVideo: false,
 				status: `Between rounds. Press advance to continue`,
 			},
 			host: () => {
@@ -804,6 +877,9 @@ class Game {
 			},
 		},
 		FJIntro: {
+			data: {
+				showVideo: false,
+			},
 			host: () => {
 				this.gameData.push({
 					round: 3,
@@ -1162,6 +1238,7 @@ class Game {
 			selectedClue: [-1, -1], //selected clue (category, row)
 			currentTime: null,
 			playSound: false,
+			showVideo: false,
 			message: null,
 			fjOrder: null,
 			fjStep: -1,
@@ -1371,8 +1448,8 @@ class Game {
 		let f = st[fn];
 		if (!f) f = this.stateMap.all[fn];
 		//invalid input for this state - don't do anything
-		if (!f) return;
-		f(...args);
+		if (!f) return null;
+		return f(...args);
 	}
 
 	setGameState(state) {

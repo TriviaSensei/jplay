@@ -1,9 +1,22 @@
 import { getElementArray } from './utils/getElementArray.js';
 import { showMessage } from './utils/messages.js';
 import { createElement } from './utils/createElementFromSelector.js';
+import { getEmbeddedLink } from './utils/videoEmbed.js';
 
 const defaultWidth = 400;
 
+const blankClue = {
+	text: '',
+	image: '',
+	videoLink: '',
+	videoStart: null,
+	videoEnd: null,
+	audio: true,
+	video: true,
+	response: '',
+	caps: true,
+	dailyDouble: false,
+};
 const getInitState = () => {
 	return {
 		name: '',
@@ -14,11 +27,7 @@ const getInitState = () => {
 					comments: '',
 					clues: new Array(5).fill(0).map((el) => {
 						return {
-							text: '',
-							image: '',
-							response: '',
-							caps: true,
-							dailyDouble: false,
+							...blankClue,
 						};
 					}),
 				};
@@ -29,11 +38,7 @@ const getInitState = () => {
 					comments: '',
 					clues: new Array(5).fill(0).map((el) => {
 						return {
-							text: '',
-							image: '',
-							response: '',
-							caps: true,
-							dailyDouble: false,
+							...blankClue,
 						};
 					}),
 				};
@@ -55,7 +60,7 @@ const createArea = document.querySelector('#create-tab-pane .game-data');
 
 const loadFile = document.querySelector('#create-tab-pane #load-file');
 const saveButton = document.querySelector('#create-tab-pane #save-data');
-
+const saveCSVButton = document.querySelector('#create-tab-pane #save-data-csv');
 const metadataArea = document.querySelector(
 	'#create-tab-pane .create-game-metadata',
 );
@@ -83,9 +88,20 @@ const valueLabels = getElementArray(
 );
 const clueText = createArea.querySelector('#edit-clue-text');
 const imageLink = createArea.querySelector('#picture-url');
-const previewContainer = createArea.querySelector('.preview-container');
+const previewContainer = createArea.querySelector('.image-preview-container');
 const imagePreview = createArea.querySelector('#picture-preview');
 const clearImage = createArea.querySelector('#clear-image');
+const videoPreviewContainer = createArea.querySelector(
+	'.video-preview-container',
+);
+const videoLink = createArea.querySelector('#video-url');
+const clueVideo = createArea.querySelector('#clue-video-embed');
+const videoTimestamps = getElementArray(createArea, '#video-start, #video-end');
+const videoSettings = createArea.querySelector('#video-settings');
+const audioOn = videoSettings.querySelector('#audio-on');
+const videoOn = videoSettings.querySelector('#video-on');
+const clearVideo = createArea.querySelector('#clear-video');
+
 const tempCanvas = document.querySelector('#temp-canvas');
 const correctResponse = createArea.querySelector('#correct-response');
 
@@ -257,6 +273,27 @@ const populateCategoryNames = () => {
 	}
 };
 
+const handleVideoLink = () => {
+	if (videoLink.value.trim().length === 0) {
+		videoPreviewContainer.classList.add('d-none');
+		clueVideo.setAttribute('src', '');
+		return;
+	}
+
+	const [start, end] = videoTimestamps.map((el) =>
+		el.value === '' ? 0 : Number(el.value),
+	);
+	const res = getEmbeddedLink(
+		videoLink.value.trim(),
+		start,
+		end,
+		audioOn.checked,
+		videoOn.checked,
+	);
+	if (res.status !== 'success') return showMessage('error', res.message);
+	videoPreviewContainer.classList.remove('d-none');
+	clueVideo.setAttribute('src', res.link.replace('controls=0', 'controls=1'));
+};
 const populateSelectedClue = () => {
 	const sc = getSelectedClue();
 	categoryName.value = sc.data.category;
@@ -266,8 +303,17 @@ const populateSelectedClue = () => {
 	imageLink.value = '';
 	if (sc.data.image) showImagePreview(sc.data.image);
 	else hideImagePreview();
+
+	videoLink.value = sc.data.videoLink;
+	videoTimestamps[0].value = sc.data.videoStart || null;
+	videoTimestamps[1].value = sc.data.videoEnd || null;
+	audioOn.checked = sc.data.audio;
+	videoOn.checked = sc.data.video;
+
 	correctResponse.value = sc.data.response;
 	setDD.checked = sc.data.dailyDouble;
+
+	handleVideoLink();
 	populateCategoryNames();
 	validateAll();
 };
@@ -370,7 +416,6 @@ const handleDataChange = (e) => {
 				category: categoryName.value,
 				text: clueText.value,
 				caps: allCaps.checked,
-				image: '',
 				response: correctResponse.value,
 			};
 		else if (sc.round === 1 || sc.round === 0) {
@@ -383,7 +428,16 @@ const handleDataChange = (e) => {
 			prev.rounds[sc.round][sc.category].clues[sc.clue].response =
 				correctResponse.value.trim();
 
-			console.log(prev.rounds[sc.round][sc.category].clues[sc.clue]);
+			prev.rounds[sc.round][sc.category].clues[sc.clue].videoLink =
+				videoLink.value.trim();
+			prev.rounds[sc.round][sc.category].clues[sc.clue].videoStart =
+				Number(videoTimestamps[0].value) || null;
+			prev.rounds[sc.round][sc.category].clues[sc.clue].videoEnd =
+				Number(videoTimestamps[1].value) || null;
+			prev.rounds[sc.round][sc.category].clues[sc.clue].video = videoOn.checked;
+			prev.rounds[sc.round][sc.category].clues[sc.clue].audio = audioOn.checked;
+			prev.rounds[sc.round][sc.category].clues[sc.clue].text =
+				clueText.value.trim();
 		}
 		localStorage.setItem('jp-creator-state', JSON.stringify(prev));
 		showHeaderMessage('info', 'Data saved');
@@ -429,7 +483,8 @@ document.addEventListener('paste', async (e) => {
 	e.preventDefault();
 	const cc = getSelectedClue();
 	//no picture clues in FJ
-	if (cc.round === 2) return;
+	if (cc.round === 2)
+		return showMessage('error', 'No picture clues in Final Jeopardy');
 
 	const blob = items[0].getAsFile();
 	const reader = new FileReader();
@@ -449,6 +504,20 @@ clearImage.addEventListener('click', () => {
 	state.rounds[cc.round][cc.category].clues[cc.clue].image = '';
 	sh.setState(state);
 	hideImagePreview();
+});
+
+[videoLink, ...videoTimestamps, audioOn, videoOn].forEach((inp) => {
+	inp.addEventListener('change', handleVideoLink);
+	inp.addEventListener('change', handleDataChange);
+});
+clearVideo.addEventListener('click', () => {
+	videoLink.value = '';
+	videoTimestamps.forEach((v) => {
+		v.value = null;
+	});
+	audioOn.checked = true;
+	videoOn.checked = true;
+	handleVideoLink();
 });
 
 const legalChars = 'abcdefghijklmnopqrstuvwxyz1234567890-_ ';
@@ -566,10 +635,18 @@ const validateData = (data) => {
 					const newClues = newCategory.clues;
 					cat.clues.forEach((clue, k) => {
 						if (k < newClues.length) {
-							newClues[k].text = clue.text || '';
-							newClues[k].image = clue.image || '';
-							newClues[k].response = clue.response || '';
-							newClues[k].dailyDouble = clue.dailyDouble || false;
+							//text props
+							['text', 'image', 'videoLink', 'response'].forEach((prop) => {
+								newClues[k][prop] = clue[prop] || '';
+							});
+							//number props
+							['videoStart', 'videoEnd'].forEach((prop) => {
+								newClues[k][prop] = clue[prop] || null;
+							});
+							//boolean props
+							['audio', 'video', 'caps', 'dailyDouble'].forEach((prop) => {
+								newClues[k][prop] = clue[prop] || false;
+							});
 						}
 					});
 				}
@@ -589,6 +666,7 @@ loadFile.addEventListener('change', (e) => {
 	reader.addEventListener('load', () => {
 		const data = JSON.parse(reader.result);
 		const result = validateData(data);
+		console.log(result);
 		if (resultModal && result.messages.length > 0) {
 			list.innerHTML = '';
 			result.messages.forEach((msg) => {
@@ -657,12 +735,16 @@ saveButton.addEventListener('click', () => {
 				...state,
 			}),
 		);
+	console.log(state);
 	const dlAnchorElem = createElement('a');
 	dlAnchorElem.setAttribute('href', dataStr);
 	dlAnchorElem.setAttribute('download', state.name || 'game.json');
 	dlAnchorElem.click();
 	dlAnchorElem.remove();
 });
+
+//Save as CSV
+//Round	Value	Daily Double	Category	Response	Clue	Media
 
 clearButton.addEventListener('click', () => {
 	sh.setState(getInitState());

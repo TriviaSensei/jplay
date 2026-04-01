@@ -97,10 +97,24 @@
 			color: white;
 			text-wrap: wrap;
 			height: min(max(100%, 5em), 5em);
+			display: flex;
+			&::after {
+				content: 'Buzz';
+				margin: auto;
+			}
 		}
 		.btn-buzzer.armed {
 			background-color: white;
-			color: var(--blue);
+			&::after {
+				color: var(--blue);
+			}
+		}
+		.btn-buzzer.early {
+			background-color: rgb(87, 87, 87);
+			&::after {
+				content: 'Too early';
+				color: pink;
+			}
 		}
 	}
 }

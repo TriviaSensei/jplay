@@ -324,9 +324,9 @@ const socket = async (http, server) => {
 			const ind = g.gameState.players.findIndex(
 				(p) => p.socketId === socket.id,
 			);
-			g.handleInput('player', ind);
+			const result = g.handleInput('player', ind);
 			resetGameTimeout(g.id);
-			cb({ status: 'OK' });
+			cb(result);
 		});
 
 		socket.on('save-fj-wager', (data, cb) => {
