@@ -1797,7 +1797,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	const advanceStage = (n) => {
 		popState.setState((prev) => prev + n);
 	};
-	popState.addWatcher(null, (state) => console.log(state));
 	//handle the board population
 	const getCatRow = (cb) => {
 		const cat = Number(cb.getAttribute('data-category'));
