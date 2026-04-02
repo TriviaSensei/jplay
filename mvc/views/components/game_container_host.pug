@@ -20,7 +20,10 @@ include lectern
                         .category-div(data-col=`${cat}`)
                 - else 
                     .clue-box(data-category=`${col}` data-row=`${row-1}`)
-                        .clue-value(data-category=`${col}` data-row=`${row-1}`)
+                        .clue-value
+                        .f-1.overflow-hidden
+                            .clue-preview
+                        .response-preview
                 - col++
             - row++
     .live-clue-display.d-none 

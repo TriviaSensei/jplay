@@ -13,6 +13,7 @@ const isKey = location.href.indexOf('control') >= 0;
 let uid;
 
 let isMobile = false;
+
 document.addEventListener(
 	'touchstart',
 	() => {
@@ -231,7 +232,9 @@ let fjw,
 	randomizeButton,
 	movePlayerPanel,
 	movePlayerLabels,
-	movePlayerButtons;
+	movePlayerButtons,
+	cluePreviews,
+	responsePreviews;
 
 if (isKey) {
 	fjw = document.querySelector('#fj-wager-modal');
@@ -260,6 +263,8 @@ if (isKey) {
 	movePlayerPanel = document.querySelector('#move-player-panel');
 	movePlayerLabels = getElementArray(document, 'span.player-order-name');
 	movePlayerButtons = getElementArray(document, '.move-player');
+	cluePreviews = getElementArray(document, '.clue-preview');
+	responsePreviews = getElementArray(document, '.response-preview');
 }
 
 const socketCB = (fn) =>
@@ -1381,16 +1386,15 @@ document.addEventListener('DOMContentLoaded', () => {
 	const getCategory = (cat) => {
 		const state = sh.getState();
 		if (!state) return null;
-		else if (Array.isArray(state.board[state.round]))
-			return state.board[state.round][cat];
-		else if (state.round === state.board.length - 1)
-			return state.board[state.round];
+		const round = Math.max(state.round, 0);
+		if (Array.isArray(state.board[round])) return state.board[round][cat];
+		else if (round === state.board.length - 1) return state.board[round];
 	};
 	const getClue = (cat, row) => {
 		const state = sh.getState();
 		if (!state) return null;
 
-		const round = state.round || 0;
+		const round = Math.max(state.round, 0);
 		if (Array.isArray(state.board[round]))
 			return state.board[round][cat].clues[row];
 		else if (round === state.board.length - 1) return state.board[round];
@@ -1586,17 +1590,29 @@ document.addEventListener('DOMContentLoaded', () => {
 				if (!cat || cat.clues.every((c) => c.selected)) {
 					cd.innerHTML = '';
 				} else {
-					if (cat.category.trim().length >= 30) cd.classList.add('long-cat');
+					if (cat.category.trim().length >= maxCategoryLength)
+						cd.classList.add('long-cat');
 					else cd.classList.remove('long-cat');
 					cd.innerHTML = cat.category.trim();
 				}
 				g.classList.remove('category-hidden');
 			});
-		} else if (state.state === 'betweenRounds') {
+		} else if (state.state === 'betweenRounds' || state.state === 'pregame') {
 			showView(gameBoard);
-			gameHeaders.forEach((g, i) => {
-				g.classList.add('category-hidden');
-			});
+			if (!isKey)
+				gameHeaders.forEach((g, i) => {
+					g.classList.add('category-hidden');
+				});
+			else
+				gameHeaders.forEach((g, i) => {
+					g.classList.remove('category-hidden');
+					const cat = getCategory(i);
+					const cd = g.querySelector('.category-div');
+					const categoryName = cat.category.trim();
+					if (categoryName.length >= maxCategoryLength)
+						cd.classList.add('long-cat');
+					cd.innerHTML = categoryName;
+				});
 		} else if (state.state === 'FJIntro') {
 			showView(fjCategory);
 			const catInner = fjCategory.querySelector('.category-box');
@@ -1804,37 +1820,60 @@ document.addEventListener('DOMContentLoaded', () => {
 	};
 	//handle the board population
 	const getCatRow = (cb) => {
-		const cat = Number(cb.getAttribute('data-category'));
-		const row = Number(cb.getAttribute('data-row'));
+		const box = cb.closest('.clue-box');
+		if (!box) return [null, null];
+		const cat = Number(box.getAttribute('data-category'));
+		const row = Number(box.getAttribute('data-row'));
 		return [cat, row];
 	};
-	clueValues.forEach((cb) => {
+	clueBoxes.forEach((cb) => {
 		const [cat, row] = getCatRow(cb);
 		if (isNaN(cat) || isNaN(row)) return;
-
-		sh.addWatcher(cb, (e) => {
+		const clueValue = cb.querySelector('.clue-value');
+		const cluePreview = cb.querySelector('.clue-preview');
+		const responsePreview = cb.querySelector('.response-preview');
+		sh.addWatcher(clueValue, (e) => {
 			const state = e.detail;
 			if (!state) return;
-			else if (state.round < 0) return;
+			else if (!isKey && state.round < 0) return;
 			const clue = getClue(cat, row);
-			if (!clue || state.round >= state.board.length - 1 || clue.selected) {
+			if (clue.selected) e.target.innerHTML = '';
+			else if (!isKey && (!clue || state.round >= state.board.length - 1)) {
 				e.target.innerHTML = '';
 				return;
 			} else e.target.innerHTML = clue.value;
 		});
-		popState.addWatcher(cb, (e) => {
-			const s0 = sh.getState();
-			if (s0.round >= 0 || s0.state !== 'boardPopulate') return;
-			const clue = s0.board[0][cat].clues[row];
-			const order = s0.order;
+		if (!isKey) {
+			popState.addWatcher(clueValue, (e) => {
+				const s0 = sh.getState();
+				if (s0.round >= 0 || s0.state !== 'boardPopulate') return;
+				const clue = s0.board[0][cat].clues[row];
+				const order = s0.order;
 
-			const n = cat * 5 + row;
-			const n2 = order[n].order;
-			if (n2 < e.detail) {
-				e.target.innerHTML = clue.value;
-			} else e.target.innerHTML = '';
-		});
+				const n = cat * 5 + row;
+				const n2 = order[n].order;
+				if (n2 < e.detail) {
+					e.target.innerHTML = clue.value;
+				} else e.target.innerHTML = '';
+			});
+		} else {
+			sh.addWatcher(cluePreview, (e) => {
+				const state = e.detail;
+				if (!state) return;
+				const clue = getClue(cat, row);
+				if (clue.selected) e.target.innerHTML = '';
+				else e.target.innerHTML = clue.text;
+			});
+			sh.addWatcher(responsePreview, (e) => {
+				const state = e.detail;
+				if (!state) return;
+				const clue = getClue(cat, row);
+				if (clue.selected) e.target.innerHTML = '';
+				else e.target.innerHTML = clue.response;
+			});
+		}
 	});
+
 	sh.addWatcher(null, (state) => {
 		if (state.state !== 'boardPopulate') return;
 		if (!isKey) {
