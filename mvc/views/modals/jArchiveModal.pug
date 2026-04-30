@@ -1,0 +1,14 @@
+.modal#j-archive-modal(tabindex="-1" aria-labelledby="j-archive-label" aria-hidden="true")
+    .modal-dialog.modal-dialog-centered
+        form#j-archive-form.w-100
+            .modal-content#j-archive-modal-content
+                .modal-header
+                    h5.modal-title#j-archive-label Load Game from J-Archive
+                .modal-body
+                    .input-row-v 
+                        .input-label Enter URL or game ID
+                        .input-container 
+                            input#j-archive-link(type="text" placenolder="Link or Game ID (e.g. 1234)")
+                .modal-footer
+                    button#confirm-j-archive.btn.btn-sm.btn-primary(type="submit") Load
+                    button.btn.btn-secondary.btn-sm(type="button" data-bs-dismiss="modal") Cancel

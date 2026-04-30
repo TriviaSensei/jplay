@@ -2,7 +2,8 @@ import { getElementArray } from './utils/getElementArray.js';
 import { showMessage } from './utils/messages.js';
 import { createElement } from './utils/createElementFromSelector.js';
 import { getEmbeddedLink } from './utils/videoEmbed.js';
-
+import { handleRequest } from './utils/requestHandler.js';
+import { getGame } from './utils/loadJArchive.js';
 const defaultWidth = 400;
 
 const blankClue = {
@@ -60,7 +61,12 @@ const createArea = document.querySelector('#create-tab-pane .game-data');
 
 const loadFile = document.querySelector('#create-tab-pane #load-file');
 const saveButton = document.querySelector('#create-tab-pane #save-data');
-const saveCSVButton = document.querySelector('#create-tab-pane #save-data-csv');
+const loadJArchiveForm = document.querySelector('#j-archive-form');
+const loadJArchive = document.querySelector('#confirm-j-archive');
+const jArchiveLink = document.querySelector('#j-archive-link');
+const loadArchiveModal = new bootstrap.Modal(
+	document.querySelector('#j-archive-modal'),
+);
 const metadataArea = document.querySelector(
 	'#create-tab-pane .create-game-metadata',
 );
@@ -743,8 +749,35 @@ saveButton.addEventListener('click', () => {
 	dlAnchorElem.remove();
 });
 
-//Save as CSV
-//Round	Value	Daily Double	Category	Response	Clue	Media
+loadJArchiveForm.addEventListener('submit', (e) => {
+	e.preventDefault();
+	const val = jArchiveLink.value;
+	// https://j-archive.com/showgame.php?game_id=9436
+
+	let num = Number(val);
+
+	const msg = 'Invalid J-Archive link or game ID';
+	if (isNaN(num)) {
+		const regex =
+			/https:\/\/(www\.)?j-archive\.com\/showgame\.php\?game_id=[0-9]+/gi;
+
+		const match = val.match(regex);
+		if (!match || match.length === 0) return showMessage('error', msg);
+		num = Number(match[0].split('=')[1]);
+	}
+
+	const handler = (res) => {
+		if (res.status !== 'success') {
+			return showMessage('error', res.message);
+		}
+
+		sh.setState(res.data);
+		localStorage.setItem('jp-creator-state', JSON.stringify(sh.getState()));
+		loadArchiveModal.hide();
+	};
+
+	handleRequest(`/api/v1/games/${num}`, 'GET', null, handler);
+});
 
 clearButton.addEventListener('click', () => {
 	sh.setState(getInitState());

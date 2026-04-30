@@ -24,6 +24,7 @@ html
         include modals/endGameModal
         include modals/createDataModal
         include modals/clearCreateModal
+        include modals/jArchiveModal
         #message-div.message.d-none
         .init-container
             include components/header
@@ -50,6 +51,9 @@ html
     script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous")
     script(src="/socket.io/socket.io.js")
     script(src="/js/utils/stateHandler.js")
+    script(src="/js/utils/moment.js")
+    script(src="/js/utils/moment-timezone-with-data-10-year-range.js")
+    script(src="https://cdn.jsdelivr.net/npm/axios@1.13.2/dist/axios.min.js")
     script(src="/js/utils/Game.js" defer)
     script(src="/js/host.js" type="module" defer)
     script(src="/js/data.js" type="module" defer)

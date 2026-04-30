@@ -1,14 +1,13 @@
 link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
 .input-row-h
     .input-row-h.f-1.me-1
-        input#load-file(type="file" accept=".json")
-        label#load-data.btn.btn-secondary.d-flex.w-100(for="load-file") 
-            .m-auto Load
-    //- .input-row-h.f-1
-    //-     .input-label Download 
-    //-     .input-container
-    //-         button#save-data-csv.btn.btn-primary.f-1.me-1 CSV
-    //-         button#save-data.btn.btn-primary.f-1 JSON
+        .dropdown.w-100 
+            button.btn.btn-secondary.dropdown-toggle.w-100(type="button" data-bs-toggle="dropdown") Load
+            ul.dropdown-menu
+                li.dropdown-item
+                    input#load-file(type="file" accept=".json")
+                    label#load-data.d-flex.w-100(for="load-file") From .JSON
+                li#load-archive.dropdown-item(data-bs-toggle="modal" data-bs-target="#j-archive-modal") From J-Archive
     .input-row-h.f-1
         button#save-data.btn.btn-primary.f-1 Download .JSON
 .input-row-v 

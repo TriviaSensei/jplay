@@ -10,4 +10,5 @@ router.get('/control', viewController.getControlPanel);
 router.get('/timer', viewController.getTimer);
 router.get('/games/:folder/:filename', viewController.getGame);
 router.get('/test', viewController.getTest);
+
 module.exports = router;
