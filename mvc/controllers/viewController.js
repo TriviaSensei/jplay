@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { readdir, readFile } = require('node:fs/promises');
 const template = require('../template');
+const axios = require('axios');
 
 exports.httpsRedirect = (req, res, next) => {
 	if (
@@ -90,4 +91,18 @@ exports.redirectToIndex = (req, res, next) => {
 		res.status(404).json({
 			status: 'fail',
 		});
+};
+
+exports.getArchiveGame = async (req, res, next) => {
+	const { gameId } = req.body;
+	const url = `https://j-archive.com/showgame.php?game_id=${gameId}`;
+
+	const result = await axios.get(url);
+
+	console.log(result);
+
+	res.status(200).json({
+		status: 'success',
+		data: result,
+	});
 };
