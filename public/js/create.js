@@ -494,6 +494,7 @@ document.addEventListener('paste', async (e) => {
 
 	const blob = items[0].getAsFile();
 	if (!blob) return;
+
 	const reader = new FileReader();
 	reader.onloadend = async () => {
 		const newFile = await getImageUrl(reader.result);
