@@ -493,6 +493,7 @@ document.addEventListener('paste', async (e) => {
 		return showMessage('error', 'No picture clues in Final Jeopardy');
 
 	const blob = items[0].getAsFile();
+	if (!blob) return;
 	const reader = new FileReader();
 	reader.onloadend = async () => {
 		const newFile = await getImageUrl(reader.result);
