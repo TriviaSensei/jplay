@@ -68,6 +68,10 @@ link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
             .ratio.ratio-4x3.mb-2.clue-text-container
                 div.p-4.clue-text-container
                     textarea#edit-clue-text.w-100.h-100(placeholder="Clue text" maxlength="175")
+    .input-row-v 
+        .input-label Correct Response
+        .input-container 
+            input#correct-response.w-100(type="text" placeholder="Correct response")
     .input-row-v.no-fj
         .input-label Picture URL (optional; for picture clues only)
         .input-container
@@ -102,10 +106,7 @@ link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
                     .ratio.screen-ratio.mb-1
                         iframe#clue-video-embed.mb-1(frameborder="0" src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" title="")
                     button#clear-video.btn.btn-sm.btn-primary Clear
-    .input-row-v 
-        .input-label Correct Response
-        .input-container 
-            input#correct-response.w-100(type="text" placeholder="Correct response")
+    
     .input-row-v.no-fj 
         .input-label Daily Double
         .input-container 
