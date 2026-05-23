@@ -1836,6 +1836,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			const state = e.detail;
 			if (!state) return;
 			else if (!isKey && state.round < 0) return;
+			else if (state.round === state.board.length - 1) {
+				e.target.innerHTML = '';
+				return;
+			}
+
 			const clue = getClue(cat, row);
 			if (clue.selected) e.target.innerHTML = '';
 			else if (!isKey && (!clue || state.round >= state.board.length - 1)) {
@@ -1860,6 +1865,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			sh.addWatcher(cluePreview, (e) => {
 				const state = e.detail;
 				if (!state) return;
+				else if (state.round === state.board.length - 1) {
+					e.target.innerHTML = '';
+					return;
+				}
 				const clue = getClue(cat, row);
 				if (clue.selected) e.target.innerHTML = '';
 				else e.target.innerHTML = clue.text;
@@ -1867,6 +1876,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			sh.addWatcher(responsePreview, (e) => {
 				const state = e.detail;
 				if (!state) return;
+				else if (state.round === state.board.length - 1) {
+					e.target.innerHTML = '';
+					return;
+				}
 				const clue = getClue(cat, row);
 				if (clue.selected) e.target.innerHTML = '';
 				else e.target.innerHTML = clue.response;
@@ -2077,7 +2090,13 @@ document.addEventListener('DOMContentLoaded', () => {
 			clueBoxes.forEach((cb) => {
 				const [cat, row] = getCatRow(cb);
 				const clue = getClue(cat, row);
-				if (clue.dailyDouble && !clue.selected) cb.classList.add('dd');
+				console.log(state.round, state.board.length - 1);
+				if (
+					clue.dailyDouble &&
+					!clue.selected &&
+					state.round !== state.board.length - 1
+				)
+					cb.classList.add('dd');
 				else cb.classList.remove('dd');
 			});
 		});
