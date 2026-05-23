@@ -2090,7 +2090,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			clueBoxes.forEach((cb) => {
 				const [cat, row] = getCatRow(cb);
 				const clue = getClue(cat, row);
-				console.log(state.round, state.board.length - 1);
 				if (
 					clue.dailyDouble &&
 					!clue.selected &&
