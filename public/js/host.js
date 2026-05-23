@@ -1605,6 +1605,10 @@ document.addEventListener('DOMContentLoaded', () => {
 				});
 			else
 				gameHeaders.forEach((g, i) => {
+					if (state.round === state.board.length - 1) {
+						g.classList.add('category-hidden');
+						return;
+					}
 					g.classList.remove('category-hidden');
 					const cat = getCategory(i);
 					const cd = g.querySelector('.category-div');
@@ -2085,15 +2089,18 @@ document.addEventListener('DOMContentLoaded', () => {
 	if (isKey)
 		sh.addWatcher(null, (state) => {
 			if (!state) return;
-			if (!Array.isArray(state.board[state.round])) return;
-
 			clueBoxes.forEach((cb) => {
+				if (!Array.isArray(state.board[state.round])) {
+					cb.classList.remove('dd');
+					return;
+				}
 				const [cat, row] = getCatRow(cb);
 				const clue = getClue(cat, row);
 				if (
 					clue.dailyDouble &&
 					!clue.selected &&
-					state.round !== state.board.length - 1
+					state.round !== state.board.length - 1 &&
+					state.state !== 'betweenRounds'
 				)
 					cb.classList.add('dd');
 				else cb.classList.remove('dd');
