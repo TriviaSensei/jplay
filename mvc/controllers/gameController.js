@@ -6,7 +6,6 @@ exports.getGame = async (req, res, next) => {
 	const url = `https://j-archive.com/showgame.php?game_id=${req.params.id}`;
 
 	const result = await axios.get(url);
-	console.log(result.data);
 	const data = parser.parse(result.data);
 
 	const errorCheck = data.querySelector('div#content > p.error');

@@ -4,10 +4,18 @@
 	display: flex;
 	justify-content: space-between;
 	margin-top: 1em;
-	.lectern.control {
-		border-bottom: 4px solid var(--white);
-	}
+
 	.lectern {
+		&.control .lectern-body .lectern-center .light-bottom::after {
+			content: '';
+			background-color: white;
+			position: absolute;
+			bottom: 3px;
+			left: calc(22.5% + 3px);
+			width: 0.2em;
+			height: 0.2em;
+		}
+
 		width: 31%;
 		display: flex;
 		flex-direction: column;
