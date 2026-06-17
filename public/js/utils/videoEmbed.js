@@ -23,8 +23,16 @@ export const getEmbeddedLink = (
 
 	let videoID;
 	let postFix = '?controls=0&autoplay=1';
-	if (startingTime > 0) postFix = postFix + `&start=${startingTime}`;
-	if (endingTime > 0) postFix = postFix + `&end=${endingTime}`;
+	const st =
+		startingTime === Math.floor(startingTime)
+			? `${startingTime}s`
+			: `${Math.floor(startingTime * 1000)}ms`;
+	const et =
+		endingTime === Math.floor(endingTime)
+			? `${endingTime}s`
+			: `${Math.floor(endingTime * 1000)}ms`;
+	if (startingTime > 0) postFix = postFix + `&start=${st}`;
+	if (endingTime > 0) postFix = postFix + `&end=${et}`;
 	if (!audio) postFix = postFix = postFix + `&mute=1`;
 	if (!video && audio) postFix = postFix + `&audioonly=1`;
 	else if (!video && !audio)
