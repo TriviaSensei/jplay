@@ -884,7 +884,7 @@ const moveBoard = () => {
 	const hideCategory = () => {
 		const st = catLarge.getState();
 		if (st) {
-			showPanel(categoryLarge);
+			hidePanel(categoryLarge);
 			catLarge.setState(false);
 		}
 	};
