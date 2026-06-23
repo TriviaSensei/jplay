@@ -62,21 +62,27 @@ exports.getGame = async (req, res, next) => {
 
 					categories.forEach((c) => {
 						round.push({
-							category: c.name,
-							comments: c.comments,
+							category: c.name.replace(/\&amp;/g, '&'),
+							comments: c.comments.replace(/\&amp;/g, '&'),
 							clues: [],
 						});
 					});
 				} else {
 					const clues = row.querySelectorAll('td.clue');
 					clues.forEach((c, i) => {
-						const text = c.querySelector('.clue_text')?.innerHTML || '';
+						const text =
+							c
+								.querySelector('.clue_text')
+								?.innerHTML.replace(/\&amp;/g, '&') || '';
 						const response =
-							c.querySelector('.correct_response')?.innerHTML || '';
+							c
+								.querySelector('.correct_response')
+								?.innerHTML.replace(/\&amp;/g, '&') || '';
 
 						round[i].clues.push({
 							text,
 							response,
+							caps: true,
 						});
 					});
 				}
@@ -86,12 +92,17 @@ exports.getGame = async (req, res, next) => {
 
 		const fj = {
 			category:
-				data.querySelector('#final_jeopardy_round .category_name')?.innerHTML ||
-				'',
-			text: data.querySelector('#clue_FJ.clue_text')?.innerHTML || '',
+				data
+					.querySelector('#final_jeopardy_round .category_name')
+					?.innerHTML.replace(/\&amp;/g, '&') || '',
+			text:
+				data
+					.querySelector('#clue_FJ.clue_text')
+					?.innerHTML.replace(/\&amp;/g, '&') || '',
 			response:
-				data.querySelector('#clue_FJ_r.clue_text .correct_response')
-					?.innerHTML || '',
+				data
+					.querySelector('#clue_FJ_r.clue_text .correct_response')
+					?.innerHTML.replace(/\&amp;/g, '&') || '',
 		};
 
 		toReturn.rounds.push(fj);
