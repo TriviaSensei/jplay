@@ -632,7 +632,7 @@ const handleKeyPress = async (e) => {
 			withTimeout(
 				(data) => {
 					if (data?.message) showMessage('error', data.message);
-					if (data.status === 'OK') {
+					if (data?.status === 'OK') {
 						buzzerButton.classList.remove('early');
 					}
 				},
@@ -870,6 +870,7 @@ const moveBoard = () => {
 	const showCategory = (e) => {
 		const state = sh.getState();
 		if (state.state !== 'select') return;
+		showMessage('info', e.type);
 		const box = e.target.closest('.category-box');
 		const inner = box.querySelector('.category-div');
 
@@ -881,7 +882,8 @@ const moveBoard = () => {
 		catLarge.setState(true);
 	};
 
-	const hideCategory = () => {
+	const hideCategory = (e) => {
+		showMessage('info', e.type);
 		const st = catLarge.getState();
 		if (st) {
 			hidePanel(categoryLarge);
