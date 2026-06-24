@@ -1,4 +1,4 @@
-const testClues = 1;
+const testClues = 2;
 const ddDistribution = [
 	[5, 756, 2491, 3636, 3112],
 	[2, 99, 286, 382, 231],
@@ -808,6 +808,7 @@ class Game {
 				} else {
 					this.setGameState({
 						state: 'DDLive',
+						showVideo: false,
 					});
 					this.startClueTimer(ddTime, {
 						state: 'DDTimedOut',

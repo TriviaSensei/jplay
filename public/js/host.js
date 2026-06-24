@@ -870,7 +870,6 @@ const moveBoard = () => {
 	const showCategory = (e) => {
 		const state = sh.getState();
 		if (state.state !== 'select') return;
-		showMessage('info', e.type);
 		const box = e.target.closest('.category-box');
 		const inner = box.querySelector('.category-div');
 
@@ -883,7 +882,6 @@ const moveBoard = () => {
 	};
 
 	const hideCategory = (e) => {
-		showMessage('info', e.type);
 		const st = catLarge.getState();
 		if (st) {
 			hidePanel(categoryLarge);
@@ -1415,6 +1413,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		const maxCategoryLength = 25;
 
 		if (state.active) startGameModal.hide();
+		liveClueVideoEmbed.setAttribute('src', '');
 
 		if (state.state === 'waitingDD') {
 			//waiting for a DD wager
@@ -1481,6 +1480,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			else liveClueCategory.classList.remove('long-cat');
 
 			liveClueCategory.innerHTML = liveCategory.category;
+			console.log(liveCategory);
 			if (liveCategory.caps === false)
 				liveClueCategory.classList.remove('caps');
 			else liveClueCategory.classList.add('caps');
