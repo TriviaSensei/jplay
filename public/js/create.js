@@ -956,6 +956,8 @@ const handleKey = (e) => {
 		return;
 
 	e.preventDefault();
+	handleDataChange({ target: document.activeElement });
+
 	//ctrl + shift + arrow moves the clue/category
 	if (e.shiftKey && !e.altKey) {
 		if (key === 'arrowup')
@@ -1010,7 +1012,6 @@ const handleKey = (e) => {
 		}
 	} else return;
 	populateSelectedClue();
-	handleDataChange({ target: document.activeElement });
 };
 
 document.addEventListener('DOMContentLoaded', () => {
