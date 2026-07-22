@@ -950,7 +950,6 @@ const handleKey = (e) => {
 	//key combos all include control and an arrow key
 	if (
 		!e.ctrlKey ||
-		e.altKey ||
 		!['arrowdown', 'arrowup', 'arrowleft', 'arrowright'].includes(key)
 	)
 		return;
@@ -983,8 +982,8 @@ const handleKey = (e) => {
 		}
 		populateSelectedClue();
 	}
-	//ctrl + arrow just selects a different clue/category
-	else {
+	//ctrl + alt + arrow just selects a different clue/category
+	else if (e.altKey) {
 		if (key === 'arrowup') {
 			if (categorySelect.selectedIndex !== 0)
 				categorySelect.selectedIndex = categorySelect.selectedIndex - 1;
