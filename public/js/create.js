@@ -984,8 +984,8 @@ const handleKey = (e) => {
 			});
 		}
 	}
-	//ctrl + alt + arrow just selects a different clue/category
-	else if (e.altKey && !e.shiftKey) {
+	//ctrl + alt + shift + arrow just selects a different clue/category
+	else if (e.altKey && e.shiftKey) {
 		if (key === 'arrowup') {
 			if (categorySelect.selectedIndex !== 0)
 				categorySelect.selectedIndex = categorySelect.selectedIndex - 1;
