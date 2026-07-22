@@ -34,14 +34,20 @@ html
                     h2.mx-auto J-Play Documentation
             .f-1.overflow-auto.p-2
                 section
-                    h4 Introduction 
+                    h4.fw-semibold Introduction 
                     p J-Play is a place where you can play Jeopardy! with your friends, just like the real thing. Create your own game file (or use one of the example ones provided), and host your game, with players joining either locally or remotely with a join code.
                 section 
-                    h4 Creating a game file 
+                    h4.fw-semibold Creating a game file 
                     p This help file will start with how to create a game file, as it is absolutely necessary for playing a game.
+                    h5.fw-semibold Keyboard shortcuts 
+                    ul 
+                        li Ctrl + Left/Right: Move to the previous/next clue 
+                        li Ctrl + Up/Down: Move to the previous/next category 
+                        li Ctrl + Shift + Left/Right: Swap selected clue with previous/next clue 
+                        li Ctrl + Shift + Up/Down: Swap selected category with previous/next category
                     p It is possible to manually create a game file (download the template #[a(href=`data:text/plain;charset=utf-8,${encodeURIComponent(JSON.stringify(template))}` download="template.json") here]), or using the "Create" tab, which is available from the #[a(href="/") homepage], as shown below: 
                     +image("The create tab")
-                    h5 Manual game creation
+                    h5.fw-semibold Manual game creation
                     p Creating a game manually takes a basic knowledge of JSON. To create a game manually, open the #[a(href=`data:text/plain;charset=utf-8,${encodeURIComponent(JSON.stringify(template))}` download="template.json") template] and note its contents - a single object with a few attributes, described below.
                     h6.fw-semibold Name 
                     p The name is any string describing the file or the game. It is optional.
@@ -80,6 +86,7 @@ html
                         li In the category selector: the name of the category is blank, or at least one clue in the category has a blank text or response field.
                         li In the clue selector: This clue has a blank text or response field.
                     +image("The creator interface")
+                    
                 section 
                     h4 Starting a game 
                     p A game requires a host and at least one player. It is recommended that the host have a dual-screen setup, as the game key with correct responses will open in a new window, and the easiest way to control the game will be to use that window. While the site is mobile friendly and it is technically possible to do so, controlling the game from a tablet or smartphone is not recommended. Players are, however, encouraged to play from their phones.

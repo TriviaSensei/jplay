@@ -57,6 +57,7 @@ const sh = new StateHandler(getInitState());
 
 const msgDiv = document.querySelector('#header-message');
 
+const createTab = document.querySelector('#create-tab-pane');
 const createArea = document.querySelector('#create-tab-pane .game-data');
 
 const loadFile = document.querySelector('#create-tab-pane #load-file');
@@ -674,7 +675,6 @@ loadFile.addEventListener('change', (e) => {
 	reader.addEventListener('load', () => {
 		const data = JSON.parse(reader.result);
 		const result = validateData(data);
-		console.log(result);
 		if (resultModal && result.messages.length > 0) {
 			list.innerHTML = '';
 			result.messages.forEach((msg) => {
@@ -815,7 +815,7 @@ const moveClue = (e) => {
 moveClueButtons.forEach((b) => b.addEventListener('click', moveClue));
 
 const moveCategory = (e) => {
-	if (!e.target.classList.contains('move-category')) return;
+	if (!e?.target?.classList.contains('move-category')) return;
 
 	const dir = Number(e.target.getAttribute('data-dir'));
 	if (isNaN(dir)) return;
@@ -942,10 +942,89 @@ sh.addWatcher(null, (state) => {
 	}
 });
 
+const handleKey = (e) => {
+	const tabActive = createTab.classList.contains('active', 'show');
+	if (!tabActive) return;
+
+	const key = e.key.toLowerCase();
+	//key combos all include control and an arrow key
+	if (
+		!e.ctrlKey ||
+		e.altKey ||
+		!['arrowdown', 'arrowup', 'arrowleft', 'arrowright'].includes(key)
+	)
+		return;
+
+	e.preventDefault();
+	//ctrl + shift + arrow moves the clue/category
+	if (e.shiftKey) {
+		if (key === 'arrowup')
+			moveCategory({
+				target: moveCategoryButtons.find(
+					(b) => b.getAttribute('data-dir') === '-1',
+				),
+			});
+		else if (key === 'arrowdown')
+			moveCategory({
+				target: moveCategoryButtons.find(
+					(b) => b.getAttribute('data-dir') === '1',
+				),
+			});
+		else if (key === 'arrowleft')
+			moveClue({
+				target: moveClueButtons.find(
+					(b) => b.getAttribute('data-dir') === '-1',
+				),
+			});
+		else if (key === 'arrowright') {
+			moveClue({
+				target: moveClueButtons.find((b) => b.getAttribute('data-dir') === '1'),
+			});
+		}
+		populateSelectedClue();
+	}
+	//ctrl + arrow just selects a different clue/category
+	else {
+		if (key === 'arrowup') {
+			if (categorySelect.selectedIndex !== 0)
+				categorySelect.selectedIndex = categorySelect.selectedIndex - 1;
+		} else if (key === 'arrowdown') {
+			if (categorySelect.selectedIndex !== categorySelect.options.length - 1)
+				categorySelect.selectedIndex = categorySelect.selectedIndex + 1;
+		} else if (key === 'arrowleft' || key === 'arrowright') {
+			const selector = 'input[type="radio"][name="selected-clue"]';
+			const clueSelects = getElementArray(createArea, selector);
+			const selectedClue = createArea.querySelector(`${selector}:checked`);
+			if (!selectedClue) return;
+
+			const ind = Number(selectedClue.getAttribute('value'));
+			if (isNaN(ind)) return;
+
+			let newClue;
+
+			if (key === 'arrowleft' && ind !== 0)
+				newClue = createArea.querySelector(`${selector}[value="${ind - 1}"]`);
+			else if (key === 'arrowright' && ind !== clueSelects.length - 1)
+				newClue = createArea.querySelector(`${selector}[value="${ind + 1}"]`);
+
+			if (newClue) newClue.click();
+		}
+		populateSelectedClue();
+	}
+};
+
 document.addEventListener('DOMContentLoaded', () => {
 	const savedStateStr = localStorage.getItem('jp-creator-state');
 	if (savedStateStr) {
 		const savedState = JSON.parse(savedStateStr);
 		if (savedState) sh.setState(savedState);
 	}
+
+	document.addEventListener('keydown', handleKey);
+	const tooltipTriggerList = createArea.querySelectorAll(
+		'[data-bs-toggle="tooltip"]',
+	);
+	const tooltipList = [...tooltipTriggerList].map(
+		(tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl),
+	);
 });

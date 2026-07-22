@@ -50,8 +50,8 @@ link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
     .input-row-v.no-fj
         .input-label Move Category
         .input-container 
-            button#move-category-up.move-category.move-button.btn.btn-outline-secondary(data-dir="-1") &#9650;
-            button#move-category-down.move-category.move-button.btn.btn-outline-secondary(data-dir="1") &#9660;
+            button#move-category-up.move-category.move-button.btn.btn-outline-secondary(data-dir="-1" data-bs-toggle="tooltip" data-bs-title="Move category up (Ctrl + Shift + Up)") &#9650;
+            button#move-category-down.move-category.move-button.btn.btn-outline-secondary(data-dir="1" data-bs-toggle="tooltip" data-bs-title="Move category down (Ctrl + Shift + Down)") &#9660;
     .input-row-h.no-fj
         .input-label Value
         .input-container
@@ -125,7 +125,7 @@ link(rel="stylesheet" href="/css/components/init_container/create_tab.css")
     .input-row-v.no-fj
         .input-label Move Clue
         .input-container 
-            button#move-clue-left.move-clue.move-button.btn.btn-outline-secondary(data-dir="-1") &#9664;
-            button#move-clue-right.move-clue.move-button.btn.btn-outline-secondary(data-dir="1") &#9654;
+            button#move-clue-left.move-clue.move-button.btn.btn-outline-secondary(data-dir="-1"  data-bs-toggle="tooltip" data-bs-title="Move clue up (Ctrl + Shift + Left)") &#9664;
+            button#move-clue-right.move-clue.move-button.btn.btn-outline-secondary(data-dir="1" data-bs-toggle="tooltip" data-bs-title="Move clue down (Ctrl + Shift + Right)") &#9654;
     .input-row-v
         button#clear-create-form.btn.btn-warning(data-bs-toggle="modal" data-bs-target="#clear-create-modal") Clear All
