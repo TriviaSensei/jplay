@@ -950,7 +950,7 @@ const handleKey = (e) => {
 	//key combos all include control and an arrow key
 	if (
 		!e.ctrlKey ||
-		(!e.altKey && !e.shiftKey) ||
+		!e.altKey ||
 		!['arrowdown', 'arrowup', 'arrowleft', 'arrowright'].includes(key)
 	)
 		return;
@@ -958,8 +958,8 @@ const handleKey = (e) => {
 	e.preventDefault();
 	handleDataChange({ target: document.activeElement });
 
-	//ctrl + shift + arrow moves the clue/category
-	if (e.shiftKey && !e.altKey) {
+	//ctrl + alt + shift + arrow moves the clue/category
+	if (e.shiftKey) {
 		if (key === 'arrowup')
 			moveCategory({
 				target: moveCategoryButtons.find(
@@ -984,8 +984,8 @@ const handleKey = (e) => {
 			});
 		}
 	}
-	//ctrl + alt + shift + arrow just selects a different clue/category
-	else if (e.altKey && e.shiftKey) {
+	//ctrl + alt  + arrow just selects a different clue/category
+	else {
 		if (key === 'arrowup') {
 			if (categorySelect.selectedIndex !== 0)
 				categorySelect.selectedIndex = categorySelect.selectedIndex - 1;
@@ -1010,7 +1010,7 @@ const handleKey = (e) => {
 
 			if (newClue) newClue.click();
 		}
-	} else return;
+	}
 	populateSelectedClue();
 };
 
