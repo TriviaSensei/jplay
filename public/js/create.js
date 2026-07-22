@@ -980,8 +980,6 @@ const handleKey = (e) => {
 				target: moveClueButtons.find((b) => b.getAttribute('data-dir') === '1'),
 			});
 		}
-		populateSelectedClue();
-		handleDataChange({ target: document.activeElement });
 	}
 	//ctrl + alt + arrow just selects a different clue/category
 	else if (e.altKey && !e.shiftKey) {
@@ -1009,8 +1007,9 @@ const handleKey = (e) => {
 
 			if (newClue) newClue.click();
 		}
-		populateSelectedClue();
 	} else return;
+	populateSelectedClue();
+	handleDataChange({ target: document.activeElement });
 };
 
 document.addEventListener('DOMContentLoaded', () => {
