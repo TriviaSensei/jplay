@@ -956,7 +956,7 @@ const handleKey = (e) => {
 
 	e.preventDefault();
 	//ctrl + shift + arrow moves the clue/category
-	if (e.shiftKey) {
+	if (e.shiftKey && !e.altKey) {
 		if (key === 'arrowup')
 			moveCategory({
 				target: moveCategoryButtons.find(
@@ -981,9 +981,10 @@ const handleKey = (e) => {
 			});
 		}
 		populateSelectedClue();
+		handleDataChange({ target: document.activeElement });
 	}
 	//ctrl + alt + arrow just selects a different clue/category
-	else if (e.altKey) {
+	else if (e.altKey && !e.shiftKey) {
 		if (key === 'arrowup') {
 			if (categorySelect.selectedIndex !== 0)
 				categorySelect.selectedIndex = categorySelect.selectedIndex - 1;
@@ -1009,7 +1010,7 @@ const handleKey = (e) => {
 			if (newClue) newClue.click();
 		}
 		populateSelectedClue();
-	}
+	} else return;
 };
 
 document.addEventListener('DOMContentLoaded', () => {
