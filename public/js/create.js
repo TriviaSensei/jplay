@@ -950,6 +950,7 @@ const handleKey = (e) => {
 	//key combos all include control and an arrow key
 	if (
 		!e.ctrlKey ||
+		(!e.altKey && !e.shiftKey) ||
 		!['arrowdown', 'arrowup', 'arrowleft', 'arrowright'].includes(key)
 	)
 		return;
