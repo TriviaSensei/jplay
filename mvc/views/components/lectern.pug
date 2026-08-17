@@ -27,3 +27,17 @@ mixin lectern(n)
                     .light.light-bottom
                 .lectern-right
                     .lectern-image
+
+mixin lecternMini(n)
+    .player-lectern-mini(data-index=`${n}`)
+        .score-display.d-flex 
+            .score.m-auto 0
+        .ratio.ratio-4x3.name-display
+            div
+                .w-100.h-100.d-flex
+                    .f-1.name-display.d-none
+                        .display-inner
+                    svg.lectern-name-canvas.d-none(version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 400 300")
+                        rect(x="0" y="0" height="300" width="400" fill="var(--blue)")
+                        g.player-name-path(stroke-width="8" stroke="#fff" fill="transparent" stroke-linecap="round")
+        .bottom-bar

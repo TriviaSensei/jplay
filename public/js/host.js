@@ -1223,13 +1223,17 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	svgDisplays.forEach((s, i) => {
-		if (!isKey) s.addEventListener('click', loadPlayerData);
+		if (isHost()) s.addEventListener('click', loadPlayerData);
 		else s.addEventListener('click', loadPlayerDataKey);
 
 		sh.addWatcher(s, (e) => {
 			const path = e.target.querySelector('.player-name-path');
 			path.innerHTML = '';
-			const player = e.detail.players[i];
+			const lec = s.closest('.player-lectern-mini, .lectern');
+			if (!lec) return;
+			const ind = Number(lec.getAttribute('data-index'));
+			if (isNaN(ind)) return;
+			const player = e.detail.players[ind];
 			if (!player) return;
 			const nameData = player.nameData;
 			if (!nameData || nameData.length === 0) {
@@ -1480,7 +1484,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			else liveClueCategory.classList.remove('long-cat');
 
 			liveClueCategory.innerHTML = liveCategory.category;
-			console.log(liveCategory);
 			if (liveCategory.caps === false)
 				liveClueCategory.classList.remove('caps');
 			else liveClueCategory.classList.add('caps');
@@ -2510,7 +2513,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (!state) return;
 
 			if (!state.isRemote) handleGameCancel();
-			else if (isHost) {
+			else if (isHost()) {
 				emitEvent({
 					eventName: 'cancel-game',
 					onSuccess: (data) => {
@@ -2625,7 +2628,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				lecterns.forEach((l, i) => {
 					const ind = Number(l.getAttribute('data-index'));
 					const nameDisp = l.querySelector('.name-display .display-inner');
-					const scoreDisp = l.querySelector('.score-display .display-inner');
+					// const scoreDisp = l.querySelector('.score-display .display-inner');
+					const scoreDisp = l.querySelector('.score-display .score');
 					if (
 						isNaN(ind) ||
 						ind < 0 ||

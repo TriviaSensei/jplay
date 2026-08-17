@@ -743,7 +743,6 @@ saveButton.addEventListener('click', () => {
 				...state,
 			}),
 		);
-	console.log(state);
 	const dlAnchorElem = createElement('a');
 	dlAnchorElem.setAttribute('href', dataStr);
 	dlAnchorElem.setAttribute('download', state.name || 'game.json');
