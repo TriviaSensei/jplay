@@ -10,7 +10,6 @@
 		width: min(100vw, 60vh);
 		height: min(33vw, 15vh);
 		font-size: min(3vw, 2vh);
-		letter-spacing: 0.25vh;
 		display: flex;
 		flex-direction: row;
 		justify-content: space-around;
@@ -21,15 +20,20 @@
 		align-items: center;
 		width: min(32%, 15vh);
 		border: 3px solid black;
-		&.lit {
-			border: 3px solid white;
-		}
 		.score-display {
 			height: 32%;
 			margin: auto;
 			background-color: var(--blue);
 			border-bottom: 3px solid black;
 		}
+
+		&.lit {
+			border: 3px solid white;
+			.score-display {
+				border-bottom: 3px solid white;
+			}
+		}
+
 		.name-display {
 			flex: 1;
 			background-color: var(--blue);
@@ -42,7 +46,8 @@
 			display: flex;
 			margin: auto;
 			width: 100%;
-			.score {
+			.score,
+			.display-inner {
 				margin: auto;
 			}
 		}

@@ -102,7 +102,10 @@ let currentFile;
 const gameMetadata = document.querySelector('.game-metadata');
 const gameContainer = document.querySelector('.game-container');
 const editPlayerButtons = getElementArray(document, '.edit-player-button');
-const nameDisplays = getElementArray(document, '.name-container');
+const nameDisplays = getElementArray(
+	document,
+	'.name-container, .name-display .display-inner',
+);
 const svgDisplays = getElementArray(document, '.lectern-name-canvas');
 const cancelEditPlayer = document.querySelector('#cancel-edit-player');
 const removePlayer = document.querySelector('#remove-player');
@@ -1211,13 +1214,24 @@ document.addEventListener('DOMContentLoaded', () => {
 		else nd.addEventListener('click', loadPlayerDataKey);
 		sh.addWatcher(nd, (e) => {
 			if (!e.detail) return;
+
+			const lec = nd.closest('.player-lectern-mini, .lectern');
+			if (!lec) return;
+			const ind = Number(lec.getAttribute('data-index'));
+			console.log(ind);
 			if (
-				e.detail.players[i]?.name &&
-				(!e.detail.players[i]?.nameData ||
-					e.detail.players[i].nameData.length === 0)
+				e.detail.players[ind]?.name &&
+				(!e.detail.players[ind]?.nameData ||
+					e.detail.players[ind].nameData.length === 0)
 			) {
 				showPanel(e.target);
-				e.target.innerHTML = e.detail.players[i].name;
+				if (lec.classList.contains('player-lectern-mini')) {
+					console.log(lec.classList);
+
+					const outer = e.target.closest('.name-display');
+					if (outer) showPanel(outer);
+				}
+				e.target.innerHTML = e.detail.players[ind].name;
 			} else hidePanel(e.target);
 		});
 	});
