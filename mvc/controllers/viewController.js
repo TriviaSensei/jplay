@@ -99,8 +99,6 @@ exports.getArchiveGame = async (req, res, next) => {
 
 	const result = await axios.get(url);
 
-	console.log(result);
-
 	res.status(200).json({
 		status: 'success',
 		data: result,
