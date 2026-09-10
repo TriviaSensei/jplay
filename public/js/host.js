@@ -270,13 +270,14 @@ if (isKey) {
 	responsePreviews = getElementArray(document, '.response-preview');
 }
 
+//all-purpose socket callback function that handles a timeout - if it comes back, set the game state accordingly; otherwise show an error
 const socketCB = (fn) =>
 	withTimeout(
 		(data) => {
+			console.log(data);
 			if (data.status !== 'OK') return showMessage('error', data.message);
 			const newState = data.gameState;
 			if (!newState) return;
-
 			if (data.reset) sh.setState(newState);
 			else
 				sh.setState((prev) => {
@@ -427,7 +428,10 @@ else {
 	document.addEventListener('assign-control', (e) => {
 		const index = e.detail;
 		const state = sh.getState();
+		if (state.state === 'pregame' || !state.active) return;
+		//if the player doesn't exist, don't assign control to them
 		if (!state.players[index]?.name) return;
+		//set the status if needed
 		const cluesLeft = state.board[state.round].reduce((p, c) => {
 			return (
 				p +
@@ -445,7 +449,9 @@ else {
 			socket.emit(
 				'edit-game-data',
 				{ gameData: { control: index, status } },
-				socketCB(),
+				socketCB(() => {
+					console.log('hello!');
+				}),
 			);
 		} else {
 			game.setGameState({
@@ -958,6 +964,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		socket.on('update-game-state', (data) => {
 			const state = sh.getState();
+			console.log(data);
 			if (state.state !== data.state && data.state === 'FJOver') {
 				saveFJResponse(true);
 			}
@@ -1218,7 +1225,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			const lec = nd.closest('.player-lectern-mini, .lectern');
 			if (!lec) return;
 			const ind = Number(lec.getAttribute('data-index'));
-			console.log(ind);
 			if (
 				e.detail.players[ind]?.name &&
 				(!e.detail.players[ind]?.nameData ||
@@ -1226,8 +1232,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			) {
 				showPanel(e.target);
 				if (lec.classList.contains('player-lectern-mini')) {
-					console.log(lec.classList);
-
 					const outer = e.target.closest('.name-display');
 					if (outer) showPanel(outer);
 				}
@@ -1346,9 +1350,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 			assignControl.addEventListener('click', () => {
 				const index = getPlayerIndex();
-				const evt = new CustomEvent('assign-control', { detail: index });
-				if (!window.opener) return;
-				return window.opener.document.dispatchEvent(evt);
+				// const evt = new CustomEvent('assign-control', { detail: index });
+				// if (!window.opener) return;
+				// return window.opener.document.dispatchEvent(evt);
+				sendGameInput('assignControl', index);
 			});
 		}
 	}
@@ -1356,7 +1361,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	if (cancelEditPlayer)
 		cancelEditPlayer.addEventListener('click', () => {
 			pi.removeAttribute('value');
-			playerName.value = '';
+			editPlayerName.value = '';
 			if (buzzerKey) buzzerKey.innerHTML = '[None]';
 		});
 
@@ -1427,11 +1432,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	//main screen display as function of state
 	sh.addWatcher(null, (state) => {
+		console.log(isKey ? 'Key' : isHost() ? 'Host' : 'Player');
+		console.log(state);
 		if (!state) return;
 		const maxCategoryLength = 25;
 
 		if (state.active) startGameModal.hide();
 		liveClueVideoEmbed.setAttribute('src', '');
+
+		if (isKey) console.log(state);
 
 		if (state.state === 'waitingDD') {
 			//waiting for a DD wager
@@ -2105,6 +2114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (state.isRemote) return;
 			sendGameState(state);
 		});
+	//color the daily double boxes on the key
 	if (isKey)
 		sh.addWatcher(null, (state) => {
 			if (!state) return;

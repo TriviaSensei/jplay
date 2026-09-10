@@ -1,4 +1,4 @@
-const testClues = 2;
+const testClues = 10;
 const ddDistribution = [
 	[5, 756, 2491, 3636, 3112],
 	[2, 99, 286, 382, 231],
@@ -418,6 +418,38 @@ class Game {
 				this.gameState.players[ind].setName(data.name);
 				this.gameState.players[ind].setScore(data.score);
 				this.updateGameState(null, { players: this.gameState.players });
+			},
+			assignControl: (index) => {
+				console.log('assigning control');
+				if (!this.gameState.active)
+					throw new Error('Cannot assign control before game starts');
+				if (
+					(typeof index).toLowerCase() !== 'number' ||
+					index < 0 ||
+					index >= this.gameState.players.length
+				)
+					throw new Error('Invalid player index');
+				if (!this.gameState.players[index].name)
+					throw new Error('Player does not exist');
+				let status;
+				if (this.gameState.state === 'waitingDD')
+					status = `Waiting for Daily Double wager from ${this.gameState.state.players[index].name}`;
+				else {
+					const cluesLeft = this.gameState.board[this.gameState.round].reduce(
+						(p, c) => {
+							return (
+								p +
+								c.clues.reduce((p2, c2) => {
+									if (c2.selected) return p2;
+									return p2 + 1;
+								}, 0)
+							);
+						},
+						0,
+					);
+					status = `${cluesLeft} clue${cluesLeft === 1 ? '' : 's'} left. ${this.gameState.players[index].name} to select a clue`;
+				}
+				this.updateGameState(null, { control: index, status });
 			},
 		},
 		//each state has a data attribute of game state attributes that are always true during that game state, but may change

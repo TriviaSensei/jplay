@@ -276,7 +276,16 @@ const socket = async (http, server) => {
 					throw new Error('Input not accepted - you are not in a game');
 				resetGameTimeout(game.id);
 				//host input
-				if (['host', 'correct', 'incorrect', 'start', 'clue'].includes(inp)) {
+				if (
+					[
+						'host',
+						'correct',
+						'incorrect',
+						'start',
+						'clue',
+						'assignControl',
+					].includes(inp)
+				) {
 					if (game.gameState.host.socketId !== socket.id)
 						throw new Error('Only the host may issue this command');
 				}
